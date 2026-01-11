@@ -82,6 +82,9 @@ const Navbar = () => {
             <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
               Ana Sayfa
             </Link>
+            <Link to="/about" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
+              Hakkımızda
+            </Link>
             <Link to="/cars" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
               Araçlar
             </Link>
