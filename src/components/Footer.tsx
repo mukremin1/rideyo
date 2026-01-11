@@ -77,7 +77,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 RideYo. Tüm hakları saklıdır.</p>
+          <p>&copy; 2026 RideYo Tüm hakları saklıdır</p>
         </div>
       </div>
     </footer>
