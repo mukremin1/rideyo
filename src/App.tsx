@@ -36,6 +36,8 @@ import CarComparison from "./pages/CarComparison";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import AvailabilityCalendar from "./pages/AvailabilityCalendar";
 import Install from "./pages/Install";
+import Payment from "./pages/Payment";
+import CancellationPolicy from "./pages/CancellationPolicy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -79,6 +81,8 @@ const App = () => (
             <Route path="/owner-dashboard" element={<OwnerDashboard />} />
             <Route path="/availability-calendar" element={<AvailabilityCalendar />} />
             <Route path="/install" element={<Install />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/cancellation-policy" element={<CancellationPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
