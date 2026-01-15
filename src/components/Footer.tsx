@@ -1,7 +1,9 @@
-import { Car, MessageSquare, Smartphone } from "lucide-react";
+import { Car, MessageSquare, Smartphone, MapPin, Phone, XCircle, RefreshCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const WHATSAPP_NUMBER = "+905395263293";
+const COMPANY_PHONE = "0539 526 32 93";
+const COMPANY_ADDRESS = "Müftü Solakzade Mah. Elmadağ Sk. No:2 Kat:2 Palandöken/Erzurum";
 
 const Footer = () => {
   return (
@@ -16,6 +18,20 @@ const Footer = () => {
             <p className="text-muted-foreground text-sm mb-4">
               Türkiye'nin en hızlı ve kolay araç kiralama platformu
             </p>
+            
+            {/* Contact Info */}
+            <div className="space-y-2 mb-4">
+              <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>{COMPANY_ADDRESS}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="w-4 h-4 shrink-0" />
+                <a href={`tel:${COMPANY_PHONE.replace(/\s/g, '')}`} className="hover:text-foreground transition-colors">
+                  {COMPANY_PHONE}
+                </a>
+              </div>
+            </div>
             
             {/* Mobile App Links */}
             <div className="space-y-2">
@@ -92,7 +108,8 @@ const Footer = () => {
             <h3 className="font-semibold text-foreground mb-4">Kaynaklar</h3>
             <ul className="space-y-2">
               <li><Link to="/safety-guidelines" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Güvenlik Kuralları</Link></li>
-              <li><Link to="/rental-agreement" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Kiralama Sözleşmesi</Link></li>
+              <li><Link to="/rental-agreement" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Mesafeli Satış Sözleşmesi</Link></li>
+              <li><Link to="/cancellation-policy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">İptal ve İade Koşulları</Link></li>
               <li><Link to="/faq" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Sık Sorulan Sorular</Link></li>
             </ul>
           </div>
@@ -105,6 +122,49 @@ const Footer = () => {
               <li><Link to="/kvkk" className="text-muted-foreground hover:text-foreground transition-colors text-sm">KVKK</Link></li>
               <li><Link to="/cookie-policy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Çerez Politikası</Link></li>
             </ul>
+          </div>
+        </div>
+
+        {/* Cancellation Policy Summary */}
+        <div className="border-t border-border pt-6 mb-6">
+          <div className="bg-muted/50 rounded-xl p-6">
+            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+              <RefreshCcw className="w-5 h-5 text-primary" />
+              İptal ve İade Koşulları
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+              <div className="bg-background p-4 rounded-lg border border-border">
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold mb-1">
+                  <XCircle className="w-4 h-4" />
+                  24+ Saat Önce
+                </div>
+                <p className="text-muted-foreground">%100 iade</p>
+              </div>
+              <div className="bg-background p-4 rounded-lg border border-border">
+                <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 font-semibold mb-1">
+                  <XCircle className="w-4 h-4" />
+                  12-24 Saat Arası
+                </div>
+                <p className="text-muted-foreground">%50 iade</p>
+              </div>
+              <div className="bg-background p-4 rounded-lg border border-border">
+                <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 font-semibold mb-1">
+                  <XCircle className="w-4 h-4" />
+                  12 Saatten Az
+                </div>
+                <p className="text-muted-foreground">İade yok</p>
+              </div>
+              <div className="bg-background p-4 rounded-lg border border-border">
+                <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold mb-1">
+                  <XCircle className="w-4 h-4" />
+                  No-show
+                </div>
+                <p className="text-muted-foreground">İade yok</p>
+              </div>
+            </div>
+            <Link to="/cancellation-policy" className="inline-block mt-4 text-primary hover:underline text-sm font-medium">
+              Detaylı bilgi için tıklayın →
+            </Link>
           </div>
         </div>
 
