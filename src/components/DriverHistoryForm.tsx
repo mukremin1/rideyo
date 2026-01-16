@@ -49,7 +49,6 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
     e.preventDefault();
     setLoading(true);
 
-    // 1) userId kontrolü
     if (!userId) {
       toast({
         title: "Giriş Gerekli",
@@ -73,7 +72,7 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
         driverData.totalAccidents < 3 &&
         driverData.trafficViolations < 5;
 
-      const payload = {
+      const upsertPayload = {
         user_id: userId,
         license_number: driverData.licenseNumber,
         penalty_points: driverData.penaltyPoints,
@@ -84,28 +83,25 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
         verification_status: isApproved ? "verified" : "rejected",
       };
 
-      console.debug("DriverHistory upsert payload:", payload);
+      console.debug("DriverHistory upsert payload:", upsertPayload);
 
-      // Daha ayrıntılı: select() ekleyip status/headers kontrolü
-      const { data, error, status, statusText } = await supabase
+      // ÇÖZÜM: onConflict ile user_id sütununu belirt
+      const { data, error } = await supabase
         .from("driver_history")
-        .upsert(payload)
+        .upsert([upsertPayload], { onConflict: "user_id" })
         .select();
 
-      console.debug("Supabase response:", { status, statusText, data, error });
+      console.debug("Supabase response:", { data, error });
 
       if (error) {
-        // Hata detaylarını göster
-        console.error("Supabase error object:", error);
+        console.error("Supabase upsert hata:", error);
         toast({
           title: "Doğrulama hatası",
-          description: error.message ?? "Sürücü bilgileri kaydedilemedi",
+          description: error.message || "Sürücü bilgileri kaydedilemedi",
           variant: "destructive",
         });
 
-        // Eğer permission/authorization hatası ise ek ipucu
-        if ((error as any).message?.toLowerCase?.().includes("permission") ||
-            (error as any).message?.toLowerCase?.().includes("authorization")) {
+        if ((error as any).message?.toLowerCase?.().includes("permission")) {
           toast({
             title: "İzin hatası",
             description: "Veritabanı izni yok — Supabase RLS ayarlarını kontrol edin.",
@@ -115,11 +111,6 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
 
         setLoading(false);
         return;
-      }
-
-      // Eğer data boşsa da uyar: upsert çalışmış ama geri veri yok
-      if (!data || (Array.isArray(data) && data.length === 0)) {
-        console.warn("Upsert başarılı olabilir ama dönen kayıt yok:", data);
       }
 
       const riskLevel = calculateRiskLevel(
@@ -151,11 +142,11 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
         description: message,
         variant: isApproved ? "default" : "destructive",
       });
-    } catch (err: any) {
-      console.error("Catch bloğu hatası:", err);
+    } catch (error) {
+      console.error("Sürücü geçmişi kaydedilemedi:", error);
       toast({
-        title: "Beklenmeyen hata",
-        description: err?.message ?? String(err),
+        title: "Hata",
+        description: String(error) || "Sürücü bilgileri kaydedilemedi",
         variant: "destructive",
       });
     } finally {
