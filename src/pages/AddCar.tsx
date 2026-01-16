@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
@@ -9,12 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, Car, CheckCircle2, Upload, MapPin, Fuel, Settings, CreditCard, Shield } from "lucide-react";
 import { z } from "zod";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 
 const carSchema = z.object({
   name: z.string().min(2, "Araç adı en az 2 karakter olmalıdır").max(100),
@@ -23,7 +22,6 @@ const carSchema = z.object({
   pricePerHour: z.number().min(1, "Fiyat 0'dan büyük olmalıdır"),
   pricePerDay: z.number().min(10, "Fiyat 10'dan büyük olmalıdır"),
   pricePerKm: z.number().min(0, "KM başı fiyat 0'dan büyük veya eşit olmalıdır"),
-  kmPackages: z.record(z.string(), z.number()).optional(),
   fuelType: z.enum(["Benzin", "Dizel", "Elektrik", "Hibrit"]),
   transmission: z.enum(["Manuel", "Otomatik"]),
   seats: z.number().min(2).max(9),
@@ -31,7 +29,6 @@ const carSchema = z.object({
   plateNumber: z.string().optional(),
   year: z.number().min(2010, "2010 ve üzeri model yılı araçlar kabul edilmektedir").max(new Date().getFullYear() + 1),
   description: z.string().max(500, "Açıklama en fazla 500 karakter olabilir").optional(),
-  gpsDeviceId: z.string().optional(),
 });
 
 const AddCar = () => {
@@ -40,6 +37,7 @@ const AddCar = () => {
   const [loading, setLoading] = useState(false);
   const [isCarOwner, setIsCarOwner] = useState<boolean | null>(null);
   const [checkingRole, setCheckingRole] = useState(true);
+  const [currentStep, setCurrentStep] = useState(1);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -47,11 +45,7 @@ const AddCar = () => {
     pricePerMinute: "",
     pricePerHour: "",
     pricePerDay: "",
-    pricePerKm: "",
-    km50: "",
-    km100: "",
-    km200: "",
-    km500: "",
+    pricePerKm: "2",
     fuelType: "Benzin",
     transmission: "Otomatik",
     seats: "5",
@@ -59,7 +53,6 @@ const AddCar = () => {
     plateNumber: "",
     year: "",
     description: "",
-    gpsDeviceId: "",
   });
 
   useEffect(() => {
@@ -108,7 +101,6 @@ const AddCar = () => {
 
       if (error) {
         if (error.code === "23505") {
-          // Already has role
           setIsCarOwner(true);
           toast.success("Zaten araç sahibi rolüne sahipsiniz!");
         } else {
@@ -120,81 +112,16 @@ const AddCar = () => {
       }
     } catch (error) {
       console.error("Rol ekleme hatası:", error);
-      toast.error("Bir hata oluştu");
+      toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (authLoading || checkingRole) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 pt-24 pb-12 text-center">
-          <p className="text-xl text-muted-foreground">Yükleniyor...</p>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-24 pb-12">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl text-center">
-            <h1 className="text-3xl font-bold text-foreground mb-4">Giriş Yapmalısınız</h1>
-            <p className="text-muted-foreground mb-8">
-              Araç eklemek için önce giriş yapmanız gerekmektedir.
-            </p>
-            <Button onClick={() => navigate("/auth")}>Giriş Yap / Üye Ol</Button>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!isCarOwner) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-24 pb-12">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
-            <Card className="p-8 text-center">
-              <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-              <h1 className="text-3xl font-bold text-foreground mb-4">Araç Sahibi Hesabı Gerekli</h1>
-              <p className="text-muted-foreground mb-6">
-                Araç ekleyebilmek için araç sahibi hesabına sahip olmanız gerekmektedir. 
-                Aşağıdaki butona tıklayarak araç sahibi olabilirsiniz.
-              </p>
-              <div className="space-y-4">
-                <Button onClick={becomeCarOwner} disabled={loading} size="lg" className="w-full">
-                  {loading ? "İşleniyor..." : "Araç Sahibi Ol"}
-                </Button>
-                <p className="text-sm text-muted-foreground">
-                  Araç sahibi olarak kaydolduğunuzda aracınızı platformumuza ekleyebilir ve gelir elde edebilirsiniz.
-                </p>
-              </div>
-            </Card>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const kmPackages: Record<string, number> = {};
-      if (formData.km50) kmPackages["50"] = parseFloat(formData.km50);
-      if (formData.km100) kmPackages["100"] = parseFloat(formData.km100);
-      if (formData.km200) kmPackages["200"] = parseFloat(formData.km200);
-      if (formData.km500) kmPackages["500"] = parseFloat(formData.km500);
-
       const validatedData = carSchema.parse({
         name: formData.name,
         type: formData.type,
@@ -202,7 +129,6 @@ const AddCar = () => {
         pricePerHour: parseFloat(formData.pricePerHour),
         pricePerDay: parseFloat(formData.pricePerDay),
         pricePerKm: parseFloat(formData.pricePerKm || "0"),
-        kmPackages: Object.keys(kmPackages).length > 0 ? kmPackages : undefined,
         fuelType: formData.fuelType,
         transmission: formData.transmission,
         seats: parseInt(formData.seats),
@@ -210,20 +136,18 @@ const AddCar = () => {
         plateNumber: formData.plateNumber || undefined,
         year: formData.year ? parseInt(formData.year) : new Date().getFullYear(),
         description: formData.description || undefined,
-        gpsDeviceId: formData.gpsDeviceId || undefined,
       });
 
       setLoading(true);
 
       const { error } = await supabase.from("cars").insert({
-        owner_id: user.id,
+        owner_id: user!.id,
         name: validatedData.name,
         type: validatedData.type,
         price_per_minute: validatedData.pricePerMinute,
         price_per_hour: validatedData.pricePerHour,
         price_per_day: validatedData.pricePerDay,
         price_per_km: validatedData.pricePerKm,
-        km_packages: validatedData.kmPackages || {},
         fuel_type: validatedData.fuelType,
         transmission: validatedData.transmission,
         seats: validatedData.seats,
@@ -232,7 +156,6 @@ const AddCar = () => {
         plate_number: validatedData.plateNumber,
         year: validatedData.year,
         description: validatedData.description,
-        gps_device_id: validatedData.gpsDeviceId,
         available: true,
       });
 
@@ -260,275 +183,407 @@ const AddCar = () => {
     }
   };
 
+  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 3));
+  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
+
+  if (authLoading || checkingRole) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 pt-24 pb-12 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">Yükleniyor...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-lg">
+            <Card className="text-center">
+              <CardHeader>
+                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <Car className="w-8 h-8 text-primary" />
+                </div>
+                <CardTitle className="text-2xl">Giriş Yapmalısınız</CardTitle>
+                <CardDescription>
+                  Araç eklemek için önce hesabınıza giriş yapmanız gerekmektedir.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate("/auth")} size="lg" className="w-full">
+                  Giriş Yap / Üye Ol
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!isCarOwner) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-2xl">
+            <Card>
+              <CardHeader className="text-center">
+                <div className="mx-auto w-20 h-20 bg-gradient-to-br from-primary to-primary/60 rounded-full flex items-center justify-center mb-4">
+                  <Car className="w-10 h-10 text-primary-foreground" />
+                </div>
+                <CardTitle className="text-3xl">Araç Sahibi Olun</CardTitle>
+                <CardDescription className="text-base">
+                  RideYo platformunda araç kiralayarak gelir elde etmeye başlayın
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <CreditCard className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <h3 className="font-semibold">Kazanç</h3>
+                    <p className="text-sm text-muted-foreground">Pasif gelir elde edin</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <Shield className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <h3 className="font-semibold">Güvenlik</h3>
+                    <p className="text-sm text-muted-foreground">Sigortalı kiralama</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <Settings className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <h3 className="font-semibold">Kontrol</h3>
+                    <p className="text-sm text-muted-foreground">Fiyat & takvim yönetimi</p>
+                  </div>
+                </div>
+                
+                <Button onClick={becomeCarOwner} disabled={loading} size="lg" className="w-full">
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      İşleniyor...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-5 h-5 mr-2" />
+                      Araç Sahibi Ol
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       <main className="pt-24 pb-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
-          <Link to="/my-cars" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <Link to="/my-cars" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
             <ArrowLeft className="w-5 h-5" />
             Araçlarıma Dön
           </Link>
 
-          <h1 className="text-4xl font-bold text-foreground mb-8">Yeni Araç Ekle</h1>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Yeni Araç Ekle</h1>
+            <p className="text-muted-foreground">Aracınızı ekleyerek gelir elde etmeye başlayın</p>
+          </div>
 
-          <Alert className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Araç sahibi olarak sisteme kayıtlısınız. Aracınızı ekleyebilirsiniz.
-            </AlertDescription>
-          </Alert>
-
-          <Card className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Araç Adı *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="örn: Renault Clio"
-                  required
-                />
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="type">Araç Tipi *</Label>
-                  <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="compact">Kompakt</SelectItem>
-                      <SelectItem value="sedan">Sedan</SelectItem>
-                      <SelectItem value="suv">SUV</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="seats">Koltuk Sayısı *</Label>
-                  <Input
-                    id="seats"
-                    type="number"
-                    min="2"
-                    max="9"
-                    value={formData.seats}
-                    onChange={(e) => setFormData({ ...formData, seats: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fuelType">Yakıt Tipi *</Label>
-                  <Select value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Benzin">Benzin</SelectItem>
-                      <SelectItem value="Dizel">Dizel</SelectItem>
-                      <SelectItem value="Elektrik">Elektrik</SelectItem>
-                      <SelectItem value="Hibrit">Hibrit</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="transmission">Vites *</Label>
-                  <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Manuel">Manuel</SelectItem>
-                      <SelectItem value="Otomatik">Otomatik</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerMinute">Dakika Fiyatı (₺) *</Label>
-                  <Input
-                    id="pricePerMinute"
-                    type="number"
-                    step="0.1"
-                    min="0.1"
-                    value={formData.pricePerMinute}
-                    onChange={(e) => setFormData({ ...formData, pricePerMinute: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerHour">Saat Fiyatı (₺) *</Label>
-                  <Input
-                    id="pricePerHour"
-                    type="number"
-                    step="1"
-                    min="1"
-                    value={formData.pricePerHour}
-                    onChange={(e) => setFormData({ ...formData, pricePerHour: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerDay">Günlük Fiyat (₺) *</Label>
-                  <Input
-                    id="pricePerDay"
-                    type="number"
-                    step="1"
-                    min="10"
-                    value={formData.pricePerDay}
-                    onChange={(e) => setFormData({ ...formData, pricePerDay: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pricePerKm">KM Başı Fiyat (₺) *</Label>
-                <Input
-                  id="pricePerKm"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  value={formData.pricePerKm}
-                  onChange={(e) => setFormData({ ...formData, pricePerKm: e.target.value })}
-                  placeholder="örn: 2.5"
-                  required
-                />
-                <p className="text-sm text-muted-foreground">Araç kiralama süresi dışında yapılan her km için ücret</p>
-              </div>
-
-              <div className="space-y-4">
-                <Label>KM Paketleri (Opsiyonel)</Label>
-                <div className="grid sm:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="km50">50 KM Paketi (₺)</Label>
-                    <Input
-                      id="km50"
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={formData.km50}
-                      onChange={(e) => setFormData({ ...formData, km50: e.target.value })}
-                      placeholder="örn: 50"
-                    />
+          {/* Progress Steps */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              {[
+                { num: 1, label: "Araç Bilgileri", icon: Car },
+                { num: 2, label: "Teknik Özellikler", icon: Settings },
+                { num: 3, label: "Fiyatlandırma", icon: CreditCard },
+              ].map((step, index) => (
+                <div key={step.num} className="flex items-center">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                    currentStep >= step.num ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  }`}>
+                    <step.icon className="w-5 h-5" />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="km100">100 KM Paketi (₺)</Label>
-                    <Input
-                      id="km100"
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={formData.km100}
-                      onChange={(e) => setFormData({ ...formData, km100: e.target.value })}
-                      placeholder="örn: 90"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="km200">200 KM Paketi (₺)</Label>
-                    <Input
-                      id="km200"
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={formData.km200}
-                      onChange={(e) => setFormData({ ...formData, km200: e.target.value })}
-                      placeholder="örn: 160"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="km500">500 KM Paketi (₺)</Label>
-                    <Input
-                      id="km500"
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={formData.km500}
-                      onChange={(e) => setFormData({ ...formData, km500: e.target.value })}
-                      placeholder="örn: 350"
-                    />
-                  </div>
+                  <span className={`ml-2 text-sm font-medium hidden sm:inline ${
+                    currentStep >= step.num ? "text-foreground" : "text-muted-foreground"
+                  }`}>
+                    {step.label}
+                  </span>
+                  {index < 2 && (
+                    <div className={`w-12 sm:w-20 h-1 mx-2 rounded ${
+                      currentStep > step.num ? "bg-primary" : "bg-muted"
+                    }`} />
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">KM paketleri ile kullanıcılara paket seçeneği sunun</p>
-              </div>
+              ))}
+            </div>
+            <Progress value={(currentStep / 3) * 100} className="h-2" />
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="location">Lokasyon *</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="örn: Palandöken, Erzurum"
-                  required
-                />
-              </div>
+          <Card>
+            <CardContent className="pt-6">
+              <form onSubmit={handleSubmit}>
+                {/* Step 1: Araç Bilgileri */}
+                {currentStep === 1 && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Araç Adı *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="örn: Renault Clio 2022"
+                        required
+                      />
+                    </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="plateNumber">Plaka</Label>
-                  <Input
-                    id="plateNumber"
-                    value={formData.plateNumber}
-                    onChange={(e) => setFormData({ ...formData, plateNumber: e.target.value })}
-                    placeholder="örn: 25 ABC 123"
-                  />
-                </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="type">Araç Tipi *</Label>
+                        <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="compact">Kompakt</SelectItem>
+                            <SelectItem value="sedan">Sedan</SelectItem>
+                            <SelectItem value="suv">SUV</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="year">Model Yılı *</Label>
-                  <Input
-                    id="year"
-                    type="number"
-                    min="2010"
-                    max={new Date().getFullYear() + 1}
-                    value={formData.year}
-                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                    placeholder="örn: 2022"
-                    required
-                  />
-                  <p className="text-sm text-muted-foreground">Minimum 2010 model</p>
-                </div>
-              </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="year">Model Yılı *</Label>
+                        <Input
+                          id="year"
+                          type="number"
+                          min="2010"
+                          max={new Date().getFullYear() + 1}
+                          value={formData.year}
+                          onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                          placeholder="örn: 2022"
+                          required
+                        />
+                      </div>
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="gpsDeviceId">GPS Cihaz ID</Label>
-                <Input
-                  id="gpsDeviceId"
-                  value={formData.gpsDeviceId}
-                  onChange={(e) => setFormData({ ...formData, gpsDeviceId: e.target.value })}
-                  placeholder="örn: GPS-12345"
-                />
-                <p className="text-sm text-muted-foreground">Araçta kurulan GPS takip cihazının kimlik numarası</p>
-              </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="location" className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        Lokasyon *
+                      </Label>
+                      <Input
+                        id="location"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        placeholder="örn: Palandöken, Erzurum"
+                        required
+                      />
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Açıklama</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Araç hakkında ek bilgiler..."
-                  rows={4}
-                  maxLength={500}
-                />
-                <p className="text-sm text-muted-foreground">{formData.description.length}/500</p>
-              </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="plateNumber">Plaka (Opsiyonel)</Label>
+                      <Input
+                        id="plateNumber"
+                        value={formData.plateNumber}
+                        onChange={(e) => setFormData({ ...formData, plateNumber: e.target.value })}
+                        placeholder="örn: 25 ABC 123"
+                      />
+                    </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? "Ekleniyor..." : "Araç Ekle"}
-              </Button>
-            </form>
+                    <div className="flex justify-end">
+                      <Button type="button" onClick={nextStep}>
+                        Devam Et
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Teknik Özellikler */}
+                {currentStep === 2 && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="fuelType" className="flex items-center gap-2">
+                          <Fuel className="w-4 h-4" />
+                          Yakıt Tipi *
+                        </Label>
+                        <Select value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Benzin">Benzin</SelectItem>
+                            <SelectItem value="Dizel">Dizel</SelectItem>
+                            <SelectItem value="Elektrik">Elektrik</SelectItem>
+                            <SelectItem value="Hibrit">Hibrit</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="transmission">Vites *</Label>
+                        <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Manuel">Manuel</SelectItem>
+                            <SelectItem value="Otomatik">Otomatik</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="seats">Koltuk Sayısı *</Label>
+                      <Select value={formData.seats} onValueChange={(value) => setFormData({ ...formData, seats: value })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[2, 4, 5, 6, 7, 8, 9].map((num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} Koltuk
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Açıklama (Opsiyonel)</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Araç hakkında ek bilgiler..."
+                        rows={4}
+                        maxLength={500}
+                      />
+                      <p className="text-sm text-muted-foreground text-right">{formData.description.length}/500</p>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <Button type="button" variant="outline" onClick={prevStep}>
+                        Geri
+                      </Button>
+                      <Button type="button" onClick={nextStep}>
+                        Devam Et
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Fiyatlandırma */}
+                {currentStep === 3 && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="pricePerMinute">Dakika Fiyatı (₺) *</Label>
+                        <Input
+                          id="pricePerMinute"
+                          type="number"
+                          step="0.1"
+                          min="0.1"
+                          value={formData.pricePerMinute}
+                          onChange={(e) => setFormData({ ...formData, pricePerMinute: e.target.value })}
+                          placeholder="0.50"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="pricePerHour">Saat Fiyatı (₺) *</Label>
+                        <Input
+                          id="pricePerHour"
+                          type="number"
+                          step="1"
+                          min="1"
+                          value={formData.pricePerHour}
+                          onChange={(e) => setFormData({ ...formData, pricePerHour: e.target.value })}
+                          placeholder="25"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="pricePerDay">Günlük Fiyat (₺) *</Label>
+                        <Input
+                          id="pricePerDay"
+                          type="number"
+                          step="1"
+                          min="10"
+                          value={formData.pricePerDay}
+                          onChange={(e) => setFormData({ ...formData, pricePerDay: e.target.value })}
+                          placeholder="150"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="pricePerKm">KM Başı Fiyat (₺) *</Label>
+                      <Input
+                        id="pricePerKm"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value={formData.pricePerKm}
+                        onChange={(e) => setFormData({ ...formData, pricePerKm: e.target.value })}
+                        placeholder="2.5"
+                        required
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Araç kiralama süresi dışında yapılan her km için ücret
+                      </p>
+                    </div>
+
+                    <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                      <h4 className="font-medium">Tahmini Kazanç</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Günlük {formData.pricePerDay || 0} ₺ fiyatla ayda ortalama 15 gün kiralama yaparsanız:{" "}
+                        <span className="font-semibold text-primary">
+                          {((parseFloat(formData.pricePerDay) || 0) * 15).toLocaleString("tr-TR")} ₺
+                        </span>
+                      </p>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <Button type="button" variant="outline" onClick={prevStep}>
+                        Geri
+                      </Button>
+                      <Button type="submit" disabled={loading}>
+                        {loading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Ekleniyor...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-5 h-5 mr-2" />
+                            Araç Ekle
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </CardContent>
           </Card>
         </div>
       </main>

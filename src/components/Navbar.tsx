@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Car, User, LogOut, Plus, Heart, Bell, Shield, MessageCircle, AlertTriangle, Award } from "lucide-react";
+import { Car, User, LogOut, Plus, Heart, Bell, Shield, MessageCircle, AlertTriangle, Award, Calendar } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import {
@@ -145,6 +145,10 @@ const Navbar = () => {
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Rezervasyonlarım
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/my-cars")}>
                       <Car className="w-4 h-4 mr-2" />
                       Araçlarım
