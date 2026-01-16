@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,22 +8,38 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { CreditCard, Lock, Shield, ArrowLeft, CheckCircle } from "lucide-react";
+import { CreditCard, Lock, Shield, ArrowLeft, CheckCircle, Calendar, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
+
+interface PaymentState {
+  bookingId: string;
+  carName: string;
+  totalPrice: number;
+  rentalType: string;
+  startTime: string;
+  endTime: string;
+}
 
 const Payment = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [saveCard, setSaveCard] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   
-  const amount = searchParams.get("amount") || "0";
-  const bookingId = searchParams.get("bookingId");
-  const carName = searchParams.get("carName") || "Araç";
+  const state = location.state as PaymentState | null;
+  
+  const bookingId = state?.bookingId;
+  const carName = state?.carName || "Araç";
+  const totalPrice = state?.totalPrice || 0;
+  const rentalType = state?.rentalType || "hour";
+  const startTime = state?.startTime ? new Date(state.startTime) : new Date();
+  const endTime = state?.endTime ? new Date(state.endTime) : new Date();
 
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -146,6 +162,36 @@ const Payment = () => {
     return null;
   };
 
+  const getRentalTypeText = (type: string) => {
+    switch (type) {
+      case "minute": return "Dakikalık";
+      case "hour": return "Saatlik";
+      case "day": return "Günlük";
+      default: return type;
+    }
+  };
+
+  // Redirect if no booking data
+  if (!state) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-lg text-center">
+            <Card className="p-8">
+              <h1 className="text-2xl font-bold text-foreground mb-4">Ödeme Bilgisi Bulunamadı</h1>
+              <p className="text-muted-foreground mb-6">
+                Ödeme yapmak için önce bir araç seçip rezervasyon yapmanız gerekmektedir.
+              </p>
+              <Button onClick={() => navigate("/cars")}>Araçlara Git</Button>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (paymentSuccess) {
     return (
       <div className="min-h-screen bg-background">
@@ -160,7 +206,7 @@ const Payment = () => {
               <p className="text-muted-foreground mb-4">
                 {carName} için ödemeniz başarıyla tamamlandı.
               </p>
-              <p className="text-3xl font-bold text-primary mb-6">{parseFloat(amount).toFixed(2)}₺</p>
+              <p className="text-3xl font-bold text-primary mb-6">{totalPrice.toFixed(2)}₺</p>
               <p className="text-sm text-muted-foreground">
                 Rezervasyon detaylarınız e-posta adresinize gönderilecektir.
               </p>
@@ -189,12 +235,45 @@ const Payment = () => {
           <h1 className="text-3xl font-bold text-foreground mb-2">Ödeme</h1>
           <p className="text-muted-foreground mb-8">{carName} için güvenli ödeme yapın</p>
 
+          {/* Booking Summary */}
+          <Card className="p-6 mb-6">
+            <h2 className="font-semibold text-foreground mb-4">Rezervasyon Özeti</h2>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Araç</span>
+                <span className="font-medium">{carName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Kiralama Türü</span>
+                <span className="font-medium">{getRentalTypeText(rentalType)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="w-4 h-4" />
+                  <span>Başlangıç</span>
+                </div>
+                <span className="font-medium text-sm">
+                  {format(startTime, "dd MMM yyyy HH:mm", { locale: tr })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="w-4 h-4" />
+                  <span>Bitiş</span>
+                </div>
+                <span className="font-medium text-sm">
+                  {format(endTime, "dd MMM yyyy HH:mm", { locale: tr })}
+                </span>
+              </div>
+            </div>
+          </Card>
+
           {/* Payment Summary */}
           <Card className="p-6 mb-6 bg-primary/5 border-primary/20">
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-muted-foreground">Toplam Tutar</p>
-                <p className="text-3xl font-bold text-primary">{parseFloat(amount).toFixed(2)}₺</p>
+                <p className="text-3xl font-bold text-primary">{totalPrice.toFixed(2)}₺</p>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Lock className="w-4 h-4" />
@@ -292,7 +371,7 @@ const Payment = () => {
                   ) : (
                     <span className="flex items-center gap-2">
                       <Lock className="w-4 h-4" />
-                      {parseFloat(amount).toFixed(2)}₺ Öde
+                      {totalPrice.toFixed(2)}₺ Öde
                     </span>
                   )}
                 </Button>
@@ -334,6 +413,19 @@ const Payment = () => {
               </div>
             </div>
           </Card>
+
+          {/* Cancellation Policy Link */}
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Ödeme yaparak{" "}
+            <Link to="/rental-agreement" className="text-primary hover:underline">
+              Kiralama Sözleşmesi
+            </Link>
+            {" "}ve{" "}
+            <Link to="/cancellation-policy" className="text-primary hover:underline">
+              İptal/İade Koşullarını
+            </Link>
+            {" "}kabul etmiş olursunuz.
+          </p>
         </div>
       </main>
 
