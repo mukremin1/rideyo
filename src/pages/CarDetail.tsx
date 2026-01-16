@@ -313,7 +313,7 @@ const CarDetail = () => {
     }
 
     try {
-      const { error: bookingError } = await supabase.from("bookings").insert({
+      const { data: bookingData, error: bookingError } = await supabase.from("bookings").insert({
         car_id: car.id,
         user_id: user.id,
         start_time: startTime.toISOString(),
@@ -328,19 +328,22 @@ const CarDetail = () => {
         pickup_address: pickupAddress || null,
         dropoff_address: dropoffAddress || null,
         different_zone_fee: 0,
-      });
+        payment_status: "pending",
+      }).select().single();
 
       if (bookingError) throw bookingError;
 
-      const pickupZone = serviceZones.find(z => z.id === pickupZoneId);
-      const dropoffZone = serviceZones.find(z => z.id === dropoffZoneId);
-      const discountText = subscription ? ` (%${subscription.discount_percentage} abonelik indirimi uygulandı)` : '';
-      const trafficText = simulatedTrafficDelay > 0 ? ` Trafik gecikmesi: +${simulatedTrafficDelay} dakika ücretsiz eklendi.` : '';
-      toast({
-        title: "Rezervasyon Başarılı!",
-        description: `${car.name} için rezervasyonunuz oluşturuldu. Alış: ${pickupZone?.name}, Bırakış: ${dropoffZone?.name}.${discountText}${trafficText}`,
+      // Navigate to payment page with booking details
+      navigate("/payment", {
+        state: {
+          bookingId: bookingData.id,
+          carName: car.name,
+          totalPrice: totalPrice,
+          rentalType: selectedPricing,
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString(),
+        }
       });
-      navigate("/");
     } catch (error: any) {
       console.error("Rezervasyon hatası:", error);
       toast({

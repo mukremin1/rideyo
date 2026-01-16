@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,9 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const carSchema = z.object({
   name: z.string().min(2, "Araç adı en az 2 karakter olmalıdır").max(100),
@@ -34,9 +35,11 @@ const carSchema = z.object({
 });
 
 const AddCar = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [isCarOwner, setIsCarOwner] = useState<boolean | null>(null);
+  const [checkingRole, setCheckingRole] = useState(true);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -59,9 +62,127 @@ const AddCar = () => {
     gpsDeviceId: "",
   });
 
+  useEffect(() => {
+    const checkCarOwnerRole = async () => {
+      if (!user) {
+        setCheckingRole(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "car_owner")
+          .maybeSingle();
+
+        if (error) {
+          console.error("Rol kontrol hatası:", error);
+          setIsCarOwner(false);
+        } else {
+          setIsCarOwner(!!data);
+        }
+      } catch (error) {
+        console.error("Rol kontrol hatası:", error);
+        setIsCarOwner(false);
+      } finally {
+        setCheckingRole(false);
+      }
+    };
+
+    if (!authLoading) {
+      checkCarOwnerRole();
+    }
+  }, [user, authLoading]);
+
+  const becomeCarOwner = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: user.id,
+        role: "car_owner",
+      });
+
+      if (error) {
+        if (error.code === "23505") {
+          // Already has role
+          setIsCarOwner(true);
+          toast.success("Zaten araç sahibi rolüne sahipsiniz!");
+        } else {
+          throw error;
+        }
+      } else {
+        setIsCarOwner(true);
+        toast.success("Araç sahibi olarak kaydınız tamamlandı!");
+      }
+    } catch (error) {
+      console.error("Rol ekleme hatası:", error);
+      toast.error("Bir hata oluştu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (authLoading || checkingRole) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 pt-24 pb-12 text-center">
+          <p className="text-xl text-muted-foreground">Yükleniyor...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!user) {
-    navigate("/auth");
-    return null;
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl text-center">
+            <h1 className="text-3xl font-bold text-foreground mb-4">Giriş Yapmalısınız</h1>
+            <p className="text-muted-foreground mb-8">
+              Araç eklemek için önce giriş yapmanız gerekmektedir.
+            </p>
+            <Button onClick={() => navigate("/auth")}>Giriş Yap / Üye Ol</Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!isCarOwner) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
+            <Card className="p-8 text-center">
+              <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+              <h1 className="text-3xl font-bold text-foreground mb-4">Araç Sahibi Hesabı Gerekli</h1>
+              <p className="text-muted-foreground mb-6">
+                Araç ekleyebilmek için araç sahibi hesabına sahip olmanız gerekmektedir. 
+                Aşağıdaki butona tıklayarak araç sahibi olabilirsiniz.
+              </p>
+              <div className="space-y-4">
+                <Button onClick={becomeCarOwner} disabled={loading} size="lg" className="w-full">
+                  {loading ? "İşleniyor..." : "Araç Sahibi Ol"}
+                </Button>
+                <p className="text-sm text-muted-foreground">
+                  Araç sahibi olarak kaydolduğunuzda aracınızı platformumuza ekleyebilir ve gelir elde edebilirsiniz.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +228,7 @@ const AddCar = () => {
         transmission: validatedData.transmission,
         seats: validatedData.seats,
         location: validatedData.location,
-        city: "Trabzon",
+        city: "Erzurum",
         plate_number: validatedData.plateNumber,
         year: validatedData.year,
         description: validatedData.description,
@@ -117,7 +238,11 @@ const AddCar = () => {
 
       if (error) {
         console.error("Araç ekleme hatası:", error);
-        toast.error("Araç eklenirken bir hata oluştu");
+        if (error.code === "42501") {
+          toast.error("Araç ekleme yetkiniz bulunmuyor. Lütfen araç sahibi olarak kayıt olun.");
+        } else {
+          toast.error("Araç eklenirken bir hata oluştu: " + error.message);
+        }
         return;
       }
 
@@ -127,6 +252,7 @@ const AddCar = () => {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
+        console.error("Hata:", error);
         toast.error("Bir hata oluştu");
       }
     } finally {
@@ -146,6 +272,13 @@ const AddCar = () => {
           </Link>
 
           <h1 className="text-4xl font-bold text-foreground mb-8">Yeni Araç Ekle</h1>
+
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Araç sahibi olarak sisteme kayıtlısınız. Aracınızı ekleyebilirsiniz.
+            </AlertDescription>
+          </Alert>
 
           <Card className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -336,7 +469,7 @@ const AddCar = () => {
                   id="location"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="örn: Ortahisar, Trabzon"
+                  placeholder="örn: Palandöken, Erzurum"
                   required
                 />
               </div>
@@ -348,7 +481,7 @@ const AddCar = () => {
                     id="plateNumber"
                     value={formData.plateNumber}
                     onChange={(e) => setFormData({ ...formData, plateNumber: e.target.value })}
-                    placeholder="örn: 34 ABC 123"
+                    placeholder="örn: 25 ABC 123"
                   />
                 </div>
 
