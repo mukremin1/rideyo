@@ -8,7 +8,7 @@ import { Shield, AlertTriangle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const PENALTY_THRESHOLD = 50; // Maksimum izin verilen ceza puanı
+const PENALTY_THRESHOLD = 70; // DB migration'da maksimum 70 görünüyor -> frontend ile uyumlu yaptık
 
 interface DriverHistoryFormProps {
   userId: string;
@@ -40,44 +40,80 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
     return "low";
   };
 
+  // Basit driver score hesaplama; kendi mantığınıza göre değiştirin
+  const computeDriverScore = (points: number, accidents: number, violations: number) => {
+    const raw = 100 - (points + accidents * 10 + violations * 5);
+    return Math.max(0, Math.min(100, Math.round(raw)));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Sürücü geçmişini kaydet
-      const { error } = await supabase
+      const driverScore = computeDriverScore(
+        driverData.penaltyPoints,
+        driverData.totalAccidents,
+        driverData.trafficViolations
+      );
+
+      // isApproved mantığını DB ile uyumlu hale getirdik:
+      // - sürücü puanı (driver_score) en az 60 olmalı (migration'da kontrol var)
+      // - ceza puanı <= PENALTY_THRESHOLD (DB'de >70 reddediyor)
+      // - kazalar <3 ve ihlaller <5
+      const isApproved =
+        driverScore >= 60 &&
+        driverData.penaltyPoints <= PENALTY_THRESHOLD &&
+        driverData.totalAccidents < 3 &&
+        driverData.trafficViolations < 5;
+
+      const upsertPayload = {
+        user_id: userId,
+        license_number: driverData.licenseNumber,
+        penalty_points: driverData.penaltyPoints,
+        total_accidents: driverData.totalAccidents,
+        traffic_violations: driverData.trafficViolations,
+        driver_score: driverScore,
+        is_approved: isApproved,
+        verification_status: isApproved ? "verified" : "rejected",
+      };
+
+      // Upsert ve cevap/log
+      const { data, error } = await supabase
         .from("driver_history")
-        .upsert({
-          user_id: userId,
-          license_number: driverData.licenseNumber,
-          penalty_points: driverData.penaltyPoints,
-          total_accidents: driverData.totalAccidents,
-          traffic_violations: driverData.trafficViolations,
-          verification_status: "verified",
+        .upsert(upsertPayload)
+        .select(); // SELECT ekleyerek dönen kaydı alıyoruz (gerektiğinde)
+
+      if (error) {
+        console.error("Supabase upsert hata:", error);
+        toast({
+          title: "Doğrulama hatası",
+          description: error.message || "Sürücü bilgileri kaydedilemedi",
+          variant: "destructive",
         });
+        setLoading(false);
+        return;
+      }
 
-      if (error) throw error;
+      console.debug("Driver history upserted:", data);
 
-      // Risk seviyesini hesapla
+      // Risk ve mesaj ayarlama
       const riskLevel = calculateRiskLevel(
         driverData.penaltyPoints,
         driverData.totalAccidents,
         driverData.trafficViolations
       );
 
-      const isApproved = driverData.penaltyPoints < PENALTY_THRESHOLD &&
-                         driverData.totalAccidents < 3 &&
-                         driverData.trafficViolations < 5;
-
       let message = "";
       if (!isApproved) {
-        if (driverData.penaltyPoints >= PENALTY_THRESHOLD) {
+        if (driverData.penaltyPoints > PENALTY_THRESHOLD) {
           message = `Ehliyet ceza puanınız (${driverData.penaltyPoints}) izin verilen maksimum değeri (${PENALTY_THRESHOLD}) aşıyor.`;
         } else if (driverData.totalAccidents >= 3) {
           message = "Kaza geçmişiniz nedeniyle kiralama yapılamıyor.";
+        } else if (driverScore < 60) {
+          message = `Sürücü puanınız (${driverScore}) kiralama için yeterli değil (minimum 60).`;
         } else {
-          message = "Trafik ihlali geçmişiniz nedeniyle kiralama yapılamıyor.";
+          message = "Sürücü doğrulaması tamamlanamadı.";
         }
       } else {
         message = "Sürücü doğrulaması başarılı!";
@@ -95,7 +131,7 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
       console.error("Sürücü geçmişi kaydedilemedi:", error);
       toast({
         title: "Hata",
-        description: "Sürücü bilgileri kaydedilemedi",
+        description: String(error) || "Sürücü bilgileri kaydedilemedi",
         variant: "destructive",
       });
     } finally {
@@ -136,11 +172,18 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
               type="number"
               min="0"
               placeholder="Toplam ceza puanınız"
-              value={driverData.penaltyPoints || ""}
-              onChange={(e) => setDriverData({ ...driverData, penaltyPoints: parseInt(e.target.value) || 0 })}
+              value={driverData.penaltyPoints ?? ""}
+              onChange={(e) =>
+                setDriverData({
+                  ...driverData,
+                  penaltyPoints: Number.isNaN(parseInt(e.target.value, 10))
+                    ? 0
+                    : parseInt(e.target.value, 10),
+                })
+              }
               required
             />
-            {driverData.penaltyPoints >= PENALTY_THRESHOLD && (
+            {driverData.penaltyPoints > PENALTY_THRESHOLD && (
               <p className="text-sm text-destructive flex items-center gap-1">
                 <AlertTriangle className="w-4 h-4" />
                 Ceza puanınız izin verilen maksimum değeri aşıyor
@@ -156,8 +199,15 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
                 type="number"
                 min="0"
                 placeholder="0"
-                value={driverData.totalAccidents || ""}
-                onChange={(e) => setDriverData({ ...driverData, totalAccidents: parseInt(e.target.value) || 0 })}
+                value={driverData.totalAccidents ?? ""}
+                onChange={(e) =>
+                  setDriverData({
+                    ...driverData,
+                    totalAccidents: Number.isNaN(parseInt(e.target.value, 10))
+                      ? 0
+                      : parseInt(e.target.value, 10),
+                  })
+                }
                 required
               />
             </div>
@@ -169,19 +219,26 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
                 type="number"
                 min="0"
                 placeholder="0"
-                value={driverData.trafficViolations || ""}
-                onChange={(e) => setDriverData({ ...driverData, trafficViolations: parseInt(e.target.value) || 0 })}
+                value={driverData.trafficViolations ?? ""}
+                onChange={(e) =>
+                  setDriverData({
+                    ...driverData,
+                    trafficViolations: Number.isNaN(parseInt(e.target.value, 10))
+                      ? 0
+                      : parseInt(e.target.value, 10),
+                  })
+                }
                 required
               />
             </div>
           </div>
 
           {verificationResult && (
-            <div className={`p-4 rounded-lg border ${
-              verificationResult.isApproved 
-                ? "bg-primary/5 border-primary/20" 
-                : "bg-destructive/5 border-destructive/20"
-            }`}>
+            <div
+              className={`p-4 rounded-lg border ${
+                verificationResult.isApproved ? "bg-primary/5 border-primary/20" : "bg-destructive/5 border-destructive/20"
+              }`}
+            >
               <div className="flex items-start gap-3">
                 {verificationResult.isApproved ? (
                   <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
@@ -192,19 +249,13 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
                   <p className="font-semibold mb-1">
                     {verificationResult.isApproved ? "Doğrulama Başarılı" : "Doğrulama Başarısız"}
                   </p>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {verificationResult.message}
-                  </p>
-                  <Badge variant={
-                    verificationResult.riskLevel === "low" ? "default" :
-                    verificationResult.riskLevel === "medium" ? "secondary" :
-                    "destructive"
-                  }>
-                    Risk Seviyesi: {
-                      verificationResult.riskLevel === "low" ? "Düşük" :
-                      verificationResult.riskLevel === "medium" ? "Orta" :
-                      "Yüksek"
+                  <p className="text-sm text-muted-foreground mb-2">{verificationResult.message}</p>
+                  <Badge
+                    variant={
+                      verificationResult.riskLevel === "low" ? "default" : verificationResult.riskLevel === "medium" ? "secondary" : "destructive"
                     }
+                  >
+                    Risk Seviyesi: {verificationResult.riskLevel === "low" ? "Düşük" : verificationResult.riskLevel === "medium" ? "Orta" : "Yüksek"}
                   </Badge>
                 </div>
               </div>
@@ -218,8 +269,8 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
 
         <div className="mt-4 p-3 bg-muted rounded-lg">
           <p className="text-xs text-muted-foreground">
-            <strong>Not:</strong> Güvenli kiralama için ehliyet ceza puanınız {PENALTY_THRESHOLD} 
-            puanın altında olmalıdır. Yüksek risk tespit edilmesi durumunda kiralama yapılamayacaktır.
+            <strong>Not:</strong> Güvenli kiralama için ehliyet ceza puanınız {PENALTY_THRESHOLD} puanın
+            altında veya eşit olmalıdır. Sürücü puanı en az 60 olmalıdır. Yüksek risk tespit edilmesi durumunda kiralama yapılamayacaktır.
           </p>
         </div>
       </CardContent>
