@@ -142,9 +142,11 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: "Ehliyet numarası gereklidir" 
+          canRent: false,
+          error: "Ehliyet numarası gereklidir",
+          reason: "missing_license"
         }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -159,7 +161,7 @@ serve(async (req) => {
           canRent: false,
           reason: "invalid_format"
         }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -176,7 +178,7 @@ serve(async (req) => {
           canRent: false,
           reason: "not_found"
         }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -188,13 +190,15 @@ serve(async (req) => {
           error: licenseData.blockReason || "Bu ehliyet ile araç kiralanamaz",
           canRent: false,
           reason: "blocked",
-          details: {
+          data: {
             penaltyPoints: licenseData.penaltyPoints,
             trafficViolations: licenseData.trafficViolations,
             totalAccidents: licenseData.totalAccidents,
+            riskLevel: "high",
+            driverScore: 0,
           }
         }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -206,9 +210,13 @@ serve(async (req) => {
           error: `Ehliyetinizin süresi ${licenseData.expiryDate} tarihinde dolmuş. Lütfen ehliyetinizi yenileyin.`,
           canRent: false,
           reason: "expired",
-          expiryDate: licenseData.expiryDate
+          data: {
+            expiryDate: licenseData.expiryDate,
+            riskLevel: "high",
+            driverScore: 0,
+          }
         }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
