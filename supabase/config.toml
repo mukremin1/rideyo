@@ -1,1 +1,13 @@
 project_id = "ucjnonpozhzuyjuowwdx"
+
+[functions.ai-support]
+verify_jwt = false
+
+[functions.chat]
+verify_jwt = false
+
+[functions.update-gps]
+verify_jwt = false
+
+[functions.verify-license]
+verify_jwt = false
