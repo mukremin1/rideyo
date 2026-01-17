@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import InsurancePackages from "@/components/InsurancePackages";
-import DriverHistoryForm from "@/components/DriverHistoryForm";
+import AutoLicenseVerification from "@/components/AutoLicenseVerification";
 import CarLocationMap from "@/components/CarLocationMap";
 import carCompact from "@/assets/car-compact.jpg";
 import carSedan from "@/assets/car-sedan.jpg";
@@ -815,7 +815,7 @@ const CarDetail = () => {
 
                 {user && (
                   <div className="mt-6">
-                    <DriverHistoryForm 
+                    <AutoLicenseVerification 
                       userId={user.id}
                       onVerified={handleDriverVerification}
                     />
