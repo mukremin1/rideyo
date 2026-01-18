@@ -15,6 +15,30 @@ import { ArrowLeft, Car, CheckCircle2, Upload, MapPin, Fuel, Settings, CreditCar
 import { z } from "zod";
 import { Progress } from "@/components/ui/progress";
 
+// Function to extract city from location text
+const extractCityFromLocation = (location: string): string => {
+  const cities = [
+    "istanbul", "ankara", "izmir", "bursa", "antalya", "trabzon", "erzurum",
+    "konya", "adana", "mersin", "samsun", "kayseri", "eskişehir", "gaziantep",
+    "diyarbakır", "şanlıurfa", "malatya", "van", "denizli", "kocaeli", "sakarya",
+    "muğla", "aydın", "manisa", "balıkesir", "tekirdağ", "edirne", "çanakkale",
+    "hatay", "kahramanmaraş", "mardin", "batman", "elazığ", "ağrı", "kars",
+    "rize", "giresun", "ordu", "artvin", "gümüşhane", "bayburt", "bingöl",
+    "muş", "bitlis", "siirt", "şırnak", "hakkari", "tunceli", "iğdır", "ardahan",
+    "aksaray", "niğde", "nevşehir", "kırşehir", "yozgat", "çorum", "amasya",
+    "tokat", "sinop", "kastamonu", "çankırı", "karabük", "bartın", "zonguldak",
+    "bolu", "düzce", "bilecik", "kütahya", "afyon", "uşak", "ısparta", "burdur"
+  ];
+  
+  const lowerLocation = location.toLowerCase();
+  for (const city of cities) {
+    if (lowerLocation.includes(city)) {
+      return city.charAt(0).toUpperCase() + city.slice(1);
+    }
+  }
+  return "Diğer";
+};
+
 const carSchema = z.object({
   name: z.string().min(2, "Araç adı en az 2 karakter olmalıdır").max(100),
   type: z.enum(["compact", "sedan", "suv"]),
@@ -152,7 +176,7 @@ const AddCar = () => {
         transmission: validatedData.transmission,
         seats: validatedData.seats,
         location: validatedData.location,
-        city: "Erzurum",
+        city: extractCityFromLocation(validatedData.location),
         plate_number: validatedData.plateNumber,
         year: validatedData.year,
         description: validatedData.description,

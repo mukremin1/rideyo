@@ -17,11 +17,15 @@ import {
   AlertTriangle,
   Key,
   ArrowRight,
-  Loader2
+  Loader2,
+  Navigation,
+  Bell
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import VehiclePhotoCapture from "@/components/VehiclePhotoCapture";
+import CarLocationMap from "@/components/CarLocationMap";
 
 interface RentalState {
   bookingId: string;
@@ -33,6 +37,7 @@ const StartRental = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { sendRentalNotification, permission: notifPermission, requestPermission: requestNotifPermission } = usePushNotifications();
   const state = location.state as RentalState | null;
 
   const [step, setStep] = useState(1);
@@ -46,6 +51,7 @@ const StartRental = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [rentalStarted, setRentalStarted] = useState(false);
   const [rentalEnded, setRentalEnded] = useState(false);
+  const [carGPSData, setCarGPSData] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
     // Kullanıcı konumunu al
@@ -61,6 +67,53 @@ const StartRental = () => {
       );
     }
   }, []);
+
+  // Araç GPS verilerini çek ve dinle
+  useEffect(() => {
+    if (!state?.carId) return;
+
+    const fetchCarGPS = async () => {
+      const { data } = await supabase
+        .from("cars")
+        .select("latitude, longitude")
+        .eq("id", state.carId)
+        .maybeSingle();
+
+      if (data?.latitude && data?.longitude) {
+        setCarGPSData({ latitude: data.latitude, longitude: data.longitude });
+      }
+    };
+
+    fetchCarGPS();
+
+    // Real-time GPS updates
+    const channel = supabase
+      .channel(`rental-gps-${state.carId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "cars",
+          filter: `id=eq.${state.carId}`,
+        },
+        (payload) => {
+          const newData = payload.new as any;
+          if (newData.latitude && newData.longitude) {
+            setCarGPSData({ latitude: newData.latitude, longitude: newData.longitude });
+            // Konum güncelleme bildirimi gönder
+            if (rentalStarted) {
+              sendRentalNotification("location", state.carName, "Araç konumu güncellendi");
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [state?.carId, rentalStarted, sendRentalNotification, state?.carName]);
 
   if (!state) {
     return (
@@ -180,6 +233,7 @@ const StartRental = () => {
 
       if (data.success) {
         toast.success("Kiralama başarıyla başlatıldı!");
+        sendRentalNotification("start", state.carName);
         setRentalStarted(true);
         setStep(4);
       } else {
