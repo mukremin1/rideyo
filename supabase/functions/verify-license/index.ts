@@ -6,18 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Türk ehliyet numarası formatı doğrulama (11 haneli)
+// Ehliyet numarası formatı doğrulama - karakter kısıtlaması yok
 function validateTurkishLicenseFormat(licenseNumber: string): { valid: boolean; error?: string } {
-  const cleaned = licenseNumber.replace(/\s/g, '').toUpperCase();
+  const cleaned = licenseNumber.replace(/\s/g, '').trim();
   
-  // Türk ehliyetleri genellikle 11 haneli sayısal veya alfanümerik
-  if (cleaned.length < 8 || cleaned.length > 15) {
-    return { valid: false, error: "Ehliyet numarası 8-15 karakter arasında olmalıdır" };
-  }
-  
-  // Sadece harf ve rakam içermeli
-  if (!/^[A-Z0-9]+$/.test(cleaned)) {
-    return { valid: false, error: "Ehliyet numarası sadece harf ve rakam içermelidir" };
+  // Sadece boş olup olmadığını kontrol et
+  if (!cleaned || cleaned.length === 0) {
+    return { valid: false, error: "Ehliyet numarası boş olamaz" };
   }
   
   return { valid: true };

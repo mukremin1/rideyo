@@ -337,6 +337,7 @@ const CarDetail = () => {
       navigate("/payment", {
         state: {
           bookingId: bookingData.id,
+          carId: car.id,
           carName: car.name,
           totalPrice: totalPrice,
           rentalType: selectedPricing,

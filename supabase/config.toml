@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.verify-license]
 verify_jwt = false
+
+[functions.vehicle-control]
+verify_jwt = false
