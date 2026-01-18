@@ -17,6 +17,7 @@ import { tr } from "date-fns/locale";
 
 interface PaymentState {
   bookingId: string;
+  carId: string;
   carName: string;
   totalPrice: number;
   rentalType: string;
@@ -143,9 +144,16 @@ const Payment = () => {
       setPaymentSuccess(true);
       toast.success("Ödeme başarıyla tamamlandı!");
       
+      // Kiralama başlatma sayfasına yönlendir
       setTimeout(() => {
-        navigate("/");
-      }, 3000);
+        navigate("/start-rental", {
+          state: {
+            bookingId,
+            carId: state?.carId,
+            carName,
+          }
+        });
+      }, 2000);
     } catch (error) {
       console.error("Ödeme hatası:", error);
       toast.error("Ödeme işlemi başarısız oldu");
@@ -208,10 +216,7 @@ const Payment = () => {
               </p>
               <p className="text-3xl font-bold text-primary mb-6">{totalPrice.toFixed(2)}₺</p>
               <p className="text-sm text-muted-foreground">
-                Rezervasyon detaylarınız e-posta adresinize gönderilecektir.
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Anasayfaya yönlendiriliyorsunuz...
+                Şimdi kiralamayı başlatma ekranına yönlendiriliyorsunuz...
               </p>
             </Card>
           </div>

@@ -39,6 +39,7 @@ import Install from "./pages/Install";
 import Payment from "./pages/Payment";
 import CancellationPolicy from "./pages/CancellationPolicy";
 import MyBookings from "./pages/MyBookings";
+import StartRental from "./pages/StartRental";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/payment" element={<Payment />} />
             <Route path="/cancellation-policy" element={<CancellationPolicy />} />
             <Route path="/my-bookings" element={<MyBookings />} />
+            <Route path="/start-rental" element={<StartRental />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
