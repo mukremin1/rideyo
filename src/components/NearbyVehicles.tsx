@@ -35,7 +35,47 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
   const { latitude, longitude, loading: locationLoading, error: locationError, requestPermission } = useGeolocation();
   const navigate = useNavigate();
 
-  // City coordinates for location matching
+  // Istanbul districts with accurate coordinates
+  const istanbulDistricts: Record<string, [number, number]> = {
+    sancaktepe: [41.0028, 29.2341],
+    pendik: [40.8756, 29.2339],
+    kartal: [40.8899, 29.1856],
+    maltepe: [40.9345, 29.1306],
+    kadikoy: [40.9927, 29.0259],
+    uskudar: [41.0234, 29.0153],
+    beykoz: [41.1323, 29.1017],
+    umraniye: [41.0162, 29.1244],
+    atasehir: [40.9833, 29.1167],
+    sultanbeyli: [40.9614, 29.2617],
+    tuzla: [40.8167, 29.3],
+    cekmekoy: [41.0333, 29.1833],
+    sile: [41.1761, 29.6128],
+    beylikduzu: [40.9833, 28.6333],
+    esenyurt: [41.0333, 28.6833],
+    avcilar: [40.9833, 28.7167],
+    bakirkoy: [40.9833, 28.8667],
+    bahcelievler: [41.0, 28.85],
+    bagcilar: [41.0333, 28.85],
+    kucukcekmece: [41.0, 28.7667],
+    buyukcekmece: [41.0167, 28.5833],
+    basaksehir: [41.0833, 28.8],
+    arnavutkoy: [41.2, 28.75],
+    eyupsultan: [41.0833, 28.9333],
+    gaziosmanpasa: [41.0667, 28.9167],
+    sultangazi: [41.1, 28.85],
+    kagithane: [41.0833, 28.9667],
+    sisli: [41.0667, 28.9833],
+    beyoglu: [41.0333, 28.9833],
+    fatih: [41.0167, 28.95],
+    zeytinburnu: [41.0, 28.9],
+    gungoren: [41.0167, 28.8833],
+    esenler: [41.05, 28.8833],
+    bayrampasa: [41.05, 28.9167],
+    besiktas: [41.05, 29.0],
+    sariyer: [41.1667, 29.05],
+  };
+
+  // City center coordinates as fallback
   const cityCoordinates: Record<string, [number, number]> = {
     istanbul: [41.0082, 28.9784],
     ankara: [39.9334, 32.8597],
@@ -55,7 +95,22 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
   };
 
   const getCoordinatesFromLocation = (location: string): [number, number] | null => {
-    const lowerLocation = location.toLowerCase();
+    const lowerLocation = location.toLowerCase()
+      .replace(/ı/g, 'i')
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c');
+
+    // Check Istanbul districts first
+    for (const [district, coords] of Object.entries(istanbulDistricts)) {
+      if (lowerLocation.includes(district)) {
+        return coords;
+      }
+    }
+
+    // Fallback to city centers
     for (const [city, coords] of Object.entries(cityCoordinates)) {
       if (lowerLocation.includes(city)) {
         return coords;
