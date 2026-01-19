@@ -11,9 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Car, CheckCircle2, Upload, MapPin, Fuel, Settings, CreditCard, Shield } from "lucide-react";
+import { ArrowLeft, Car, CheckCircle2, MapPin, Fuel, Settings, CreditCard, Shield, Image } from "lucide-react";
 import { z } from "zod";
 import { Progress } from "@/components/ui/progress";
+import CarImageUpload from "@/components/CarImageUpload";
 
 // Function to extract city from location text
 const extractCityFromLocation = (location: string): string => {
@@ -53,6 +54,7 @@ const carSchema = z.object({
   plateNumber: z.string().optional(),
   year: z.number().min(2010, "2010 ve üzeri model yılı araçlar kabul edilmektedir").max(new Date().getFullYear() + 1),
   description: z.string().max(500, "Açıklama en fazla 500 karakter olabilir").optional(),
+  imageUrl: z.string().optional(),
 });
 
 const AddCar = () => {
@@ -77,6 +79,7 @@ const AddCar = () => {
     plateNumber: "",
     year: "",
     description: "",
+    imageUrl: "",
   });
 
   useEffect(() => {
@@ -160,6 +163,7 @@ const AddCar = () => {
         plateNumber: formData.plateNumber || undefined,
         year: formData.year ? parseInt(formData.year) : new Date().getFullYear(),
         description: formData.description || undefined,
+        imageUrl: formData.imageUrl || undefined,
       });
 
       setLoading(true);
@@ -180,6 +184,7 @@ const AddCar = () => {
         plate_number: validatedData.plateNumber,
         year: validatedData.year,
         description: validatedData.description,
+        image_url: validatedData.imageUrl,
         available: true,
       });
 
@@ -207,7 +212,7 @@ const AddCar = () => {
     }
   };
 
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 3));
+  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
   if (authLoading || checkingRole) {
@@ -332,8 +337,9 @@ const AddCar = () => {
             <div className="flex justify-between items-center mb-4">
               {[
                 { num: 1, label: "Araç Bilgileri", icon: Car },
-                { num: 2, label: "Teknik Özellikler", icon: Settings },
-                { num: 3, label: "Fiyatlandırma", icon: CreditCard },
+                { num: 2, label: "Fotoğraf", icon: Image },
+                { num: 3, label: "Teknik Özellikler", icon: Settings },
+                { num: 4, label: "Fiyatlandırma", icon: CreditCard },
               ].map((step, index) => (
                 <div key={step.num} className="flex items-center">
                   <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
@@ -346,15 +352,15 @@ const AddCar = () => {
                   }`}>
                     {step.label}
                   </span>
-                  {index < 2 && (
-                    <div className={`w-12 sm:w-20 h-1 mx-2 rounded ${
+                  {index < 3 && (
+                    <div className={`w-8 sm:w-16 h-1 mx-2 rounded ${
                       currentStep > step.num ? "bg-primary" : "bg-muted"
                     }`} />
                   )}
                 </div>
               ))}
             </div>
-            <Progress value={(currentStep / 3) * 100} className="h-2" />
+            <Progress value={(currentStep / 4) * 100} className="h-2" />
           </div>
 
           <Card>
@@ -436,8 +442,37 @@ const AddCar = () => {
                   </div>
                 )}
 
-                {/* Step 2: Teknik Özellikler */}
+                {/* Step 2: Fotoğraf */}
                 {currentStep === 2 && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Image className="w-4 h-4" />
+                        Araç Fotoğrafı
+                      </Label>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Aracınızın net ve kaliteli bir fotoğrafını yükleyin. Bu fotoğraf araç listesinde görünecektir.
+                      </p>
+                      <CarImageUpload
+                        userId={user?.id || ""}
+                        currentImageUrl={formData.imageUrl}
+                        onImageUploaded={(url) => setFormData({ ...formData, imageUrl: url })}
+                      />
+                    </div>
+
+                    <div className="flex justify-between">
+                      <Button type="button" variant="outline" onClick={prevStep}>
+                        Geri
+                      </Button>
+                      <Button type="button" onClick={nextStep}>
+                        Devam Et
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Teknik Özellikler */}
+                {currentStep === 3 && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -512,8 +547,8 @@ const AddCar = () => {
                   </div>
                 )}
 
-                {/* Step 3: Fiyatlandırma */}
-                {currentStep === 3 && (
+                {/* Step 4: Fiyatlandırma */}
+                {currentStep === 4 && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
