@@ -15,6 +15,7 @@ import { ArrowLeft, Car, CheckCircle2, MapPin, Fuel, Settings, CreditCard, Shiel
 import { z } from "zod";
 import { Progress } from "@/components/ui/progress";
 import CarImageUpload from "@/components/CarImageUpload";
+import LocationPickerMap from "@/components/LocationPickerMap";
 
 // Function to extract city from location text
 const extractCityFromLocation = (location: string): string => {
@@ -80,6 +81,8 @@ const AddCar = () => {
     year: "",
     description: "",
     imageUrl: "",
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   useEffect(() => {
@@ -168,32 +171,9 @@ const AddCar = () => {
 
       setLoading(true);
 
-      // Konum metninden en doğru koordinatları bul (harita için)
-      let latitude: number | null = null;
-      let longitude: number | null = null;
-      try {
-        const url = new URL("https://nominatim.openstreetmap.org/search");
-        url.searchParams.set("format", "json");
-        url.searchParams.set("limit", "1");
-        url.searchParams.set("q", `${validatedData.location}, Türkiye`);
-
-        const res = await fetch(url.toString(), {
-          headers: { Accept: "application/json" },
-        });
-
-        if (res.ok) {
-          const json = (await res.json()) as Array<{ lat: string; lon: string }>;
-          const first = json?.[0];
-          const lat = Number(first?.lat);
-          const lon = Number(first?.lon);
-          if (Number.isFinite(lat) && Number.isFinite(lon)) {
-            latitude = lat;
-            longitude = lon;
-          }
-        }
-      } catch {
-        // sessiz geç: metin üzerinden fallback geocoding zaten var
-      }
+      // Haritadan seçilen koordinatları kullan
+      const latitude = formData.latitude;
+      const longitude = formData.longitude;
 
       const { error } = await supabase.from("cars").insert({
         owner_id: user!.id,
@@ -440,17 +420,28 @@ const AddCar = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="location" className="flex items-center gap-2">
+                      <Label className="flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
                         Lokasyon *
                       </Label>
-                      <Input
-                        id="location"
-                        value={formData.location}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="örn: Palandöken, Erzurum"
-                        required
+                      <LocationPickerMap
+                        initialLat={formData.latitude || 41.0082}
+                        initialLng={formData.longitude || 28.9784}
+                        height="300px"
+                        onLocationSelect={(lat, lng, address) => {
+                          setFormData({
+                            ...formData,
+                            latitude: lat,
+                            longitude: lng,
+                            location: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+                          });
+                        }}
                       />
+                      {formData.location && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Seçilen adres: {formData.location}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
