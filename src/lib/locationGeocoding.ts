@@ -114,7 +114,7 @@ export const geocodeWithNominatim = async (location: string): Promise<LatLngTupl
       const lon = Number(first.lon);
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
 
-      return [lat, lon];
+      return [lat, lon] as LatLngTuple;
     } catch {
       return null;
     }
