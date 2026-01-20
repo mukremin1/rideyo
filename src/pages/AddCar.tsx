@@ -168,6 +168,33 @@ const AddCar = () => {
 
       setLoading(true);
 
+      // Konum metninden en doğru koordinatları bul (harita için)
+      let latitude: number | null = null;
+      let longitude: number | null = null;
+      try {
+        const url = new URL("https://nominatim.openstreetmap.org/search");
+        url.searchParams.set("format", "json");
+        url.searchParams.set("limit", "1");
+        url.searchParams.set("q", `${validatedData.location}, Türkiye`);
+
+        const res = await fetch(url.toString(), {
+          headers: { Accept: "application/json" },
+        });
+
+        if (res.ok) {
+          const json = (await res.json()) as Array<{ lat: string; lon: string }>;
+          const first = json?.[0];
+          const lat = Number(first?.lat);
+          const lon = Number(first?.lon);
+          if (Number.isFinite(lat) && Number.isFinite(lon)) {
+            latitude = lat;
+            longitude = lon;
+          }
+        }
+      } catch {
+        // sessiz geç: metin üzerinden fallback geocoding zaten var
+      }
+
       const { error } = await supabase.from("cars").insert({
         owner_id: user!.id,
         name: validatedData.name,
@@ -185,6 +212,8 @@ const AddCar = () => {
         year: validatedData.year,
         description: validatedData.description,
         image_url: validatedData.imageUrl,
+        latitude,
+        longitude,
         available: true,
       });
 
