@@ -26,6 +26,7 @@ const carSchema = z.object({
   fuelType: z.enum(["Benzin", "Dizel", "Elektrik", "Hibrit"]),
   transmission: z.enum(["Manuel", "Otomatik"]),
   seats: z.number().min(2).max(9),
+  city: z.string().min(2, "Lütfen geçerli bir il seçin"),
   location: z.string().min(3, "Lokasyon en az 3 karakter olmalıdır"),
   plateNumber: z.string().optional(),
   year: z.number().min(2010, "2010 ve üzeri model yılı araçlar kabul edilmektedir").max(new Date().getFullYear() + 1),
@@ -37,6 +38,22 @@ const AddCar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [coordinates, setCoordinates] = useState<{ latitude: number | null; longitude: number | null }>({
+    latitude: null,
+    longitude: null,
+  });
+
+  const turkeyCities = [
+    "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Aksaray", "Amasya", "Ankara", "Antalya", "Ardahan", "Artvin",
+    "Aydın", "Balıkesir", "Bartın", "Batman", "Bayburt", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur",
+    "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Düzce", "Edirne", "Elazığ", "Erzincan",
+    "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Iğdır", "Isparta", "İstanbul",
+    "İzmir", "Kahramanmaraş", "Karabük", "Karaman", "Kars", "Kastamonu", "Kayseri", "Kilis", "Kırıkkale", "Kırklareli",
+    "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Mardin", "Mersin", "Muğla", "Muş",
+    "Nevşehir", "Niğde", "Ordu", "Osmaniye", "Rize", "Sakarya", "Samsun", "Şanlıurfa", "Siirt", "Sinop",
+    "Sivas", "Şırnak", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Uşak", "Van", "Yalova", "Yozgat", "Zonguldak",
+  ];
   
   const [formData, setFormData] = useState({
     name: "",
@@ -52,6 +69,7 @@ const AddCar = () => {
     fuelType: "Benzin",
     transmission: "Otomatik",
     seats: "5",
+    city: "",
     location: "",
     plateNumber: "",
     year: "",
@@ -63,6 +81,83 @@ const AddCar = () => {
     navigate("/auth");
     return null;
   }
+
+  const reverseGeocode = async (latitude: number, longitude: number) => {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+      {
+        headers: {
+          "Accept-Language": "tr",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Reverse geocode failed");
+    }
+    const data = await response.json();
+    const address = data?.display_name as string | undefined;
+    const city =
+      data?.address?.city ||
+      data?.address?.town ||
+      data?.address?.state ||
+      data?.address?.county;
+    return { address, city };
+  };
+
+  const forwardGeocode = async (query: string) => {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          "Accept-Language": "tr",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Forward geocode failed");
+    }
+    const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) return null;
+    const result = data[0];
+    return {
+      latitude: Number(result.lat),
+      longitude: Number(result.lon),
+    };
+  };
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Tarayıcınız konum desteği sunmuyor");
+      return;
+    }
+
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        setCoordinates({ latitude, longitude });
+        try {
+          const { address, city } = await reverseGeocode(latitude, longitude);
+          if (address) {
+            setFormData((prev) => ({ ...prev, location: address }));
+          }
+          if (city) {
+            setFormData((prev) => ({ ...prev, city }));
+          }
+        } catch (error) {
+          toast.error("Konum adresine çevrilemedi");
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      () => {
+        setGeoLoading(false);
+        toast.error("Konum alınamadı");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,12 +180,30 @@ const AddCar = () => {
         fuelType: formData.fuelType,
         transmission: formData.transmission,
         seats: parseInt(formData.seats),
+        city: formData.city,
         location: formData.location,
         plateNumber: formData.plateNumber || undefined,
         year: formData.year ? parseInt(formData.year) : new Date().getFullYear(),
         description: formData.description || undefined,
         gpsDeviceId: formData.gpsDeviceId || undefined,
       });
+
+      let latitude = coordinates.latitude;
+      let longitude = coordinates.longitude;
+
+      if (!latitude || !longitude) {
+        try {
+          const geoResult = await forwardGeocode(
+            `${validatedData.location}, ${validatedData.city}, Türkiye`
+          );
+          if (geoResult) {
+            latitude = geoResult.latitude;
+            longitude = geoResult.longitude;
+          }
+        } catch (error) {
+          console.warn("Geocode işlemi başarısız:", error);
+        }
+      }
 
       setLoading(true);
 
@@ -107,11 +220,13 @@ const AddCar = () => {
         transmission: validatedData.transmission,
         seats: validatedData.seats,
         location: validatedData.location,
-        city: "Trabzon",
+        city: validatedData.city,
         plate_number: validatedData.plateNumber,
         year: validatedData.year,
         description: validatedData.description,
         gps_device_id: validatedData.gpsDeviceId,
+        latitude,
+        longitude,
         available: true,
       });
 
@@ -330,8 +445,35 @@ const AddCar = () => {
                 <p className="text-sm text-muted-foreground">KM paketleri ile kullanıcılara paket seçeneği sunun</p>
               </div>
 
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">İl *</Label>
+                  <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="İl seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {turkeyCities.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="location">Lokasyon *</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="location">Lokasyon *</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDetectLocation}
+                    disabled={geoLoading}
+                  >
+                    {geoLoading ? "Algılanıyor..." : "Konumu Algıla"}
+                  </Button>
+                </div>
                 <Input
                   id="location"
                   value={formData.location}
@@ -339,6 +481,11 @@ const AddCar = () => {
                   placeholder="örn: Ortahisar, Trabzon"
                   required
                 />
+                {coordinates.latitude && coordinates.longitude && (
+                  <p className="text-xs text-muted-foreground">
+                    GPS: {coordinates.latitude.toFixed(6)}, {coordinates.longitude.toFixed(6)}
+                  </p>
+                )}
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
