@@ -478,8 +478,8 @@ const StartRental = () => {
         </div>
 
         <div className="flex gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="flex-1 gap-2"
             onClick={handleUnlockCar}
             disabled={unlocking}
@@ -487,8 +487,8 @@ const StartRental = () => {
             {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4" />}
             Kapıları Aç
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="flex-1 gap-2"
             onClick={handleLockCar}
             disabled={locking}
@@ -497,6 +497,33 @@ const StartRental = () => {
             Kapıları Kilitle
           </Button>
         </div>
+      </Card>
+
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Navigation className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">Canlı Araç Konumu</h3>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Bell className="w-4 h-4" />
+            <span>Güncellendikçe yenilenir</span>
+          </div>
+        </div>
+
+        {carGPSData ? (
+          <CarLocationMap latitude={carGPSData.latitude} longitude={carGPSData.longitude} carName={state.carName} />
+        ) : (
+          <div className="flex items-center justify-center h-64 bg-muted rounded-lg">
+            <div className="text-muted-foreground">GPS verisi bekleniyor...</div>
+          </div>
+        )}
+
+        {carGPSData && (
+          <div className="mt-4 text-sm text-muted-foreground">
+            {carGPSData.latitude.toFixed(6)}, {carGPSData.longitude.toFixed(6)}
+          </div>
+        )}
       </Card>
 
       <Card className="p-6">
@@ -510,11 +537,7 @@ const StartRental = () => {
           </div>
         </div>
 
-        <VehiclePhotoCapture
-          onPhotosChange={setAfterPhotos}
-          photos={afterPhotos}
-          maxPhotos={4}
-        />
+        <VehiclePhotoCapture onPhotosChange={setAfterPhotos} photos={afterPhotos} maxPhotos={4} />
 
         <div className="mt-6 space-y-4">
           <div>
@@ -541,7 +564,7 @@ const StartRental = () => {
           </div>
         </div>
 
-        <Button 
+        <Button
           size="lg"
           variant="destructive"
           className="w-full mt-6 gap-2"
