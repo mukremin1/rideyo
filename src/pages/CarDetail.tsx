@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import InsurancePackages from "@/components/InsurancePackages";
-import AutoLicenseVerification from "@/components/AutoLicenseVerification";
 import CarLocationMap from "@/components/CarLocationMap";
 import carCompact from "@/assets/car-compact.jpg";
 import carSedan from "@/assets/car-sedan.jpg";
@@ -51,8 +50,6 @@ const CarDetail = () => {
   const [selectedKmPackage, setSelectedKmPackage] = useState<string | null>(null);
   const [selectedInsurance, setSelectedInsurance] = useState<string | null>(null);
   const [insurancePrice, setInsurancePrice] = useState(0);
-  const [driverVerified, setDriverVerified] = useState(false);
-  const [driverRiskLevel, setDriverRiskLevel] = useState<string>("");
   const [lockStatus, setLockStatus] = useState<string>("locked");
   const [isProcessing, setIsProcessing] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
@@ -71,10 +68,6 @@ const CarDetail = () => {
     setInsurancePrice(price);
   };
 
-  const handleDriverVerification = (isApproved: boolean, riskLevel: string) => {
-    setDriverVerified(isApproved);
-    setDriverRiskLevel(riskLevel);
-  };
 
   const handleLockToggle = async () => {
     if (!user || !car) return;
@@ -281,15 +274,6 @@ const CarDetail = () => {
       return;
     }
 
-    if (!driverVerified) {
-      toast({
-        title: "Sürücü Doğrulaması Gerekli",
-        description: "Kiralama yapabilmek için önce sürücü bilgilerinizi doğrulamanız gerekiyor",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!selectedPricing) {
       toast({
         title: "Fiyat Seçimi Gerekli",
@@ -341,8 +325,8 @@ const CarDetail = () => {
         end_time: endTime.toISOString(),
         total_price: totalPrice,
         rental_type: selectedPricing,
-        driver_history_checked: driverVerified,
-        driver_risk_level: driverRiskLevel || null,
+        driver_history_checked: false,
+        driver_risk_level: null,
         traffic_delay_minutes: simulatedTrafficDelay,
         pickup_zone_id: selectedPricing === "day" ? (pickupZoneId || null) : null,
         dropoff_zone_id: selectedPricing === "day" ? (dropoffZoneId || null) : null,
@@ -812,15 +796,6 @@ const CarDetail = () => {
                   selectedPackage={selectedInsurance}
                 />
 
-                {user && (
-                  <div className="mt-6">
-                    <AutoLicenseVerification 
-                      userId={user.id}
-                      onVerified={handleDriverVerification}
-                    />
-                  </div>
-                )}
-
                 <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6 mt-6">
                   <div className="flex items-center gap-2 text-primary mb-2">
                     <Shield className="w-5 h-5" />
@@ -837,13 +812,11 @@ const CarDetail = () => {
                 <Button 
                   size="lg"
                   className="w-full text-lg h-14"
-                  disabled={!car.available || !driverVerified}
+                  disabled={!car.available}
                   onClick={handleReserve}
                 >
                   {!car.available 
                     ? "Müsait Değil" 
-                    : !driverVerified 
-                    ? "Önce Sürücü Doğrulaması Yapın" 
                     : "Hemen Kirala"}
                 </Button>
               </div>

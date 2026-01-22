@@ -68,35 +68,21 @@ const extractCityFromLocation = (location: string): string => {
 
 
 const carSchema = z.object({
-
-  name: z.string().min(2, "AraÃ§ adÄ± en az 2 karakter olmalÄ±dÄ±r").max(100),
-
+  name: z.string().min(2, "Araç adı en az 2 karakter olmalıdır").max(100),
   type: z.enum(["compact", "sedan", "suv"]),
-
-  pricePerMinute: z.number().min(0.1, "Fiyat 0'dan bÃ¼yÃ¼k olmalÄ±dÄ±r"),
-
-  pricePerHour: z.number().min(1, "Fiyat 0'dan bÃ¼yÃ¼k olmalÄ±dÄ±r"),
-
-  pricePerDay: z.number().min(10, "Fiyat 10'dan bÃ¼yÃ¼k olmalÄ±dÄ±r"),
-
-  pricePerKm: z.number().min(0, "KM baÅŸÄ± fiyat 0'dan bÃ¼yÃ¼k veya eÅŸit olmalÄ±dÄ±r"),
-
+  pricePerMinute: z.number().min(0.1, "Fiyat 0'dan büyük olmalıdır"),
+  pricePerHour: z.number().min(1, "Fiyat 0'dan büyük olmalıdır"),
+  pricePerDay: z.number().min(10, "Fiyat 10'dan büyük olmalıdır"),
+  pricePerKm: z.number().min(0, "KM başı fiyat 0'dan büyük veya eşit olmalıdır"),
   fuelType: z.enum(["Benzin", "Dizel", "Elektrik", "Hibrit"]),
-
   transmission: z.enum(["Manuel", "Otomatik"]),
-
   seats: z.number().min(2).max(9),
   city: z.string().min(2, "Lütfen geçerli bir il seçin"),
-  location: z.string().min(3, "Lokasyon en az 3 karakter olmalÄ±dÄ±r"),
-
+  location: z.string().min(3, "Lokasyon en az 3 karakter olmalıdır"),
   plateNumber: z.string().optional(),
-
-  year: z.number().min(2010, "2010 ve Ã¼zeri model yÄ±lÄ± araÃ§lar kabul edilmektedir").max(new Date().getFullYear() + 1),
-
-  description: z.string().max(500, "AÃ§Ä±klama en fazla 500 karakter olabilir").optional(),
-
+  year: z.number().min(2010, "2010 ve üzeri model yılı araçlar kabul edilmektedir").max(new Date().getFullYear() + 1),
+  description: z.string().max(500, "Açıklama en fazla 500 karakter olabilir").optional(),
   imageUrl: z.string().optional(),
-
 });
 
 
@@ -186,27 +172,16 @@ const AddCar = () => {
 
 
         if (error) {
-
-          console.error("Rol kontrol hatasÄ±:", error);
-
+          console.error("Rol kontrol hatası:", error);
           setIsCarOwner(false);
-
         } else {
-
           setIsCarOwner(!!data);
-
         }
-
       } catch (error) {
-
-        console.error("Rol kontrol hatasÄ±:", error);
-
+        console.error("Rol kontrol hatası:", error);
         setIsCarOwner(false);
-
       } finally {
-
         setCheckingRole(false);
-
       }
 
     };
@@ -249,7 +224,7 @@ const AddCar = () => {
 
           setIsCarOwner(true);
 
-          toast.success("Zaten araÃ§ sahibi rolÃ¼ne sahipsiniz!");
+          toast.success("Zaten araç sahibi rolüne sahipsiniz!");
 
         } else {
 
@@ -261,15 +236,15 @@ const AddCar = () => {
 
         setIsCarOwner(true);
 
-        toast.success("AraÃ§ sahibi olarak kaydÄ±nÄ±z tamamlandÄ±!");
+        toast.success("Araç sahibi olarak kaydınız tamamlandı!");
 
       }
 
     } catch (error) {
 
-      console.error("Rol ekleme hatasÄ±:", error);
+      console.error("Rol ekleme hatası:", error);
 
-      toast.error("Bir hata oluÅŸtu. LÃ¼tfen tekrar deneyin.");
+      toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
 
     } finally {
 
@@ -331,7 +306,7 @@ const AddCar = () => {
       setLoading(true);
 
 
-      // Haritadan seÃ§ilen koordinatlarÄ± kullan
+      // Haritadan seçilen koordinatları kullan
 
       const latitude = formData.latitude;
 
@@ -384,15 +359,15 @@ const AddCar = () => {
 
       if (error) {
 
-        console.error("AraÃ§ ekleme hatasÄ±:", error);
+        console.error("Araç ekleme hatası:", error);
 
         if (error.code === "42501") {
 
-          toast.error("AraÃ§ ekleme yetkiniz bulunmuyor. LÃ¼tfen araÃ§ sahibi olarak kayÄ±t olun.");
+          toast.error("Araç ekleme yetkiniz bulunmuyor. Lütfen araç sahibi olarak kayıt olun.");
 
         } else {
 
-          toast.error("AraÃ§ eklenirken bir hata oluÅŸtu: " + error.message);
+          toast.error("Araç eklenirken bir hata oluştu: " + error.message);
 
         }
 
@@ -402,7 +377,7 @@ const AddCar = () => {
 
 
 
-      toast.success("AraÃ§ baÅŸarÄ±yla eklendi!");
+      toast.success("Araç başarıyla eklendi!");
 
       navigate("/my-cars");
 
@@ -450,7 +425,7 @@ const AddCar = () => {
 
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
 
-            <p className="text-muted-foreground">YÃ¼kleniyor...</p>
+            <p className="text-muted-foreground">Yükleniyor...</p>
 
           </div>
 
@@ -488,22 +463,14 @@ const AddCar = () => {
 
                 </div>
 
-                <CardTitle className="text-2xl">GiriÅŸ YapmalÄ±sÄ±nÄ±z</CardTitle>
-
+                <CardTitle className="text-2xl">Giriş Yapmalısınız</CardTitle>
                 <CardDescription>
-
-                  AraÃ§ eklemek iÃ§in Ã¶nce hesabÄ±nÄ±za giriÅŸ yapmanÄ±z gerekmektedir.
-
+                  Araç eklemek için önce hesabınıza giriş yapmanız gerekmektedir.
                 </CardDescription>
-
               </CardHeader>
-
               <CardContent>
-
                 <Button onClick={() => navigate("/auth")} size="lg" className="w-full">
-
-                  GiriÅŸ Yap / Ãœye Ol
-
+                  Giriş Yap / Üye Ol
                 </Button>
 
               </CardContent>
