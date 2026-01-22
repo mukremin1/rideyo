@@ -20,6 +20,20 @@ const Cars = () => {
 
   useEffect(() => {
     fetchCars();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel("cars-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "cars" },
+        () => fetchCars()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchCars = async () => {
