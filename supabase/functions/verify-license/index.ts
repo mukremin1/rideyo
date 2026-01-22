@@ -118,7 +118,12 @@ function calculateRiskLevel(penaltyPoints: number, accidents: number, violations
 
 // Sürücü puanı hesaplama
 function calculateDriverScore(penaltyPoints: number, accidents: number, violations: number): number {
-  const raw = 100 - (penaltyPoints + accidents * 10 + violations * 5);
+  // Daha yumuşak puanlama sistemi - cezalar daha az etkili
+  const penaltyDeduction = Math.min(penaltyPoints * 0.5, 30); // Max 30 puan ceza puanı için
+  const accidentDeduction = accidents * 5; // Kaza başına 5 puan
+  const violationDeduction = violations * 2; // İhlal başına 2 puan
+
+  const raw = 100 - (penaltyDeduction + accidentDeduction + violationDeduction);
   return Math.max(0, Math.min(100, Math.round(raw)));
 }
 
