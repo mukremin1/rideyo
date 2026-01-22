@@ -23,6 +23,7 @@ interface PaymentState {
   rentalType: string;
   startTime: string;
   endTime: string;
+  insurancePrice?: number;
 }
 
 const Payment = () => {

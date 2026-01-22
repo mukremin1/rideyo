@@ -798,7 +798,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="year">Model Y?l? *</Label>
+                        <Label htmlFor="year">Model Yılı *</Label>
 
                         <Input
 
@@ -814,7 +814,7 @@ const AddCar = () => {
 
                           onChange={(e) => setFormData({ ...formData, year: e.target.value })}
 
-                          placeholder="?rn: 2022"
+                          placeholder="Örn: 2022"
 
                           required
 
@@ -825,10 +825,10 @@ const AddCar = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="city">?l *</Label>
+                      <Label htmlFor="city">İl *</Label>
                       <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
                         <SelectTrigger>
-                          <SelectValue placeholder="?l se?in" />
+                          <SelectValue placeholder="İl seçin" />
                         </SelectTrigger>
                         <SelectContent>
                           {turkeyCities.map((city) => (

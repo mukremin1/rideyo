@@ -7,7 +7,7 @@ const insurancePackages = [
   {
     id: "basic",
     name: "Temel Sigorta",
-    price: 50,
+    price: 550,
     features: [
       "Trafik Sigortası",
       "Zorunlu Mali Sorumluluk",
@@ -17,7 +17,7 @@ const insurancePackages = [
   {
     id: "standard",
     name: "Standart Sigorta",
-    price: 100,
+    price: 750,
     features: [
       "Temel Sigorta + Tüm Hakları",
       "Kasko Sigortası",
@@ -29,7 +29,7 @@ const insurancePackages = [
   {
     id: "premium",
     name: "Premium Sigorta",
-    price: 200,
+    price: 950,
     features: [
       "Standart Sigorta + Tüm Hakları",
       "Tam Kasko",
@@ -43,14 +43,21 @@ const insurancePackages = [
 interface InsurancePackagesProps {
   onSelect: (packageId: string, price: number) => void;
   selectedPackage?: string;
+  rentalType?: string;
 }
 
-const InsurancePackages = ({ onSelect, selectedPackage }: InsurancePackagesProps) => {
+const InsurancePackages = ({ onSelect, selectedPackage, rentalType }: InsurancePackagesProps) => {
+  // Sigorta paketleri sadece günlük kiralama için gösterilir
+  if (rentalType !== "day") {
+    return null;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Shield className="w-6 h-6 text-primary" />
         <h3 className="text-2xl font-bold">Sigorta Paketleri</h3>
+        <span className="text-sm text-muted-foreground">(Günlük kiralama için zorunlu)</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {insurancePackages.map((pkg) => (
