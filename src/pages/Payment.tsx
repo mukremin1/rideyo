@@ -43,6 +43,9 @@ interface PaymentState {
   rentalType: string;
   startTime: string;
   endTime: string;
+  rentalAmount?: number;
+  kmPackageLabel?: string;
+  kmPackagePrice?: number;
   insurancePrice?: number;
   provisionFee?: number;
 }
@@ -83,6 +86,10 @@ const Payment = () => {
   const endTime = state?.endTime ? new Date(state.endTime) : new Date();
   const defaultProvisionFee = rentalType === "day" ? 350 : 300;
   const provisionFee = state?.provisionFee ?? defaultProvisionFee;
+  const insurancePrice = state?.insurancePrice ?? 0;
+  const kmPackageLabel = state?.kmPackageLabel;
+  const kmPackagePrice = state?.kmPackagePrice ?? 0;
+  const rentalAmount = state?.rentalAmount ?? Math.max(0, totalPrice - insurancePrice - provisionFee - kmPackagePrice);
 
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -417,22 +424,26 @@ const Payment = () => {
 
               <Card className="p-6 mb-6 bg-primary/5 border-primary/20">
                 <div className="space-y-3">
-                  {rentalType === "minute" && (
+                  <div className="flex justify-between items-center pb-2 border-b border-border">
+                    <span className="text-muted-foreground">Kiralama Tutarı</span>
+                    <span className="font-semibold text-primary">{rentalAmount.toFixed(2)}₺</span>
+                  </div>
+                  {kmPackageLabel && (
                     <div className="flex justify-between items-center pb-2 border-b border-border">
-                      <span className="text-muted-foreground">Provizyon Ücreti</span>
-                      <span className="font-semibold text-primary">{provisionFee}₺</span>
+                      <span className="text-muted-foreground">KM Paketi</span>
+                      <span className="font-semibold text-primary">
+                        {kmPackageLabel} • {kmPackagePrice.toFixed(2)}₺
+                      </span>
                     </div>
                   )}
-                  {rentalType === "day" && (
-                    <div className="flex justify-between items-center pb-2 border-b border-border">
-                      <span className="text-muted-foreground">Provizyon Ücreti</span>
-                      <span className="font-semibold text-primary">{provisionFee}₺</span>
-                    </div>
-                  )}
-                  {rentalType === "day" && state?.insurancePrice && (
+                  <div className="flex justify-between items-center pb-2 border-b border-border">
+                    <span className="text-muted-foreground">Provizyon Ücreti</span>
+                    <span className="font-semibold text-primary">{provisionFee}₺</span>
+                  </div>
+                  {rentalType === "day" && insurancePrice > 0 && (
                     <div className="flex justify-between items-center pb-2 border-b border-border">
                       <span className="text-muted-foreground">Sigorta Ücreti</span>
-                      <span className="font-semibold text-primary">{state.insurancePrice}₺</span>
+                      <span className="font-semibold text-primary">{insurancePrice}₺</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center">

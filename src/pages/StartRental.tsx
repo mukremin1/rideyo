@@ -52,6 +52,24 @@ const StartRental = () => {
   const [rentalStarted, setRentalStarted] = useState(false);
   const [rentalEnded, setRentalEnded] = useState(false);
   const [carGPSData, setCarGPSData] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [lastGPSData, setLastGPSData] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [rentalStartTime, setRentalStartTime] = useState<Date | null>(null);
+  const [elapsedMinutes, setElapsedMinutes] = useState(0);
+  const [distanceKm, setDistanceKm] = useState(0);
+
+  const toRadians = (value: number) => (value * Math.PI) / 180;
+  const calculateDistanceKm = (a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) => {
+    const earthRadiusKm = 6371;
+    const dLat = toRadians(b.latitude - a.latitude);
+    const dLon = toRadians(b.longitude - a.longitude);
+    const lat1 = toRadians(a.latitude);
+    const lat2 = toRadians(b.latitude);
+    const sinLat = Math.sin(dLat / 2);
+    const sinLon = Math.sin(dLon / 2);
+    const h = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+    const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+    return earthRadiusKm * c;
+  };
 
   useEffect(() => {
     // Kullanıcı konumunu al
@@ -114,6 +132,31 @@ const StartRental = () => {
       supabase.removeChannel(channel);
     };
   }, [state?.carId, rentalStarted, sendRentalNotification, state?.carName]);
+
+  useEffect(() => {
+    if (!rentalStarted || !carGPSData) return;
+    if (!lastGPSData) {
+      setLastGPSData(carGPSData);
+      return;
+    }
+
+    const delta = calculateDistanceKm(lastGPSData, carGPSData);
+    if (Number.isFinite(delta) && delta > 0) {
+      setDistanceKm((prev) => prev + delta);
+    }
+    setLastGPSData(carGPSData);
+  }, [carGPSData, rentalStarted, lastGPSData]);
+
+  useEffect(() => {
+    if (!rentalStarted || !rentalStartTime) return;
+
+    const timer = setInterval(() => {
+      const diffMs = Date.now() - rentalStartTime.getTime();
+      setElapsedMinutes(Math.max(0, Math.floor(diffMs / 60000)));
+    }, 30000);
+
+    return () => clearInterval(timer);
+  }, [rentalStarted, rentalStartTime]);
 
   if (!state) {
     return (
@@ -235,6 +278,11 @@ const StartRental = () => {
         toast.success("Kiralama başarıyla başlatıldı!");
         sendRentalNotification("start", state.carName);
         setRentalStarted(true);
+        const startTime = new Date();
+        setRentalStartTime(startTime);
+        if (carGPSData) {
+          setLastGPSData(carGPSData);
+        }
         setStep(4);
       } else {
         throw new Error(data.error);
@@ -496,6 +544,16 @@ const StartRental = () => {
             {locking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
             Kapıları Kilitle
           </Button>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+          <div className="p-3 bg-background rounded-lg border border-border">
+            <p className="text-muted-foreground">Geçen Süre</p>
+            <p className="text-lg font-semibold">{elapsedMinutes} dk</p>
+          </div>
+          <div className="p-3 bg-background rounded-lg border border-border">
+            <p className="text-muted-foreground">Toplam Mesafe</p>
+            <p className="text-lg font-semibold">{distanceKm.toFixed(2)} km</p>
+          </div>
         </div>
       </Card>
 
