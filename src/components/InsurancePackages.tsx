@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Shield, CheckCircle } from "lucide-react";
-import { useState } from "react";
 
 const insurancePackages = [
   {

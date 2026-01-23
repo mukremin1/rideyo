@@ -24,7 +24,7 @@ const plans: SubscriptionPlan[] = [
   {
     tier: 'basic',
     name: 'Temel',
-    price: 99,
+    price: 5000,
     discount: 5,
     features: [
       '%5 indirim tüm kiralamalarınızda',
@@ -39,7 +39,7 @@ const plans: SubscriptionPlan[] = [
   {
     tier: 'premium',
     name: 'Premium',
-    price: 199,
+    price: 7500,
     discount: 15,
     features: [
       '%15 indirim tüm kiralamalarınızda',
@@ -56,7 +56,7 @@ const plans: SubscriptionPlan[] = [
   {
     tier: 'vip',
     name: 'VIP',
-    price: 299,
+    price: 10000,
     discount: 25,
     features: [
       '%25 indirim tüm kiralamalarınızda',

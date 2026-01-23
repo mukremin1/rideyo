@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -47,6 +47,16 @@ interface PaymentState {
   provisionFee?: number;
 }
 
+interface SavedCard {
+  id: string;
+  card_holder_name: string;
+  card_type: string;
+  expiry_month: number;
+  expiry_year: number;
+  last_four_digits: string;
+  is_default: boolean | null;
+}
+
 const Payment = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,6 +69,9 @@ const Payment = () => {
     email: "",
     message: "",
   });
+  const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
+  const [selectedSavedCardId, setSelectedSavedCardId] = useState<string | null>(null);
+  const [loadingSavedCards, setLoadingSavedCards] = useState(false);
 
   const state = location.state as PaymentState | null;
 
@@ -68,7 +81,8 @@ const Payment = () => {
   const rentalType = state?.rentalType || "hour";
   const startTime = state?.startTime ? new Date(state.startTime) : new Date();
   const endTime = state?.endTime ? new Date(state.endTime) : new Date();
-  const provisionFee = state?.provisionFee ?? 300;
+  const defaultProvisionFee = rentalType === "day" ? 350 : 300;
+  const provisionFee = state?.provisionFee ?? defaultProvisionFee;
 
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -76,6 +90,32 @@ const Payment = () => {
     expiryDate: "",
     cvv: "",
   });
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchSavedCards = async () => {
+      setLoadingSavedCards(true);
+      const { data, error } = await supabase
+        .from("saved_cards")
+        .select("id, card_holder_name, card_type, expiry_month, expiry_year, last_four_digits, is_default")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast.error("Kayıtlı kartlar yüklenemedi");
+      } else {
+        setSavedCards(data || []);
+        const defaultCard = (data || []).find((card) => card.is_default);
+        if (defaultCard) {
+          setSelectedSavedCardId(defaultCard.id);
+        }
+      }
+      setLoadingSavedCards(false);
+    };
+
+    fetchSavedCards();
+  }, [user]);
 
   const faqs = [
     {
@@ -150,6 +190,7 @@ const Payment = () => {
   };
 
   const validateCard = () => {
+    if (selectedSavedCardId) return true;
     const cardNumber = cardData.cardNumber.replace(/\s/g, "");
     if (cardNumber.length < 16) {
       toast.error("Geçerli bir kart numarası girin");
@@ -170,6 +211,16 @@ const Payment = () => {
     return true;
   };
 
+  const parseExpiry = (value: string) => {
+    const [monthRaw, yearRaw] = value.split("/");
+    const month = Number(monthRaw);
+    const year = Number(`20${yearRaw}`);
+    if (!month || !year || month < 1 || month > 12 || yearRaw?.length !== 2) {
+      return null;
+    }
+    return { month, year };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -184,8 +235,32 @@ const Payment = () => {
         await supabase.from("bookings").update({ payment_status: "paid" }).eq("id", bookingId);
       }
 
-      if (saveCard && user) {
-        console.log("Card saved for future use");
+      if (saveCard && user && !selectedSavedCardId) {
+        const expiry = parseExpiry(cardData.expiryDate);
+        if (!expiry) {
+          toast.error("Geçerli bir son kullanma tarihi girin");
+          setLoading(false);
+          return;
+        }
+
+        const cardType = getCardType() || "unknown";
+        const lastFour = cardData.cardNumber.replace(/\s/g, "").slice(-4);
+
+        const { error } = await supabase.from("saved_cards").insert({
+          user_id: user.id,
+          card_holder_name: cardData.cardHolder,
+          card_type: cardType,
+          expiry_month: expiry.month,
+          expiry_year: expiry.year,
+          last_four_digits: lastFour,
+          encrypted_card_token: `demo-token-${Date.now()}`,
+        });
+
+        if (error) {
+          toast.error("Kart kaydedilemedi");
+        } else {
+          toast.success("Kart kaydedildi");
+        }
       }
 
       setPaymentSuccess(true);
@@ -224,6 +299,12 @@ const Payment = () => {
     if (cardNumber.startsWith("5")) return "mastercard";
     if (cardNumber.startsWith("9")) return "troy";
     return null;
+  };
+
+  const formatSavedCardLabel = (card: SavedCard) => {
+    const typeLabel = card.card_type ? card.card_type.toUpperCase() : "KART";
+    const expiry = `${String(card.expiry_month).padStart(2, "0")}/${String(card.expiry_year).slice(-2)}`;
+    return `${typeLabel} •••• ${card.last_four_digits} • ${expiry}`;
   };
 
   const getRentalTypeText = (type: string) => {
@@ -342,6 +423,12 @@ const Payment = () => {
                       <span className="font-semibold text-primary">{provisionFee}₺</span>
                     </div>
                   )}
+                  {rentalType === "day" && (
+                    <div className="flex justify-between items-center pb-2 border-b border-border">
+                      <span className="text-muted-foreground">Provizyon Ücreti</span>
+                      <span className="font-semibold text-primary">{provisionFee}₺</span>
+                    </div>
+                  )}
                   {rentalType === "day" && state?.insurancePrice && (
                     <div className="flex justify-between items-center pb-2 border-b border-border">
                       <span className="text-muted-foreground">Sigorta Ücreti</span>
@@ -369,8 +456,56 @@ const Payment = () => {
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-6">
                   <CreditCard className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-semibold">Ödeme Yöntemlerim</h2>
+                </div>
+
+                {loadingSavedCards ? (
+                  <p className="text-sm text-muted-foreground">Kayıtlı kartlar yükleniyor...</p>
+                ) : savedCards.length > 0 ? (
+                  <div className="space-y-3">
+                    {savedCards.map((card) => (
+                      <button
+                        key={card.id}
+                        type="button"
+                        className={`w-full flex items-center justify-between rounded-lg border px-4 py-3 text-left transition ${
+                          selectedSavedCardId === card.id
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:border-primary/40"
+                        }`}
+                        onClick={() => setSelectedSavedCardId(card.id)}
+                      >
+                        <span className="text-sm font-medium">{formatSavedCardLabel(card)}</span>
+                        {card.is_default && (
+                          <span className="text-xs text-primary font-semibold">Varsayılan</span>
+                        )}
+                      </button>
+                    ))}
+                    {selectedSavedCardId && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setSelectedSavedCardId(null)}
+                      >
+                        Yeni kart kullan
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Kayıtlı kart bulunamadı. Aşağıdan yeni kart ekleyin.</p>
+                )}
+              </Card>
+
+              <Card className="p-6 mt-6">
+                <div className="flex items-center gap-2 mb-6">
+                  <CreditCard className="w-5 h-5 text-primary" />
                   <h2 className="text-lg font-semibold">Kart Bilgileri</h2>
                 </div>
+                {selectedSavedCardId && (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Kayıtlı kartla ödeme yapıyorsunuz. Yeni kart kullanmak için yukarıdan seçim kaldırın.
+                  </p>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
@@ -382,6 +517,7 @@ const Payment = () => {
                         value={cardData.cardNumber}
                         onChange={handleCardNumberChange}
                         className="pr-16"
+                        disabled={Boolean(selectedSavedCardId)}
                         required
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
@@ -411,6 +547,7 @@ const Payment = () => {
                       placeholder="AD SOYAD"
                       value={cardData.cardHolder}
                       onChange={(e) => setCardData({ ...cardData, cardHolder: e.target.value.toUpperCase() })}
+                      disabled={Boolean(selectedSavedCardId)}
                       required
                     />
                   </div>
@@ -423,6 +560,7 @@ const Payment = () => {
                         placeholder="AA/YY"
                         value={cardData.expiryDate}
                         onChange={handleExpiryChange}
+                        disabled={Boolean(selectedSavedCardId)}
                         required
                       />
                     </div>
@@ -434,6 +572,7 @@ const Payment = () => {
                         placeholder="***"
                         value={cardData.cvv}
                         onChange={handleCvvChange}
+                        disabled={Boolean(selectedSavedCardId)}
                         required
                       />
                     </div>
@@ -444,6 +583,7 @@ const Payment = () => {
                       id="saveCard"
                       checked={saveCard}
                       onCheckedChange={(checked) => setSaveCard(checked as boolean)}
+                      disabled={Boolean(selectedSavedCardId)}
                     />
                     <Label htmlFor="saveCard" className="text-sm text-muted-foreground cursor-pointer">
                       Kart bilgilerimi gelecek ödemeler için kaydet
