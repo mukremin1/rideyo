@@ -55,6 +55,7 @@ const CarDetail = () => {
   const [subscription, setSubscription] = useState<any>(null);
   const [trafficDelayMinutes, setTrafficDelayMinutes] = useState(10);
   const [rentalDays, setRentalDays] = useState(1);
+  const [rentalHours, setRentalHours] = useState(0.5);
   const [serviceZones, setServiceZones] = useState<any[]>([]);
   const [pickupZoneId, setPickupZoneId] = useState<string>("");
   const [dropoffZoneId, setDropoffZoneId] = useState<string>("");
@@ -62,6 +63,14 @@ const CarDetail = () => {
   const [dropoffAddress, setDropoffAddress] = useState("");
   const MINUTE_PROVISION_FEE = 300;
   const DAY_PROVISION_FEE = 350;
+  const KM_PRICE_PER_UNIT = 15;
+  const kmPackages = [
+    { id: "100", label: "100 KM", price: 1000 },
+    { id: "200", label: "200 KM", price: 2000 },
+    { id: "none", label: `Paketsiz devam et (${KM_PRICE_PER_UNIT} TL/km)`, price: 0 },
+  ];
+  const selectedKmPackageData = kmPackages.find((pkg) => pkg.id === selectedKmPackage) || null;
+  const kmPackagePrice = selectedKmPackageData?.price ?? 0;
 
   const normalizeText = (value: string) => value.toLocaleLowerCase("tr");
 
@@ -306,6 +315,7 @@ const CarDetail = () => {
     const startTime = new Date();
     const endTime = new Date();
     let totalPrice = 0;
+    let rentalBase = 0;
 
     // Calculate traffic delay (random 0-10 minutes for simulation)
     const simulatedTrafficDelay = Math.floor(Math.random() * 11);
@@ -313,21 +323,24 @@ const CarDetail = () => {
 
     let provisionFee = 0;
 
-    if (selectedPricing === "minute") {
+    if (selectedPricing === "minute" || selectedPricing === "hour") {
       provisionFee = MINUTE_PROVISION_FEE;
     } else if (selectedPricing === "day") {
       provisionFee = DAY_PROVISION_FEE;
     }
 
     if (selectedPricing === "hour") {
-      endTime.setHours(endTime.getHours() + 1);
-      totalPrice = car.price_per_hour;
+      endTime.setHours(endTime.getHours() + rentalHours);
+      rentalBase = car.price_per_hour * rentalHours;
+      totalPrice = rentalBase + provisionFee + kmPackagePrice;
     } else if (selectedPricing === "day") {
       endTime.setDate(endTime.getDate() + rentalDays);
-      totalPrice = car.price_per_day * rentalDays + insurancePrice + provisionFee;
+      rentalBase = car.price_per_day * rentalDays;
+      totalPrice = rentalBase + insurancePrice + provisionFee + kmPackagePrice;
     } else if (selectedPricing === "minute") {
       endTime.setMinutes(endTime.getMinutes() + 30);
-      totalPrice = car.price_per_minute * 30 + provisionFee;
+      rentalBase = car.price_per_minute * 30;
+      totalPrice = rentalBase + provisionFee + kmPackagePrice;
     }
 
     // Apply subscription discount
@@ -367,6 +380,9 @@ const CarDetail = () => {
           rentalType: selectedPricing,
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString(),
+          rentalAmount: rentalBase,
+          kmPackageLabel: selectedKmPackageData?.label,
+          kmPackagePrice: selectedKmPackageData ? kmPackagePrice : undefined,
           insurancePrice: selectedInsurance ? insurancePrice : undefined,
           provisionFee,
         }
@@ -567,11 +583,9 @@ const CarDetail = () => {
                   <h3 className="font-semibold text-foreground mb-4 text-lg">Kiralama Paketleri</h3>
                   
                   <Tabs defaultValue="minute" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="minute">Dakika</TabsTrigger>
-                      <TabsTrigger value="hour">Saat</TabsTrigger>
                       <TabsTrigger value="day">Gün</TabsTrigger>
-                      <TabsTrigger value="km">KM</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="minute" className="space-y-4 mt-4">
@@ -611,50 +625,70 @@ const CarDetail = () => {
                           {selectedPricing === "minute" ? "✓ Seçildi" : "Seç"}
                         </Button>
                       </div>
-                    </TabsContent>
-
-                    <TabsContent value="hour" className="space-y-4 mt-4">
-                      <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <Clock className="w-8 h-8 text-primary" />
-                            <div>
-                              <h4 className="font-bold text-xl">Saatlik Kiralama</h4>
-                              <p className="text-sm text-muted-foreground">Popüler seçenek</p>
-                            </div>
+                      <div className="bg-background border border-border rounded-xl p-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold text-lg">Saatlik Kiralama</h4>
+                            <p className="text-sm text-muted-foreground">Dakikalık altından saat seçimi</p>
                           </div>
                           <div className="text-right">
-                            <div className="text-3xl font-bold text-primary">{car.price_per_hour}₺</div>
+                            <div className="text-2xl font-bold text-primary">{car.price_per_hour}₺</div>
                             <div className="text-xs text-muted-foreground">saat başı</div>
                           </div>
                         </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">1 Saat</span>
-                            <span className="font-semibold">{car.price_per_hour}₺</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">2 Saat</span>
-                            <span className="font-semibold">{(car.price_per_hour * 2).toFixed(2)}₺</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">4 Saat</span>
-                            <span className="font-semibold">{(car.price_per_hour * 4).toFixed(2)}₺</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">8 Saat</span>
-                            <span className="font-semibold">{(car.price_per_hour * 8).toFixed(2)}₺</span>
-                          </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {[0.5, 1, 2, 3, 4, 6, 8, 10, 12].map((hour) => (
+                            <Button
+                              key={hour}
+                              type="button"
+                              variant={selectedPricing === "hour" && rentalHours === hour ? "default" : "outline"}
+                              onClick={() => {
+                                setRentalHours(hour);
+                                setSelectedPricing("hour");
+                              }}
+                            >
+                              {hour === 0.5 ? "30 dk" : `${hour} Saat`}
+                            </Button>
+                          ))}
                         </div>
-                        <Button
-                          variant={selectedPricing === "hour" ? "default" : "outline"}
-                          className="w-full mt-4"
-                          onClick={() => setSelectedPricing("hour")}
-                        >
-                          {selectedPricing === "hour" ? "✓ Seçildi" : "Seç"}
-                        </Button>
+                        <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                          <span>Toplam</span>
+                          <span className="font-semibold text-foreground">
+                            {(car.price_per_hour * rentalHours).toFixed(2)}₺
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+                          <Badge variant="secondary">KM</Badge>
+                          Paketleri
+                        </h4>
+                        <p className="text-xs text-muted-foreground mb-3">Paketsiz kullanım: {KM_PRICE_PER_UNIT}₺/km</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          {kmPackages.map((pkg) => (
+                            <button
+                              type="button"
+                              key={pkg.id}
+                              className={`border rounded-xl p-4 text-left transition-all ${
+                                selectedKmPackage === pkg.id
+                                  ? "border-primary bg-primary/5 shadow-md"
+                                  : "border-border hover:border-primary/50"
+                              }`}
+                              onClick={() => setSelectedKmPackage(selectedKmPackage === pkg.id ? null : pkg.id)}
+                            >
+                              <div className="text-xl font-bold text-foreground">{pkg.label}</div>
+                              <div className="text-lg font-semibold text-primary">
+                                {pkg.price > 0 ? `${pkg.price}₺` : "Seç"}
+                              </div>
+                              {selectedKmPackage === pkg.id && (
+                                <div className="mt-2 text-xs font-semibold text-primary">✓ Seçildi</div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </TabsContent>
+
 
                     <TabsContent value="day" className="space-y-4 mt-4">
                       <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
@@ -720,57 +754,35 @@ const CarDetail = () => {
                           {selectedPricing === "day" ? "✓ Seçildi" : "Seç"}
                         </Button>
                       </div>
-                    </TabsContent>
-
-                    <TabsContent value="km" className="space-y-4 mt-4">
-                      <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <TrendingUp className="w-6 h-6 text-primary" />
-                            <div>
-                              <h4 className="font-semibold">KM Başı Ücret</h4>
-                              <p className="text-xs text-muted-foreground">Temel fiyat</p>
-                            </div>
-                          </div>
-                          <div className="text-2xl font-bold text-primary">{car.price_per_km}₺/km</div>
+                      <div>
+                        <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+                          <Badge variant="secondary">KM</Badge>
+                          Paketleri
+                        </h4>
+                        <p className="text-xs text-muted-foreground mb-3">Paketsiz kullanım: {KM_PRICE_PER_UNIT}₺/km</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          {kmPackages.map((pkg) => (
+                            <button
+                              type="button"
+                              key={pkg.id}
+                              className={`border rounded-xl p-4 text-left transition-all ${
+                                selectedKmPackage === pkg.id
+                                  ? "border-primary bg-primary/5 shadow-md"
+                                  : "border-border hover:border-primary/50"
+                              }`}
+                              onClick={() => setSelectedKmPackage(selectedKmPackage === pkg.id ? null : pkg.id)}
+                            >
+                              <div className="text-xl font-bold text-foreground">{pkg.label}</div>
+                              <div className="text-lg font-semibold text-primary">
+                                {pkg.price > 0 ? `${pkg.price}₺` : "Seç"}
+                              </div>
+                              {selectedKmPackage === pkg.id && (
+                                <div className="mt-2 text-xs font-semibold text-primary">✓ Seçildi</div>
+                              )}
+                            </button>
+                          ))}
                         </div>
                       </div>
-
-                      {car.km_packages && Object.keys(car.km_packages).length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                            <Badge variant="secondary">Avantajlı</Badge>
-                            KM Paketleri
-                          </h4>
-                          <div className="grid grid-cols-2 gap-3">
-                            {Object.entries(car.km_packages).map(([km, price]) => {
-                              const perKmPrice = (price / Number(km)).toFixed(2);
-                              const discount = ((1 - Number(perKmPrice) / car.price_per_km) * 100).toFixed(0);
-                              return (
-                                <div
-                                  key={km}
-                                  className={`border rounded-xl p-4 cursor-pointer transition-all ${
-                                    selectedKmPackage === km
-                                      ? "border-primary bg-primary/5 shadow-md"
-                                      : "border-border hover:border-primary/50"
-                                  }`}
-                                  onClick={() => setSelectedKmPackage(selectedKmPackage === km ? null : km)}
-                                >
-                                  {Number(discount) > 0 && (
-                                    <Badge variant="default" className="mb-2 text-xs">%{discount} İndirim</Badge>
-                                  )}
-                                  <div className="text-2xl font-bold text-foreground">{km} KM</div>
-                                  <div className="text-xl font-semibold text-primary mb-1">{price}₺</div>
-                                  <div className="text-xs text-muted-foreground">{perKmPrice}₺/km</div>
-                                  {selectedKmPackage === km && (
-                                    <div className="mt-2 text-xs font-semibold text-primary">✓ Seçildi</div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
                     </TabsContent>
                   </Tabs>
                 </div>
