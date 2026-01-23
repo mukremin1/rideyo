@@ -1104,7 +1104,7 @@ const AddCar = () => {
 
 
 
-                {/* Step 4: FiyatlandÄ±rma */}
+                {/* Step 4: Fiyatlandırma */}
 
                 {currentStep === 4 && (
 
@@ -1114,7 +1114,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerMinute">Dakika FiyatÄ± (â‚º) *</Label>
+                        <Label htmlFor="pricePerMinute">Dakika Fiyatı (₺) *</Label>
 
                         <Input
 
@@ -1142,7 +1142,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerHour">Saat FiyatÄ± (â‚º) *</Label>
+                        <Label htmlFor="pricePerHour">Saat Fiyatı (₺) *</Label>
 
                         <Input
 
@@ -1170,7 +1170,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerDay">GÃ¼nlÃ¼k Fiyat (â‚º) *</Label>
+                        <Label htmlFor="pricePerDay">Günlük Fiyat (₺) *</Label>
 
                         <Input
 
@@ -1200,97 +1200,171 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="pricePerKm">KM BaÅŸÄ± Fiyat (â‚º) *</Label>
+                      <Label htmlFor="pricePerKm">KM Başına Fiyat (₺) *</Label>
 
-                      <Input
+                        <Input
 
-                        id="pricePerKm"
+                          id="pricePerKm"
 
-                        type="number"
+                          type="number"
 
-                        step="0.1"
+                          step="0.1"
 
-                        min="0"
+                          min="0"
 
-                        value={formData.pricePerKm}
+                          value={formData.pricePerKm}
 
-                        onChange={(e) => setFormData({ ...formData, pricePerKm: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, pricePerKm: e.target.value })}
 
-                        placeholder="2.5"
+                          placeholder="2.5"
 
-                        required
+                          required
 
-                      />
+                        />
 
-                      <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
 
-                        AraÃ§ kiralama sÃ¼resi dÄ±ÅŸÄ±nda yapÄ±lan her km iÃ§in Ã¼cret
+                          Araç kiralama süresi dışında yapılan her km için ücret
 
-                      </p>
+                        </p>
 
-                    </div>
-
-
-
-                    <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-
-                      <h4 className="font-medium">Tahmini KazanÃ§</h4>
-
-                      <p className="text-sm text-muted-foreground">
-
-                        GÃ¼nlÃ¼k {formData.pricePerDay || 0} â‚º fiyatla ayda ortalama 15 gÃ¼n kiralama yaparsanÄ±z:{" "}
-
-                        <span className="font-semibold text-primary">
-
-                          {((parseFloat(formData.pricePerDay) || 0) * 15).toLocaleString("tr-TR")} â‚º
-
-                        </span>
-
-                      </p>
-
-                    </div>
+                      </div>
 
 
 
-                    <div className="flex justify-between">
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-2">
 
-                      <Button type="button" variant="outline" onClick={prevStep}>
+                        <h4 className="font-medium">Tahmini Kazanç</h4>
 
-                        Geri
+                        <p className="text-sm text-muted-foreground">
 
-                      </Button>
+                          Günlük {formData.pricePerDay || 0} ₺ fiyatla ayda ortalama 15 gün kiralama yaparsanız:{" "}
 
-                      <Button type="submit" disabled={loading}>
+                          <span className="font-semibold text-primary">
 
-                        {loading ? (
+                            {((parseFloat(formData.pricePerDay) || 0) * 15).toLocaleString("tr-TR")} ₺
 
-                          <>
+                          </span>
 
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        </p>
 
-                            Ekleniyor...
+                      </div>
 
-                          </>
 
-                        ) : (
 
-                          <>
+                      <div className="flex justify-between">
 
-                            <CheckCircle2 className="w-5 h-5 mr-2" />
+                        <Button type="button" variant="outline" onClick={prevStep}>
 
-                            AraÃ§ Ekle
+                          Geri
 
-                          </>
+                        </Button>
 
-                        )}
+                        <Button type="button" onClick={nextStep}>
 
-                      </Button>
+                          Devam Et
+
+                        </Button>
+
+                      </div>
 
                     </div>
 
-                  </div>
+                  )}
 
-                )}
+
+
+                  {/* Step 5: Ehliyet */}
+
+                  {currentStep === 5 && (
+
+                    <div className="space-y-6 animate-in fade-in duration-300">
+
+                      <div className="space-y-2">
+
+                        <Label className="flex items-center gap-2">
+
+                          <Shield className="w-4 h-4" />
+
+                          Ehliyet Belgesi *
+
+                        </Label>
+
+                        <p className="text-sm text-muted-foreground mb-4">
+
+                          Araç kiralama işlemlerinde ehliyet belgeniz zorunludur. Geçerli bir ehliyet belgesi yükleyiniz.
+
+                        </p>
+
+                        <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+
+                          <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+
+                          <p className="text-muted-foreground mb-4">
+
+                            Ehliyet belgenizi buraya yükleyin
+
+                          </p>
+
+                          <Button variant="outline" type="button">
+
+                            <Image className="w-4 h-4 mr-2" />
+
+                            Ehliyet Yükle
+
+                          </Button>
+
+                        </div>
+
+                        <p className="text-xs text-muted-foreground mt-2">
+
+                          * Ehliyet belgesi olmadan araç ekleyemezsiniz.
+
+                        </p>
+
+                      </div>
+
+
+
+                      <div className="flex justify-between">
+
+                        <Button type="button" variant="outline" onClick={prevStep}>
+
+                          Geri
+
+                        </Button>
+
+                        <Button type="submit" disabled={loading}>
+
+                          {loading ? (
+
+                            <>
+
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+
+                              Ekleniyor...
+
+                            </>
+
+                          ) : (
+
+                            <>
+
+                              <CheckCircle2 className="w-5 h-5 mr-2" />
+
+                              Araç Ekle
+
+                            </>
+
+                          )}
+
+                        </Button>
+
+                      </div>
+
+                    </div>
+
+                  )}
 
               </form>
 

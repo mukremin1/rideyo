@@ -24,6 +24,7 @@ interface PaymentState {
   startTime: string;
   endTime: string;
   insurancePrice?: number;
+  provisionFee?: number;
 }
 
 const Payment = () => {
@@ -276,15 +277,32 @@ const Payment = () => {
 
           {/* Payment Summary */}
           <Card className="p-6 mb-6 bg-primary/5 border-primary/20">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-muted-foreground">Toplam Tutar</p>
+            <div className="space-y-3">
+              {rentalType === "minute" && (
+                <div className="flex justify-between items-center pb-2 border-b border-border">
+                  <span className="text-muted-foreground">Provizyon Ücreti</span>
+                  <span className="font-semibold text-primary">300₺</span>
+                </div>
+              )}
+              {rentalType === "day" && state?.insurancePrice && (
+                <div className="flex justify-between items-center pb-2 border-b border-border">
+                  <span className="text-muted-foreground">Sigorta Ücreti</span>
+                  <span className="font-semibold text-primary">{state.insurancePrice}₺</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-muted-foreground">Toplam Tutar</p>
+                  {rentalType === "minute" && (
+                    <p className="text-xs text-muted-foreground">Provizyon ücreti kiralama sonrası iade edilir</p>
+                  )}
+                </div>
                 <p className="text-3xl font-bold text-primary">{totalPrice.toFixed(2)}₺</p>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Lock className="w-4 h-4" />
-                <span className="text-sm">256-bit SSL</span>
-              </div>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground mt-4">
+              <Lock className="w-4 h-4" />
+              <span className="text-sm">256-bit SSL</span>
             </div>
           </Card>
 
