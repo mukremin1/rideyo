@@ -292,20 +292,29 @@ const CarDetail = () => {
       return;
     }
 
+    if (selectedPricing === "day" && !selectedInsurance) {
+      toast({
+        title: "Sigorta Seçimi Gerekli",
+        description: "Günlük kiralama için sigorta paketi seçimi zorunludur",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const startTime = new Date();
     const endTime = new Date();
     let totalPrice = 0;
-    
+
     // Calculate traffic delay (random 0-10 minutes for simulation)
     const simulatedTrafficDelay = Math.floor(Math.random() * 11);
     setTrafficDelayMinutes(simulatedTrafficDelay);
-    
+
     if (selectedPricing === "hour") {
       endTime.setHours(endTime.getHours() + 1);
       totalPrice = car.price_per_hour;
     } else if (selectedPricing === "day") {
       endTime.setDate(endTime.getDate() + rentalDays);
-      totalPrice = car.price_per_day * rentalDays;
+      totalPrice = car.price_per_day * rentalDays + insurancePrice;
     } else if (selectedPricing === "minute") {
       endTime.setMinutes(endTime.getMinutes() + 30);
       totalPrice = car.price_per_minute * 30;

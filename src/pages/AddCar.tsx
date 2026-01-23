@@ -405,7 +405,7 @@ const AddCar = () => {
 
 
 
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
+  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 5));
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
@@ -513,11 +513,11 @@ const AddCar = () => {
 
                 </div>
 
-                <CardTitle className="text-3xl">AraÃ§ Sahibi Olun</CardTitle>
+                <CardTitle className="text-3xl">Araç Sahibi Olun</CardTitle>
 
                 <CardDescription className="text-base">
 
-                  RideYo platformunda araÃ§ kiralayarak gelir elde etmeye baÅŸlayÄ±n
+                  RideYo platformunda araç kiralayarak gelir elde etmeye başlayın
 
                 </CardDescription>
 
@@ -531,7 +531,7 @@ const AddCar = () => {
 
                     <CreditCard className="w-8 h-8 text-primary mx-auto mb-2" />
 
-                    <h3 className="font-semibold">KazanÃ§</h3>
+                    <h3 className="font-semibold">Kazanç</h3>
 
                     <p className="text-sm text-muted-foreground">Pasif gelir elde edin</p>
 
@@ -541,9 +541,9 @@ const AddCar = () => {
 
                     <Shield className="w-8 h-8 text-primary mx-auto mb-2" />
 
-                    <h3 className="font-semibold">GÃ¼venlik</h3>
+                    <h3 className="font-semibold">Güvenlik</h3>
 
-                    <p className="text-sm text-muted-foreground">SigortalÄ± kiralama</p>
+                    <p className="text-sm text-muted-foreground">Sigortalı kiralama</p>
 
                   </div>
 
@@ -553,13 +553,13 @@ const AddCar = () => {
 
                     <h3 className="font-semibold">Kontrol</h3>
 
-                    <p className="text-sm text-muted-foreground">Fiyat & takvim yÃ¶netimi</p>
+                    <p className="text-sm text-muted-foreground">Fiyat & takvim yönetimi</p>
 
                   </div>
 
                 </div>
 
-                
+
 
                 <Button onClick={becomeCarOwner} disabled={loading} size="lg" className="w-full">
 
@@ -569,7 +569,7 @@ const AddCar = () => {
 
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
 
-                      Ä°ÅŸleniyor...
+                      İşleniyor...
 
                     </>
 
@@ -579,7 +579,7 @@ const AddCar = () => {
 
                       <CheckCircle2 className="w-5 h-5 mr-2" />
 
-                      AraÃ§ Sahibi Ol
+                      Araç Sahibi Ol
 
                     </>
 
@@ -621,7 +621,7 @@ const AddCar = () => {
 
             <ArrowLeft className="w-5 h-5" />
 
-            AraÃ§larÄ±ma DÃ¶n
+            Araçlarıma Dön
 
           </Link>
 
@@ -629,9 +629,9 @@ const AddCar = () => {
 
           <div className="text-center mb-8">
 
-            <h1 className="text-3xl font-bold text-foreground mb-2">Yeni AraÃ§ Ekle</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Yeni Araç Ekle</h1>
 
-            <p className="text-muted-foreground">AracÄ±nÄ±zÄ± ekleyerek gelir elde etmeye baÅŸlayÄ±n</p>
+            <p className="text-muted-foreground">Araçınızı ekleyerek gelir elde etmeye başlayın</p>
 
           </div>
 
@@ -644,15 +644,11 @@ const AddCar = () => {
             <div className="flex justify-between items-center mb-4">
 
               {[
-
-                { num: 1, label: "AraÃ§ Bilgileri", icon: Car },
-
-                { num: 2, label: "FotoÄŸraf", icon: Image },
-
-                { num: 3, label: "Teknik Ã–zellikler", icon: Settings },
-
-                { num: 4, label: "FiyatlandÄ±rma", icon: CreditCard },
-
+                { num: 1, label: "Araç Bilgileri", icon: Car },
+                { num: 2, label: "Fotoğraf", icon: Image },
+                { num: 3, label: "Teknik Özellikler", icon: Settings },
+                { num: 4, label: "Fiyatlandırma", icon: CreditCard },
+                { num: 5, label: "Ehliyet", icon: Shield },
               ].map((step, index) => (
 
                 <div key={step.num} className="flex items-center">
@@ -677,7 +673,7 @@ const AddCar = () => {
 
                   </span>
 
-                  {index < 3 && (
+                  {index < 4 && (
 
                     <div className={`w-8 sm:w-16 h-1 mx-2 rounded ${
 
@@ -693,7 +689,7 @@ const AddCar = () => {
 
             </div>
 
-            <Progress value={(currentStep / 4) * 100} className="h-2" />
+            <Progress value={(currentStep / 5) * 100} className="h-2" />
 
           </div>
 
@@ -713,7 +709,7 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="name">AraÃ§ AdÄ± *</Label>
+                      <Label htmlFor="name">Araç Adı *</Label>
 
                       <Input
 
@@ -723,7 +719,7 @@ const AddCar = () => {
 
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 
-                        placeholder="Ã¶rn: Renault Clio 2022"
+                        placeholder="örn: Renault Clio 2022"
 
                         required
 
@@ -874,7 +870,7 @@ const AddCar = () => {
 
                         onChange={(e) => setFormData({ ...formData, plateNumber: e.target.value })}
 
-                        placeholder="Ã¶rn: 25 ABC 123"
+                        placeholder="örn: 25 ABC 123"
 
                       />
 
@@ -1108,7 +1104,7 @@ const AddCar = () => {
 
 
 
-                {/* Step 4: FiyatlandÄ±rma */}
+                {/* Step 4: Fiyatlandırma */}
 
                 {currentStep === 4 && (
 
@@ -1118,7 +1114,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerMinute">Dakika FiyatÄ± (â‚º) *</Label>
+                        <Label htmlFor="pricePerMinute">Dakika Fiyatı (₺) *</Label>
 
                         <Input
 
@@ -1146,7 +1142,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerHour">Saat FiyatÄ± (â‚º) *</Label>
+                        <Label htmlFor="pricePerHour">Saat Fiyatı (₺) *</Label>
 
                         <Input
 
@@ -1174,7 +1170,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerDay">GÃ¼nlÃ¼k Fiyat (â‚º) *</Label>
+                        <Label htmlFor="pricePerDay">Günlük Fiyat (₺) *</Label>
 
                         <Input
 
@@ -1204,97 +1200,171 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="pricePerKm">KM BaÅŸÄ± Fiyat (â‚º) *</Label>
+                      <Label htmlFor="pricePerKm">KM Başına Fiyat (₺) *</Label>
 
-                      <Input
+                        <Input
 
-                        id="pricePerKm"
+                          id="pricePerKm"
 
-                        type="number"
+                          type="number"
 
-                        step="0.1"
+                          step="0.1"
 
-                        min="0"
+                          min="0"
 
-                        value={formData.pricePerKm}
+                          value={formData.pricePerKm}
 
-                        onChange={(e) => setFormData({ ...formData, pricePerKm: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, pricePerKm: e.target.value })}
 
-                        placeholder="2.5"
+                          placeholder="2.5"
 
-                        required
+                          required
 
-                      />
+                        />
 
-                      <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
 
-                        AraÃ§ kiralama sÃ¼resi dÄ±ÅŸÄ±nda yapÄ±lan her km iÃ§in Ã¼cret
+                          Araç kiralama süresi dışında yapılan her km için ücret
 
-                      </p>
+                        </p>
 
-                    </div>
-
-
-
-                    <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-
-                      <h4 className="font-medium">Tahmini KazanÃ§</h4>
-
-                      <p className="text-sm text-muted-foreground">
-
-                        GÃ¼nlÃ¼k {formData.pricePerDay || 0} â‚º fiyatla ayda ortalama 15 gÃ¼n kiralama yaparsanÄ±z:{" "}
-
-                        <span className="font-semibold text-primary">
-
-                          {((parseFloat(formData.pricePerDay) || 0) * 15).toLocaleString("tr-TR")} â‚º
-
-                        </span>
-
-                      </p>
-
-                    </div>
+                      </div>
 
 
 
-                    <div className="flex justify-between">
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-2">
 
-                      <Button type="button" variant="outline" onClick={prevStep}>
+                        <h4 className="font-medium">Tahmini Kazanç</h4>
 
-                        Geri
+                        <p className="text-sm text-muted-foreground">
 
-                      </Button>
+                          Günlük {formData.pricePerDay || 0} ₺ fiyatla ayda ortalama 15 gün kiralama yaparsanız:{" "}
 
-                      <Button type="submit" disabled={loading}>
+                          <span className="font-semibold text-primary">
 
-                        {loading ? (
+                            {((parseFloat(formData.pricePerDay) || 0) * 15).toLocaleString("tr-TR")} ₺
 
-                          <>
+                          </span>
 
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        </p>
 
-                            Ekleniyor...
+                      </div>
 
-                          </>
 
-                        ) : (
 
-                          <>
+                      <div className="flex justify-between">
 
-                            <CheckCircle2 className="w-5 h-5 mr-2" />
+                        <Button type="button" variant="outline" onClick={prevStep}>
 
-                            AraÃ§ Ekle
+                          Geri
 
-                          </>
+                        </Button>
 
-                        )}
+                        <Button type="button" onClick={nextStep}>
 
-                      </Button>
+                          Devam Et
+
+                        </Button>
+
+                      </div>
 
                     </div>
 
-                  </div>
+                  )}
 
-                )}
+
+
+                  {/* Step 5: Ehliyet */}
+
+                  {currentStep === 5 && (
+
+                    <div className="space-y-6 animate-in fade-in duration-300">
+
+                      <div className="space-y-2">
+
+                        <Label className="flex items-center gap-2">
+
+                          <Shield className="w-4 h-4" />
+
+                          Ehliyet Belgesi *
+
+                        </Label>
+
+                        <p className="text-sm text-muted-foreground mb-4">
+
+                          Araç kiralama işlemlerinde ehliyet belgeniz zorunludur. Geçerli bir ehliyet belgesi yükleyiniz.
+
+                        </p>
+
+                        <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+
+                          <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+
+                          <p className="text-muted-foreground mb-4">
+
+                            Ehliyet belgenizi buraya yükleyin
+
+                          </p>
+
+                          <Button variant="outline" type="button">
+
+                            <Image className="w-4 h-4 mr-2" />
+
+                            Ehliyet Yükle
+
+                          </Button>
+
+                        </div>
+
+                        <p className="text-xs text-muted-foreground mt-2">
+
+                          * Ehliyet belgesi olmadan araç ekleyemezsiniz.
+
+                        </p>
+
+                      </div>
+
+
+
+                      <div className="flex justify-between">
+
+                        <Button type="button" variant="outline" onClick={prevStep}>
+
+                          Geri
+
+                        </Button>
+
+                        <Button type="submit" disabled={loading}>
+
+                          {loading ? (
+
+                            <>
+
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+
+                              Ekleniyor...
+
+                            </>
+
+                          ) : (
+
+                            <>
+
+                              <CheckCircle2 className="w-5 h-5 mr-2" />
+
+                              Araç Ekle
+
+                            </>
+
+                          )}
+
+                        </Button>
+
+                      </div>
+
+                    </div>
+
+                  )}
 
               </form>
 
