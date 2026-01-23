@@ -60,6 +60,8 @@ const CarDetail = () => {
   const [dropoffZoneId, setDropoffZoneId] = useState<string>("");
   const [pickupAddress, setPickupAddress] = useState("");
   const [dropoffAddress, setDropoffAddress] = useState("");
+  const MINUTE_PROVISION_FEE = 300;
+  const DAY_PROVISION_FEE = 350;
 
   const normalizeText = (value: string) => value.toLocaleLowerCase("tr");
 
@@ -309,15 +311,23 @@ const CarDetail = () => {
     const simulatedTrafficDelay = Math.floor(Math.random() * 11);
     setTrafficDelayMinutes(simulatedTrafficDelay);
 
+    let provisionFee = 0;
+
+    if (selectedPricing === "minute") {
+      provisionFee = MINUTE_PROVISION_FEE;
+    } else if (selectedPricing === "day") {
+      provisionFee = DAY_PROVISION_FEE;
+    }
+
     if (selectedPricing === "hour") {
       endTime.setHours(endTime.getHours() + 1);
       totalPrice = car.price_per_hour;
     } else if (selectedPricing === "day") {
       endTime.setDate(endTime.getDate() + rentalDays);
-      totalPrice = car.price_per_day * rentalDays + insurancePrice;
+      totalPrice = car.price_per_day * rentalDays + insurancePrice + provisionFee;
     } else if (selectedPricing === "minute") {
       endTime.setMinutes(endTime.getMinutes() + 30);
-      totalPrice = car.price_per_minute * 30;
+      totalPrice = car.price_per_minute * 30 + provisionFee;
     }
 
     // Apply subscription discount
@@ -357,6 +367,8 @@ const CarDetail = () => {
           rentalType: selectedPricing,
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString(),
+          insurancePrice: selectedInsurance ? insurancePrice : undefined,
+          provisionFee,
         }
       });
     } catch (error: any) {
@@ -803,6 +815,7 @@ const CarDetail = () => {
                 <InsurancePackages 
                   onSelect={handleInsuranceSelect}
                   selectedPackage={selectedInsurance}
+                  rentalType={selectedPricing ?? undefined}
                 />
 
                 <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6 mt-6">

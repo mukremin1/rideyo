@@ -40,6 +40,61 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
   const [verificationStep, setVerificationStep] = useState<"idle" | "checking" | "complete">("idle");
   const [result, setResult] = useState<VerificationResult | null>(null);
 
+  const persistLicenseRecord = async (verification: VerificationResult) => {
+    if (!userId || !licenseNumber.trim()) return;
+
+    const payload = {
+      user_id: userId,
+      license_number: licenseNumber.trim(),
+      penalty_points: verification.data?.penaltyPoints ?? 0,
+      total_accidents: verification.data?.totalAccidents ?? 0,
+      traffic_violations: verification.data?.trafficViolations ?? 0,
+      driver_score: verification.data?.driverScore ?? null,
+      is_approved: verification.data?.isApproved ?? verification.canRent,
+      verification_status: verification.data?.verificationStatus ?? (verification.canRent ? "verified" : "rejected"),
+    };
+
+    const { data: existing, error: selectError } = await supabase
+      .from("driver_history")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (selectError) {
+      toast({
+        title: "Ehliyet kaydı alınamadı",
+        description: selectError.message ?? "Kayıt kontrol edilemedi",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (existing?.id) {
+      const { error } = await supabase
+        .from("driver_history")
+        .update(payload)
+        .eq("user_id", userId);
+
+      if (error) {
+        toast({
+          title: "Ehliyet kaydı güncellenemedi",
+          description: error.message ?? "Güncelleme sırasında hata oluştu",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    const { error } = await supabase.from("driver_history").insert(payload);
+    if (error) {
+      toast({
+        title: "Ehliyet kaydı oluşturulamadı",
+        description: error.message ?? "Kayıt sırasında hata oluştu",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -75,6 +130,7 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
       }
 
       setResult(data as VerificationResult);
+      await persistLicenseRecord(data as VerificationResult);
       setVerificationStep("complete");
 
       if (data.success && data.canRent) {
