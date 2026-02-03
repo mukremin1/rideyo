@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -14,13 +15,18 @@ interface Car {
 }
 
 const GPSTracking = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCars = async () => {
-      if (!user) return;
+      if (authLoading) return;
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
 
       const { data, error } = await supabase
         .from("cars")
@@ -35,7 +41,7 @@ const GPSTracking = () => {
     };
 
     fetchCars();
-  }, [user]);
+  }, [user, authLoading, navigate]);
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
@@ -60,7 +66,7 @@ const GPSTracking = () => {
             </AlertDescription>
           </Alert>
 
-          {loading ? (
+          {authLoading || loading ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Araçlar yükleniyor...</p>
             </div>

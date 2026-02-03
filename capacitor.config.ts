@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.0db773dd95304362a44e3059b271f6c6',
+  appId: 'com.rideyo',
   appName: 'RideYo',
   webDir: 'dist',
   server: {

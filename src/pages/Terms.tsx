@@ -5,7 +5,7 @@ const Terms = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-foreground mb-6">Kullanım Koşulları</h1>
           <p className="text-muted-foreground mb-8">Son Güncelleme: 23 Ekim 2024</p>
@@ -14,7 +14,7 @@ const Terms = () => {
             <section>
               <h2 className="text-2xl font-semibold text-foreground mb-4">1. Genel Hükümler</h2>
               <p>
-                Bu Kullanım Koşulları, RentNow platformunu kullanımınızı düzenleyen yasal bir sözleşmedir. 
+                Bu Kullanım Koşulları, RideYo platformunu kullanımınızı düzenleyen yasal bir sözleşmedir. 
                 Platformu kullanarak bu koşulları kabul etmiş sayılırsınız. Eğer bu koşulları kabul etmiyorsanız, 
                 lütfen platformu kullanmayınız.
               </p>
@@ -23,7 +23,7 @@ const Terms = () => {
             <section>
               <h2 className="text-2xl font-semibold text-foreground mb-4">2. Hizmet Tanımı</h2>
               <p>
-                RentNow, araç sahipleri ile kiralayıcıları bir araya getiren dijital bir platformdur. 
+                RideYo, araç sahipleri ile kiralayıcıları bir araya getiren dijital bir platformdur. 
                 Platform, araç paylaşımını kolaylaştırır ancak araçların sahibi değildir. Tüm araçlar, 
                 bağımsız araç sahipleri tarafından sağlanır.
               </p>
@@ -137,7 +137,7 @@ const Terms = () => {
             <section>
               <h2 className="text-2xl font-semibold text-foreground mb-4">10. Hesap Askıya Alma ve Sonlandırma</h2>
               <p>
-                RentNow, bu koşulların ihlali durumunda hesabınızı askıya alma veya sonlandırma hakkını saklı tutar. 
+                RideYo, bu koşulların ihlali durumunda hesabınızı askıya alma veya sonlandırma hakkını saklı tutar. 
                 Ciddi ihlaller durumunda yasal işlem başlatılabilir.
               </p>
             </section>
@@ -145,7 +145,7 @@ const Terms = () => {
             <section>
               <h2 className="text-2xl font-semibold text-foreground mb-4">11. Sorumluluk Reddi</h2>
               <p>
-                RentNow, araç sahipleri ve kiralayıcılar arasında bir aracı platformdur. Araçların kalitesi, 
+                RideYo, araç sahipleri ve kiralayıcılar arasında bir aracı platformdur. Araçların kalitesi, 
                 güvenliği ve uygunluğu konusunda garanti vermez. Kullanıcılar arası anlaşmazlıklarda taraf değiliz.
               </p>
             </section>
@@ -161,7 +161,7 @@ const Terms = () => {
             <section>
               <h2 className="text-2xl font-semibold text-foreground mb-4">13. Değişiklikler</h2>
               <p>
-                RentNow, bu Kullanım Koşullarını dilediği zaman değiştirme hakkını saklı tutar. Önemli değişiklikler 
+                RideYo, bu Kullanım Koşullarını dilediği zaman değiştirme hakkını saklı tutar. Önemli değişiklikler 
                 kullanıcılara bildirilecektir. Değişikliklerden sonra platformu kullanmaya devam etmeniz, yeni koşulları 
                 kabul ettiğiniz anlamına gelir.
               </p>
@@ -173,7 +173,7 @@ const Terms = () => {
                 Kullanım Koşulları hakkında sorularınız için:
               </p>
               <p className="mt-3">
-                <strong>E-posta:</strong> destek@rentnow.com<br />
+                <strong>E-posta:</strong> destek@ride-yo.com<br />
                 <strong>Telefon:</strong> +90 (462) 123 45 67<br />
                 <strong>Adres:</strong> Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye
               </p>
@@ -187,3 +187,5 @@ const Terms = () => {
 };
 
 export default Terms;
+
+

@@ -5,7 +5,7 @@ const CookiePolicy = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 mt-20">
+      <main className="container mx-auto px-4 pt-24 pb-12">
         <h1 className="text-4xl font-bold mb-8 text-foreground">Çerez Politikası</h1>
         
         <div className="prose prose-lg max-w-none space-y-6 text-muted-foreground">
@@ -102,7 +102,7 @@ const CookiePolicy = () => {
               Çerez politikamız hakkında sorularınız için bizimle iletişime geçebilirsiniz:
             </p>
             <div className="bg-muted p-4 rounded-lg mt-2">
-              <p><strong>E-posta:</strong> info@rideyo.com</p>
+              <p><strong>E-posta:</strong> info@ride-yo.com</p>
               <p><strong>Telefon:</strong> +90 (462) 123 45 67</p>
               <p><strong>Adres:</strong> Trabzon, Türkiye</p>
             </div>

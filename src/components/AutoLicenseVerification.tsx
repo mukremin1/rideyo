@@ -39,6 +39,54 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
   const [loading, setLoading] = useState(false);
   const [verificationStep, setVerificationStep] = useState<"idle" | "checking" | "complete">("idle");
   const [result, setResult] = useState<VerificationResult | null>(null);
+  const [nfcStatus, setNfcStatus] = useState<"idle" | "scanning" | "verified" | "error" | "unsupported">("idle");
+  const [nfcError, setNfcError] = useState<string | null>(null);
+  const handleNfcScan = async () => {
+    setNfcError(null);
+
+    if (!("NDEFReader" in window)) {
+      setNfcStatus("unsupported");
+      toast({
+        title: "NFC Desteklenmiyor",
+        description: "Cihaziniz NFC okumayi desteklemiyor. Mobil cihaz ile deneyin.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setNfcStatus("scanning");
+      const reader = new (window as any).NDEFReader();
+
+      await reader.scan();
+
+      reader.onreading = () => {
+        setNfcStatus("verified");
+        toast({
+          title: "NFC Dogrulama Basarili",
+          description: "Kimlik bilgisi okundu.",
+        });
+      };
+
+      reader.onreadingerror = () => {
+        setNfcStatus("error");
+        setNfcError("NFC okuma basarisiz oldu. Tekrar deneyin.");
+        toast({
+          title: "NFC Okuma Hatasi",
+          description: "Kart okunamadi. Telefonu yaklastirip tekrar deneyin.",
+          variant: "destructive",
+        });
+      };
+    } catch (error: any) {
+      setNfcStatus("error");
+      setNfcError(error?.message ?? "NFC dogrulama baslatilamadi.");
+      toast({
+        title: "NFC Dogrulama Hatasi",
+        description: error?.message ?? "NFC dogrulama baslatilamadi.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const persistLicenseRecord = async (verification: VerificationResult) => {
     if (!userId || !licenseNumber.trim()) return;
@@ -97,6 +145,15 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (nfcStatus !== "verified") {
+      toast({
+        title: "NFC Dogrulamasi Gerekli",
+        description: "Kimlik dogrulamasi icin once NFC okuma yapin.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!licenseNumber.trim()) {
       toast({
@@ -204,6 +261,49 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
       </CardHeader>
       <CardContent>
         <form onSubmit={handleVerify} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="nfcVerification">NFC ile Kimlik Dogrulama</Label>
+            <div className="rounded-lg border border-border bg-background/50 p-3 space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                {nfcStatus === "verified" ? (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>NFC dogrulamasi tamamlandi</span>
+                  </>
+                ) : nfcStatus === "scanning" ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>NFC taramasi baslatildi, karti yaklastirin</span>
+                  </>
+                ) : nfcStatus === "unsupported" ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-destructive" />
+                    <span>NFC desteklenmiyor. Mobil cihaz ile deneyin</span>
+                  </>
+                ) : nfcStatus === "error" ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-destructive" />
+                    <span>{nfcError ?? "NFC okuma basarisiz"}</span>
+                  </>
+                ) : (
+                  <>
+                    <Info className="w-4 h-4 text-muted-foreground" />
+                    <span>NFC ile kimlik dogrulamasi yapin</span>
+                  </>
+                )}
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleNfcScan}
+                disabled={loading || nfcStatus === "scanning" || nfcStatus === "verified"}
+              >
+                {nfcStatus === "verified" ? "NFC Dogrulandi" : "NFC ile Dogrula"}
+              </Button>
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="licenseNumber">Ehliyet Numarası</Label>
             <div className="relative">
@@ -333,7 +433,7 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading || nfcStatus !== "verified"}>
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
