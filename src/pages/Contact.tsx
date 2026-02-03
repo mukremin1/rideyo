@@ -20,7 +20,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl font-bold text-foreground mb-12 text-center">İletişim</h1>
           
@@ -58,7 +58,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">E-posta</h3>
-                    <p className="text-muted-foreground">destek@rentnow.com</p>
+                    <p className="text-muted-foreground">destek@ride-yo.com</p>
                   </div>
                 </div>
               </div>
@@ -135,3 +135,5 @@ const Contact = () => {
 };
 
 export default Contact;
+
+

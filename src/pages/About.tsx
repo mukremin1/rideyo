@@ -5,13 +5,13 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-foreground mb-6">Hakkımızda</h1>
           
           <div className="prose prose-lg max-w-none space-y-6 text-muted-foreground">
             <p>
-              RentNow, Türkiye'nin en yenilikçi araç paylaşım platformudur. 2024 yılında kurulan şirketimiz, 
+              RideYo, Türkiye'nin en yenilikçi araç paylaşım platformudur. 2024 yılında kurulan şirketimiz, 
               insanların araçlarını daha verimli kullanmalarını ve araç sahiplerinin araçlarından gelir elde 
               etmelerini sağlamak misyonuyla yola çıktı.
             </p>
@@ -39,7 +39,7 @@ const About = () => {
 
             <h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">Nasıl Çalışıyoruz?</h2>
             <p>
-              RentNow, araç sahiplerinin kullanmadıkları araçlarını platform üzerinden kiraya vermesini 
+              RideYo, araç sahiplerinin kullanmadıkları araçlarını platform üzerinden kiraya vermesini 
               sağlıyor. Kiralayıcılar ise dakika, saat veya gün bazında ihtiyaçlarına uygun araçları 
               kolayca kiralayabiliyor. Tüm işlemler dijital ortamda, güvenli ödeme altyapımızla gerçekleşiyor.
             </p>

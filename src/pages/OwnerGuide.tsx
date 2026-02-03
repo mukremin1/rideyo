@@ -7,7 +7,7 @@ const OwnerGuide = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 mt-20">
+      <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="flex items-center gap-3 mb-8">
           <Car className="w-10 h-10 text-primary" />
           <h1 className="text-4xl font-bold text-foreground">Araç Sahipleri Rehberi</h1>
@@ -370,7 +370,7 @@ const OwnerGuide = () => {
             </p>
             <div className="space-y-2">
               <p><strong className="text-foreground">📞 Telefon:</strong> +90 (462) 123 45 67</p>
-              <p><strong className="text-foreground">📧 E-posta:</strong> owner-support@rideyo.com</p>
+              <p><strong className="text-foreground">📧 E-posta:</strong> owner-support@ride-yo.com</p>
               <p><strong className="text-foreground">💬 WhatsApp:</strong> +90 (539) 526 32 93</p>
               <p><strong className="text-foreground">🕐 Çalışma Saatleri:</strong> 7/24 Destek</p>
             </div>

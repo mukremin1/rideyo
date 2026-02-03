@@ -56,6 +56,12 @@ const StartRental = () => {
   const [rentalStartTime, setRentalStartTime] = useState<Date | null>(null);
   const [elapsedMinutes, setElapsedMinutes] = useState(0);
   const [distanceKm, setDistanceKm] = useState(0);
+  const [lastAutoUnlockAt, setLastAutoUnlockAt] = useState<number | null>(null);
+  const [autoUnlockArmed, setAutoUnlockArmed] = useState(true);
+
+  const AUTO_UNLOCK_DISTANCE_METERS = 30;
+  const AUTO_UNLOCK_RESET_DISTANCE_METERS = 60;
+  const AUTO_UNLOCK_INTERVAL_MS = 15000;
 
   const toRadians = (value: number) => (value * Math.PI) / 180;
   const calculateDistanceKm = (a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) => {
@@ -146,6 +152,42 @@ const StartRental = () => {
     }
     setLastGPSData(carGPSData);
   }, [carGPSData, rentalStarted, lastGPSData]);
+
+  useEffect(() => {
+    if (rentalStarted || unlocking) return;
+    if (!userLocation || !carGPSData) return;
+    if (step < 2) return;
+
+    const checkAndUnlock = () => {
+      const distanceKm = calculateDistanceKm(
+        { latitude: userLocation.lat, longitude: userLocation.lng },
+        carGPSData
+      );
+
+      if (!Number.isFinite(distanceKm)) return;
+
+      const distanceMeters = distanceKm * 1000;
+
+      if (distanceMeters >= AUTO_UNLOCK_RESET_DISTANCE_METERS && !autoUnlockArmed) {
+        setAutoUnlockArmed(true);
+        return;
+      }
+
+      if (distanceMeters <= AUTO_UNLOCK_DISTANCE_METERS && autoUnlockArmed) {
+        const now = Date.now();
+        if (!lastAutoUnlockAt || now - lastAutoUnlockAt >= AUTO_UNLOCK_INTERVAL_MS) {
+          setLastAutoUnlockAt(now);
+          setAutoUnlockArmed(false);
+          handleUnlockCar();
+        }
+      }
+    };
+
+    checkAndUnlock();
+    const interval = setInterval(checkAndUnlock, AUTO_UNLOCK_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [rentalStarted, unlocking, userLocation, carGPSData, step, lastAutoUnlockAt, autoUnlockArmed]);
 
   useEffect(() => {
     if (!rentalStarted || !rentalStartTime) return;
@@ -419,6 +461,9 @@ const StartRental = () => {
         </div>
         <h3 className="text-xl font-semibold mb-2">{state.carName}</h3>
         <p className="text-muted-foreground mb-6">Aracın yanında olduğunuzdan emin olun</p>
+        <p className="text-xs text-muted-foreground mb-4">
+          Otomatik acma aktif: Araca {AUTO_UNLOCK_DISTANCE_METERS}m yaklastiginizda kilit acma denemesi yapilir.
+        </p>
 
         <Button 
           size="lg" 
@@ -705,3 +750,4 @@ const StartRental = () => {
 };
 
 export default StartRental;
+

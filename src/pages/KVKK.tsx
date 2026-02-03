@@ -5,7 +5,7 @@ const KVKK = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-foreground mb-6">KVKK Aydınlatma Metni</h1>
           <p className="text-muted-foreground mb-8">Kişisel Verilerin Korunması Kanunu Uyarınca Bilgilendirme</p>
@@ -15,12 +15,12 @@ const KVKK = () => {
               <h2 className="text-2xl font-semibold text-foreground mb-4">1. Veri Sorumlusu</h2>
               <p>
                 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, kişisel verileriniz; 
-                veri sorumlusu olarak RentNow tarafından aşağıda açıklanan kapsamda işlenebilecektir.
+                veri sorumlusu olarak RideYo tarafından aşağıda açıklanan kapsamda işlenebilecektir.
               </p>
               <p className="mt-3">
-                <strong>Şirket Unvanı:</strong> RentNow Teknoloji A.Ş.<br />
+                <strong>Şirket Unvanı:</strong> RideYo Teknoloji A.Ş.<br />
                 <strong>Adres:</strong> Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon<br />
-                <strong>E-posta:</strong> kvkk@rentnow.com
+                <strong>E-posta:</strong> kvkk@ride-yo.com
               </p>
             </section>
 
@@ -138,7 +138,7 @@ const KVKK = () => {
                   ıslak imzalı başvuru dilekçenizi şahsen veya noter kanalıyla göndererek
                 </li>
                 <li>
-                  <strong>E-posta ile:</strong> kvkk@rentnow.com adresine kayıtlı elektronik posta (KEP) 
+                  <strong>E-posta ile:</strong> kvkk@ride-yo.com adresine kayıtlı elektronik posta (KEP) 
                   adresi, güvenli elektronik imza veya mobil imza ile imzalanmış başvuru göndererek
                 </li>
               </ul>
@@ -152,7 +152,7 @@ const KVKK = () => {
             <section>
               <h2 className="text-2xl font-semibold text-foreground mb-4">8. Veri Güvenliği</h2>
               <p>
-                RentNow olarak, kişisel verilerinizin güvenliğini sağlamak için teknik ve idari tedbirler 
+                RideYo olarak, kişisel verilerinizin güvenliğini sağlamak için teknik ve idari tedbirler 
                 almaktayız. Verileriniz, yetkisiz erişime, kaybolmaya, kötüye kullanıma karşı korunmaktadır.
               </p>
             </section>
@@ -171,7 +171,7 @@ const KVKK = () => {
                 KVKK ve kişisel verilerinizin işlenmesi hakkında sorularınız için:
               </p>
               <p className="mt-3">
-                <strong>E-posta:</strong> kvkk@rentnow.com<br />
+                <strong>E-posta:</strong> kvkk@ride-yo.com<br />
                 <strong>Telefon:</strong> +90 (462) 123 45 67<br />
                 <strong>Adres:</strong> Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye
               </p>
@@ -185,3 +185,5 @@ const KVKK = () => {
 };
 
 export default KVKK;
+
+

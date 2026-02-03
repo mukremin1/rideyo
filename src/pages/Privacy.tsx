@@ -5,7 +5,7 @@ const Privacy = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-foreground mb-6">Gizlilik Politikası</h1>
           <p className="text-muted-foreground mb-8">Son Güncelleme: 23 Ekim 2024</p>
@@ -14,7 +14,7 @@ const Privacy = () => {
             <section>
               <h2 className="text-2xl font-semibold text-foreground mb-4">1. Giriş</h2>
               <p>
-                RentNow olarak, kullanıcılarımızın gizliliğini korumayı taahhüt ediyoruz. Bu Gizlilik Politikası, 
+                RideYo olarak, kullanıcılarımızın gizliliğini korumayı taahhüt ediyoruz. Bu Gizlilik Politikası, 
                 kişisel verilerinizi nasıl topladığımızı, kullandığımızı, sakladığımızı ve koruduğumuzu açıklamaktadır.
               </p>
             </section>
@@ -129,7 +129,7 @@ const Privacy = () => {
                 Gizlilik Politikamız hakkında sorularınız için:
               </p>
               <p className="mt-3">
-                <strong>E-posta:</strong> gizlilik@rentnow.com<br />
+                <strong>E-posta:</strong> gizlilik@ride-yo.com<br />
                 <strong>Telefon:</strong> +90 (462) 123 45 67<br />
                 <strong>Adres:</strong> Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye
               </p>
@@ -143,3 +143,5 @@ const Privacy = () => {
 };
 
 export default Privacy;
+
+

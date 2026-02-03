@@ -116,7 +116,7 @@ const FAQ = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-foreground mb-4 text-center">Sık Sorulan Sorular</h1>
           <p className="text-muted-foreground text-center mb-12">

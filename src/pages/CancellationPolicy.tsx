@@ -6,7 +6,7 @@ const CancellationPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 mt-20">
+      <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="flex items-center gap-3 mb-8">
           <RefreshCcw className="w-10 h-10 text-primary" />
           <h1 className="text-4xl font-bold text-foreground">İptal ve İade Koşulları</h1>
@@ -157,7 +157,7 @@ const CancellationPolicy = () => {
             </p>
             <div className="mt-4 space-y-1">
               <p>Telefon: 0539 526 32 93</p>
-              <p>E-posta: destek@rideyo.com</p>
+              <p>E-posta: destek@ride-yo.com</p>
               <p>WhatsApp: +90 539 526 32 93</p>
             </div>
           </section>
@@ -169,3 +169,4 @@ const CancellationPolicy = () => {
 };
 
 export default CancellationPolicy;
+
