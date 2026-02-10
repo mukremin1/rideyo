@@ -12,12 +12,12 @@ interface GPSTrackerProps {
 }
 
 interface GPSData {
-  latitude: number;
-  longitude: number;
-  speed: number;
-  heading: number;
-  battery_level: number;
-  last_gps_update: string;
+  latitude: number | null;
+  longitude: number | null;
+  speed: number | null;
+  heading: number | null;
+  battery_level: number | null;
+  last_gps_update: string | null;
 }
 
 const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
@@ -25,7 +25,6 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
-    // Fetch initial GPS data
     const fetchGPSData = async () => {
       const { data } = await supabase
         .from("cars")
@@ -33,10 +32,9 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
         .eq("id", carId)
         .maybeSingle();
 
-      if (data && data.latitude && data.longitude) {
+      if (data && data.latitude !== null && data.longitude !== null) {
         setGpsData(data as GPSData);
-        
-        // Check if car is online (updated within last 5 minutes)
+
         const lastUpdate = new Date(data.last_gps_update || 0);
         const now = new Date();
         const diffMinutes = (now.getTime() - lastUpdate.getTime()) / (1000 * 60);
@@ -46,7 +44,6 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
 
     fetchGPSData();
 
-    // Subscribe to real-time GPS updates
     const channel = supabase
       .channel(`gps-${carId}`)
       .on(
@@ -58,15 +55,15 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
           filter: `id=eq.${carId}`,
         },
         (payload) => {
-          const newData = payload.new as any;
-          if (newData.latitude && newData.longitude) {
+          const newData = payload.new as Partial<GPSData>;
+          if (newData.latitude !== null && newData.longitude !== null) {
             setGpsData({
-              latitude: newData.latitude,
-              longitude: newData.longitude,
-              speed: newData.speed,
-              heading: newData.heading,
-              battery_level: newData.battery_level,
-              last_gps_update: newData.last_gps_update,
+              latitude: newData.latitude ?? null,
+              longitude: newData.longitude ?? null,
+              speed: newData.speed ?? null,
+              heading: newData.heading ?? null,
+              battery_level: newData.battery_level ?? null,
+              last_gps_update: newData.last_gps_update ?? null,
             });
             setIsOnline(true);
           }
@@ -107,7 +104,8 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
               <span>Konum</span>
             </div>
             <p className="text-sm font-medium">
-              {gpsData.latitude.toFixed(6)}, {gpsData.longitude.toFixed(6)}
+              {gpsData.latitude !== null ? gpsData.latitude.toFixed(6) : "-"},{" "}
+              {gpsData.longitude !== null ? gpsData.longitude.toFixed(6) : "-"}
             </p>
           </div>
 
@@ -116,7 +114,9 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
               <Navigation className="w-4 h-4" />
               <span>Hız</span>
             </div>
-            <p className="text-sm font-medium">{gpsData.speed.toFixed(0)} km/s</p>
+            <p className="text-sm font-medium">
+              {gpsData.speed !== null ? gpsData.speed.toFixed(0) : "-"} km/h
+            </p>
           </div>
 
           <div className="space-y-1">
@@ -124,7 +124,9 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
               <Zap className="w-4 h-4" />
               <span>Batarya</span>
             </div>
-            <p className="text-sm font-medium">%{gpsData.battery_level}</p>
+            <p className="text-sm font-medium">
+              %{gpsData.battery_level !== null ? gpsData.battery_level : "-"}
+            </p>
           </div>
 
           <div className="space-y-1">
@@ -133,19 +135,21 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
               <span>Son Güncelleme</span>
             </div>
             <p className="text-sm font-medium">
-              {format(new Date(gpsData.last_gps_update), "HH:mm:ss", { locale: tr })}
+              {gpsData.last_gps_update
+                ? format(new Date(gpsData.last_gps_update), "HH:mm:ss", { locale: tr })
+                : "-"}
             </p>
           </div>
         </div>
 
         <div className="pt-4 border-t">
           <a
-            href={`https://www.google.com/maps?q=${gpsData.latitude},${gpsData.longitude}`}
+            href={`https://www.google.com/maps?q=${gpsData.latitude ?? 0},${gpsData.longitude ?? 0}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-primary hover:underline"
           >
-            Haritada Görüntüle →
+            Haritada Görüntüle &rarr;
           </a>
         </div>
       </div>

@@ -23,10 +23,15 @@ const GPSTracking = () => {
   useEffect(() => {
     const fetchCars = async () => {
       if (authLoading) return;
+
       if (!user) {
+        setCars([]);
+        setLoading(false);
         navigate("/auth");
         return;
       }
+
+      setLoading(true);
 
       const { data, error } = await supabase
         .from("cars")
@@ -61,7 +66,7 @@ const GPSTracking = () => {
           <Alert className="mb-6">
             <Info className="w-4 h-4" />
             <AlertDescription>
-              GPS takip sistemi gerçek zamanlı olarak araç konumlarını gösterir. 
+              GPS takip sistemi gerçek zamanlı olarak araç konumlarını gösterir.
               GPS cihazı kurulu araçlar listede görünecektir.
             </AlertDescription>
           </Alert>
