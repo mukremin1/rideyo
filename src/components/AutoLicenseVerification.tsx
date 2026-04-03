@@ -41,20 +41,21 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [nfcStatus, setNfcStatus] = useState<"idle" | "scanning" | "verified" | "error" | "unsupported">("idle");
   const [nfcError, setNfcError] = useState<string | null>(null);
+
   const handleNfcScan = async () => {
     setNfcError(null);
 
-    if (!("NDEFReader" in window)) {
-      setNfcStatus("unsupported");
-      toast({
-        title: "NFC Desteklenmiyor",
-        description: "Cihaziniz NFC okumayi desteklemiyor. Mobil cihaz ile deneyin.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
+      if (!("NDEFReader" in window)) {
+        setNfcStatus("unsupported");
+        toast({
+          title: "NFC Desteklenmiyor",
+          description: "Cihaziniz NFC okumayi desteklemiyor. Mobil cihaz ile deneyin.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setNfcStatus("scanning");
       const reader = new (window as any).NDEFReader();
 

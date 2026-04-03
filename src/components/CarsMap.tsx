@@ -160,7 +160,7 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
   }
 
   return (
-    <div className="rounded-lg overflow-hidden border border-border" style={{ height }}>
+    <div className="relative z-0 rounded-lg overflow-hidden border border-border" style={{ height }}>
       <MapContainer center={mapCenter} zoom={userLocation ? 13 : 6} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -189,11 +189,11 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
 
         {markers.map(({ car, position }) => (
           <Marker key={car.id} position={position} icon={carIcon}>
-            <Popup>
-              <Card className="border-0 shadow-none p-0 min-w-[200px]">
+            <Popup maxWidth={260} minWidth={180}>
+              <Card className="border-0 shadow-none p-0 w-[min(72vw,220px)] sm:w-[220px]">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm">{car.name}</h3>
+                    <h3 className="font-semibold text-sm break-words pr-2">{car.name}</h3>
                     <Badge variant="secondary" className="text-xs capitalize">
                       {car.type}
                     </Badge>
@@ -201,7 +201,7 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <MapPin className="w-3 h-3" />
-                    <span>{car.location}</span>
+                    <span className="break-words">{car.location}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">

@@ -6,8 +6,15 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Vercel üzerinde deploy yapılıyorsa root; lokal development için de '/'
-  base: process.env.VERCEL ? '/' : (mode === "development" ? "/" : "/tiktak-turkiye-rent/"),
+  // Web deploy uses sub-path; Capacitor needs relative paths in production.
+  base:
+    mode === "development"
+      ? "/"
+      : process.env.CAPACITOR
+        ? "./"
+        : process.env.VERCEL
+          ? "/"
+          : "/tiktak-turkiye-rent/",
   server: {
     host: "::",
     port: 8080,

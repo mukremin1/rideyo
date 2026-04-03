@@ -17,16 +17,16 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 15%;
 
-    --primary: 217 91% 35%;
+    --primary: 221 92% 46%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 14% 89%;
+    --secondary: 212 40% 92%;
     --secondary-foreground: 220 15% 15%;
 
-    --muted: 210 14% 89%;
+    --muted: 212 34% 92%;
     --muted-foreground: 220 10% 45%;
 
-    --accent: 25 95% 53%;
+    --accent: 18 96% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -34,16 +34,16 @@ All colors MUST be HSL.
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 217 91% 35%;
+    --ring: 221 92% 46%;
 
     --radius: 0.75rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 35%), hsl(217 91% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(25 95% 53%), hsl(33 95% 60%));
-    --gradient-hero: linear-gradient(180deg, hsl(0 0% 98%), hsl(217 91% 98%));
+    --gradient-primary: linear-gradient(135deg, hsl(221 92% 46%), hsl(204 98% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(18 96% 52%), hsl(34 98% 56%));
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 99%), hsl(212 100% 97%));
 
-    --shadow-soft: 0 4px 24px -1px hsl(217 91% 35% / 0.08);
-    --shadow-hover: 0 8px 32px -2px hsl(217 91% 35% / 0.15);
+    --shadow-soft: 0 6px 28px -4px hsl(221 92% 46% / 0.2);
+    --shadow-hover: 0 10px 36px -6px hsl(221 92% 46% / 0.28);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -58,16 +58,16 @@ All colors MUST be HSL.
     --popover: 220 15% 13%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 217 91% 50%;
+    --primary: 221 92% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 20%;
+    --secondary: 220 24% 22%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 15% 20%;
+    --muted: 220 22% 22%;
     --muted-foreground: 220 10% 65%;
 
-    --accent: 25 95% 53%;
+    --accent: 18 96% 56%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -75,7 +75,7 @@ All colors MUST be HSL.
 
     --border: 220 15% 20%;
     --input: 220 15% 20%;
-    --ring: 217 91% 50%;
+    --ring: 221 92% 58%;
   }
 }
 
@@ -86,6 +86,13 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  html,
+  body,
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   /* Mobile App Optimizations */

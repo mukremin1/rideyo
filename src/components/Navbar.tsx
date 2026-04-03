@@ -67,33 +67,33 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border pt-safe">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 md:h-16">
-          <Link to="/" className="flex items-center gap-2 transition-transform active:scale-95 md:hover:scale-105">
+        <div className="flex min-h-14 md:min-h-16 items-center justify-between gap-2 py-2">
+          <Link to="/" className="flex min-w-0 items-center gap-2 transition-transform active:scale-95 md:hover:scale-105">
             <img
               src="/logo-512x512.png"
               alt="RideYo logo"
               className="w-9 h-9 md:w-10 md:h-10 rounded-md object-contain"
               loading="eager"
             />
-            <span className="text-lg md:text-xl font-bold text-foreground">RideYo</span>
+            <span className="truncate text-base sm:text-lg md:text-xl font-bold text-foreground">RideYo</span>
           </Link>
           
-          <div className="hidden md:flex items-center gap-8">
-            <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
+          <div className="hidden xl:flex items-center gap-5 2xl:gap-7">
+            <Link to="/" className="text-sm 2xl:text-base text-foreground/80 hover:text-foreground transition-colors font-medium whitespace-nowrap">
               Ana Sayfa
             </Link>
-            <Link to="/about" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
+            <Link to="/about" className="text-sm 2xl:text-base text-foreground/80 hover:text-foreground transition-colors font-medium whitespace-nowrap">
               Hakkımızda
             </Link>
-            <Link to="/cars" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
+            <Link to="/cars" className="text-sm 2xl:text-base text-foreground/80 hover:text-foreground transition-colors font-medium whitespace-nowrap">
               Araçlar
             </Link>
-            <a href="/#how-it-works" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
+            <a href="/#how-it-works" className="text-sm 2xl:text-base text-foreground/80 hover:text-foreground transition-colors font-medium whitespace-nowrap">
               Nasıl Çalışır
             </a>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex shrink-0 items-center gap-2 md:gap-3">
             {user ? (
               <>
                 <Link to="/favorites" className="hidden md:block">

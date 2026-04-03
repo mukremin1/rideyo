@@ -6,7 +6,6 @@ import "leaflet/dist/leaflet.css";
 import { MapPin, Crosshair } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Custom pin icon for selected location
 const selectedLocationIcon = L.divIcon({
   className: "custom-pin-icon",
   html: `<div style="
@@ -40,7 +39,6 @@ interface LocationPickerMapProps {
   height?: string;
 }
 
-// Component to handle map click events
 const MapClickHandler = ({
   onLocationSelect,
 }: {
@@ -54,7 +52,6 @@ const MapClickHandler = ({
   return null;
 };
 
-// Component to recenter map
 const MapController = ({ center }: { center: [number, number] }) => {
   const map = useMap();
   useEffect(() => {
@@ -76,7 +73,6 @@ const LocationPickerMap = ({
   const [isLocating, setIsLocating] = useState(false);
   const [addressText, setAddressText] = useState<string>("");
 
-  // Reverse geocode to get address from coordinates
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
       const url = new URL("https://nominatim.openstreetmap.org/reverse");
@@ -131,10 +127,10 @@ const LocationPickerMap = ({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground flex items-center gap-1">
-          <MapPin className="w-4 h-4" />
+    <div className="space-y-3 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground flex items-center gap-1 break-words">
+          <MapPin className="w-4 h-4 shrink-0" />
           Haritada konumu seçmek için tıklayın
         </p>
         <Button
@@ -143,6 +139,7 @@ const LocationPickerMap = ({
           size="sm"
           onClick={getCurrentLocation}
           disabled={isLocating}
+          className="w-full sm:w-auto"
         >
           <Crosshair className="w-4 h-4 mr-1" />
           {isLocating ? "Konum alınıyor..." : "Mevcut Konum"}
@@ -150,33 +147,24 @@ const LocationPickerMap = ({
       </div>
 
       <div className="rounded-lg overflow-hidden border border-border" style={{ height }}>
-        <MapContainer
-          center={mapCenter}
-          zoom={13}
-          style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom={true}
-        >
+        <MapContainer center={mapCenter} zoom={13} style={{ height: "100%", width: "100%" }} scrollWheelZoom={true}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <MapClickHandler onLocationSelect={handleMapClick} />
           <MapController center={mapCenter} />
-          {selectedPosition && (
-            <Marker position={selectedPosition} icon={selectedLocationIcon} />
-          )}
+          {selectedPosition && <Marker position={selectedPosition} icon={selectedLocationIcon} />}
         </MapContainer>
       </div>
 
       {selectedPosition && (
-        <div className="p-3 bg-muted/50 rounded-lg space-y-1">
-          <p className="text-sm font-medium text-foreground">
-            Seçilen Konum
-          </p>
-          <p className="text-xs text-muted-foreground">
+        <div className="p-3 bg-muted/50 rounded-lg space-y-1 overflow-hidden">
+          <p className="text-sm font-medium text-foreground">Seçilen Konum</p>
+          <p className="text-xs text-muted-foreground break-words">
             {addressText || `${selectedPosition[0].toFixed(6)}, ${selectedPosition[1].toFixed(6)}`}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground break-words">
             Koordinatlar: {selectedPosition[0].toFixed(6)}, {selectedPosition[1].toFixed(6)}
           </p>
         </div>

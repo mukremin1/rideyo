@@ -16,40 +16,50 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { latitude, longitude, loading: locationLoading, requestPermission: requestLocationPermission } = useGeolocation();
-  const { permission: notifPermission, requestPermission: requestNotifPermission, isSupported: notifSupported } = usePushNotifications();
+  const {
+    latitude,
+    longitude,
+    loading: locationLoading,
+    requestPermission: requestLocationPermission,
+  } = useGeolocation();
+  const {
+    permission: notifPermission,
+    requestPermission: requestNotifPermission,
+    isSupported: notifSupported,
+  } = usePushNotifications();
   const [showMap, setShowMap] = useState(true);
 
   const userLocation = latitude && longitude ? { latitude, longitude } : null;
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className="min-h-screen bg-background pb-16 md:pb-0 overflow-x-hidden pt-[calc(env(safe-area-inset-top)+4.5rem)] md:pt-[calc(env(safe-area-inset-top)+5rem)]">
       <Navbar />
-      
-      {/* Premium Banner - Mobile Optimized */}
-      <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 md:py-3 px-4 mt-14 md:mt-16">
-        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-center sm:text-left">
-            <Crown className="h-5 w-5 shrink-0" />
-            <span className="text-sm font-medium">Aylık aboneliklerle %25'e varan indirimler!</span>
+
+      <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white py-1.5 md:py-2.5 px-3 sm:px-4 overflow-x-hidden">
+        <div className="container mx-auto grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2 text-left">
+            <Crown className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+            <span className="min-w-0 text-[13px] sm:text-sm font-semibold leading-tight break-words tracking-tight">
+              Aylık aboneliklerle %25'e varan indirimler!
+            </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:flex items-stretch gap-2 w-full md:w-auto">
             {notifSupported && notifPermission !== "granted" && (
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant="secondary"
                 onClick={requestNotifPermission}
-                className="whitespace-nowrap"
+                className="w-full md:w-auto whitespace-nowrap h-8 sm:h-9 px-3 text-[11px] sm:text-xs md:text-sm"
               >
-                <Bell className="w-4 h-4 mr-1" />
+                <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                 Bildirimleri Aç
               </Button>
             )}
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant="secondary"
-              onClick={() => navigate('/subscription')}
-              className="whitespace-nowrap"
+              onClick={() => navigate("/subscription")}
+              className="w-full md:w-auto whitespace-nowrap h-8 sm:h-9 px-3 text-[11px] sm:text-xs md:text-sm"
             >
               Paketleri Gör
             </Button>
@@ -59,29 +69,29 @@ const Index = () => {
 
       <Hero />
 
-      {/* Map Section */}
-      <section className="py-12 px-4 bg-muted/30">
+      <section className="py-12 px-4 bg-muted/30 overflow-x-hidden">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-            <div>
-              <h2 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-2">
-                <MapPin className="w-8 h-8 text-primary" />
+            <div className="min-w-0">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 flex items-center gap-2 break-words">
+                <MapPin className="w-7 h-7 sm:w-8 sm:h-8 text-primary shrink-0" />
                 Araçları Haritada Gör
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground break-words">
                 Konumunuza yakın araçları haritada görüntüleyin
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               {!userLocation && !locationLoading && (
-                <Button variant="outline" onClick={requestLocationPermission}>
+                <Button variant="outline" onClick={requestLocationPermission} className="w-full sm:w-auto whitespace-normal">
                   <MapPin className="w-4 h-4 mr-2" />
                   Konumu Etkinleştir
                 </Button>
               )}
-              <Button 
+              <Button
                 variant={showMap ? "default" : "outline"}
                 onClick={() => setShowMap(!showMap)}
+                className="w-full sm:w-auto whitespace-normal"
               >
                 {showMap ? "Haritayı Gizle" : "Haritayı Göster"}
               </Button>
@@ -89,17 +99,14 @@ const Index = () => {
           </div>
 
           {showMap && (
-            <CarsMap 
-              userLocation={userLocation} 
-              showUserLocation={true}
-              height="500px"
-            />
+            <div className="relative z-0 mt-2 md:mt-4 mb-8 md:mb-10">
+              <CarsMap userLocation={userLocation} showUserLocation={true} height="min(500px, 62vh)" />
+            </div>
           )}
         </div>
       </section>
 
-      {/* Nearby Vehicles Section */}
-      <section className="py-12 px-4">
+      <section className="relative z-10 py-12 px-4 bg-background">
         <div className="container mx-auto">
           <NearbyVehicles maxDistance={100} limit={6} />
         </div>
@@ -115,3 +122,4 @@ const Index = () => {
 };
 
 export default Index;
+

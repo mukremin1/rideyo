@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Chatbot from "@/components/Chatbot";
 import BottomNav from "@/components/BottomNav";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import NfcLoginVerificationPrompt from "@/components/NfcLoginVerificationPrompt";
 import Index from "./pages/Index";
 import Cars from "./pages/Cars";
 import CarDetail from "./pages/CarDetail";
@@ -53,6 +54,7 @@ const App = () => (
       <Chatbot />
       <BrowserRouter>
         <AuthProvider>
+          <NfcLoginVerificationPrompt />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/cars" element={<Cars />} />
