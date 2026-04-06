@@ -13,6 +13,8 @@ dist
 .env.local
 android/keystore.properties
 android/keystore/*.keystore
+android/keystore/*.jks
+android/keystore/*.pem
 dist-ssr
 *.local
 
