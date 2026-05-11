@@ -8,6 +8,10 @@ interface VehiclePhotoCaptureProps {
   photos: string[];
   maxPhotos?: number;
 }
+type TorchCapableTrack = MediaStreamTrack & {
+  getCapabilities: () => MediaTrackCapabilities & { torch?: boolean };
+  applyConstraints: (constraints: MediaTrackConstraints & { advanced?: Array<{ torch?: boolean }> }) => Promise<void>;
+};
 
 const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehiclePhotoCaptureProps) => {
   const { toast } = useToast();
@@ -84,13 +88,13 @@ const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehicleP
   const toggleFlash = async () => {
     if (!streamRef.current) return;
 
-    const track = streamRef.current.getVideoTracks()[0];
-    const capabilities = track.getCapabilities() as any;
+    const track = streamRef.current.getVideoTracks()[0] as TorchCapableTrack;
+    const capabilities = track.getCapabilities();
 
     if (capabilities.torch) {
       try {
         await track.applyConstraints({
-          advanced: [{ torch: !isFlashEnabled } as any]
+          advanced: [{ torch: !isFlashEnabled }]
         });
         setIsFlashEnabled(!isFlashEnabled);
       } catch (error) {

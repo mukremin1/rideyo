@@ -18,6 +18,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNav from "@/components/BottomNav";
 import { Link } from "react-router-dom";
+type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
 const OwnerDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -113,7 +114,7 @@ const OwnerDashboard = () => {
   ];
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: any; label: string }> = {
+    const variants: Record<string, { variant: BadgeVariant; label: string }> = {
       active: { variant: "default", label: "Aktif" },
       rented: { variant: "secondary", label: "Kiralandı" },
       maintenance: { variant: "destructive", label: "Bakımda" },
@@ -121,7 +122,7 @@ const OwnerDashboard = () => {
       completed: { variant: "secondary", label: "Tamamlandı" }
     };
     const config = variants[status] || variants.available;
-    return <Badge variant={config.variant as any}>{config.label}</Badge>;
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   return (

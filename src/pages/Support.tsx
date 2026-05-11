@@ -111,7 +111,7 @@ const Support = () => {
 
       // Final flush
       if (textBuffer.trim()) {
-        for (let raw of textBuffer.split("\n")) {
+        for (const raw of textBuffer.split("\n")) {
           if (!raw || raw.startsWith(":") || !raw.startsWith("data: ")) continue;
           const jsonStr = raw.slice(6).trim();
           if (jsonStr === "[DONE]") continue;
@@ -119,7 +119,9 @@ const Support = () => {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) updateAssistant(content);
-          } catch {}
+          } catch {
+            // ignore malformed trailing chunk
+          }
         }
       }
     } catch (error) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 
 import { useNavigate, Link } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import { Input } from "@/components/ui/input";
 
@@ -100,6 +101,8 @@ const AddCar = () => {
   const [checkingRole, setCheckingRole] = useState(true);
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [ownerDeclarationAccepted, setOwnerDeclarationAccepted] = useState(false);
+  const [listingRulesAccepted, setListingRulesAccepted] = useState(false);
 
   
 
@@ -303,6 +306,11 @@ const AddCar = () => {
         return;
       }
 
+      if (!ownerDeclarationAccepted || !listingRulesAccepted) {
+        toast.error("Devam etmek için zorunlu onay kutularını işaretleyin.");
+        return;
+      }
+
       setLoading(true);
 
 
@@ -391,7 +399,7 @@ const AddCar = () => {
 
         console.error("Hata:", error);
 
-        toast.error("Bir hata oluÅŸtu");
+        toast.error("Bir hata oluştu");
 
       }
 
@@ -405,7 +413,37 @@ const AddCar = () => {
 
 
 
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 5));
+  const validateCurrentStep = () => {
+    if (currentStep === 1) {
+      if (!formData.name.trim() || !formData.year || !formData.city || !formData.location) {
+        toast.error("Araç bilgileri adımındaki zorunlu alanları doldurun.");
+        return false;
+      }
+      if (formData.latitude === null || formData.longitude === null) {
+        toast.error("Lütfen haritadan bir konum seçin.");
+        return false;
+      }
+    }
+
+    if (currentStep === 2 && !formData.imageUrl) {
+      toast.error("Devam etmek için en az bir araç fotoğrafı yükleyin.");
+      return false;
+    }
+
+    if (currentStep === 4) {
+      if (!formData.pricePerMinute || !formData.pricePerHour || !formData.pricePerDay || !formData.pricePerKm) {
+        toast.error("Fiyatlandırma adımındaki tüm alanları doldurun.");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const nextStep = () => {
+    if (!validateCurrentStep()) return;
+    setCurrentStep((prev) => Math.min(prev + 1, 5));
+  };
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
@@ -631,7 +669,7 @@ const AddCar = () => {
 
             <h1 className="text-3xl font-bold text-foreground mb-2">Yeni Araç Ekle</h1>
 
-            <p className="text-muted-foreground">Araçınızı ekleyerek gelir elde etmeye başlayın</p>
+            <p className="text-muted-foreground">Aracınızı ekleyerek gelir elde etmeye başlayın</p>
 
           </div>
 
@@ -701,7 +739,7 @@ const AddCar = () => {
 
               <form onSubmit={handleSubmit}>
 
-                {/* Step 1: AraÃ§ Bilgileri */}
+                {/* Step 1: Araç Bilgileri */}
 
                 {currentStep === 1 && (
 
@@ -733,7 +771,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="type">AraÃ§ Tipi *</Label>
+                        <Label htmlFor="type">Araç Tipi *</Label>
 
                         <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
 
@@ -848,7 +886,7 @@ const AddCar = () => {
 
                         <p className="text-sm text-muted-foreground mt-2">
 
-                          SeÃ§ilen adres: {formData.location}
+                          Seçilen adres: {formData.location}
 
                         </p>
 
@@ -894,7 +932,7 @@ const AddCar = () => {
 
 
 
-                {/* Step 2: FotoÄŸraf */}
+                {/* Step 2: Fotoğraf */}
 
                 {currentStep === 2 && (
 
@@ -906,13 +944,13 @@ const AddCar = () => {
 
                         <Image className="w-4 h-4" />
 
-                        AraÃ§ FotoÄŸrafÄ±
+                        Araç Fotoğrafı
 
                       </Label>
 
                       <p className="text-sm text-muted-foreground mb-4">
 
-                        AracÄ±nÄ±zÄ±n net ve kaliteli bir fotoÄŸrafÄ±nÄ± yÃ¼kleyin. Bu fotoÄŸraf araÃ§ listesinde gÃ¶rÃ¼necektir.
+                        Aracınızın net ve kaliteli bir fotoğrafını yükleyin. Bu fotoğraf araç listesinde görünecektir.
 
                       </p>
 
@@ -952,7 +990,7 @@ const AddCar = () => {
 
 
 
-                {/* Step 3: Teknik Ã–zellikler */}
+                {/* Step 3: Teknik Özellikler */}
 
                 {currentStep === 3 && (
 
@@ -966,7 +1004,7 @@ const AddCar = () => {
 
                           <Fuel className="w-4 h-4" />
 
-                          YakÄ±t Tipi *
+                          Yakıt Tipi *
 
                         </Label>
 
@@ -1026,7 +1064,7 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="seats">Koltuk SayÄ±sÄ± *</Label>
+                      <Label htmlFor="seats">Koltuk Sayısı *</Label>
 
                       <Select value={formData.seats} onValueChange={(value) => setFormData({ ...formData, seats: value })}>
 
@@ -1058,7 +1096,7 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="description">AÃ§Ä±klama (Opsiyonel)</Label>
+                      <Label htmlFor="description">Açıklama (Opsiyonel)</Label>
 
                       <Textarea
 
@@ -1068,7 +1106,7 @@ const AddCar = () => {
 
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
 
-                        placeholder="AraÃ§ hakkÄ±nda ek bilgiler..."
+                        placeholder="Araç hakkında ek bilgiler..."
 
                         rows={4}
 
@@ -1252,6 +1290,7 @@ const AddCar = () => {
 
 
 
+
                       <div className="flex justify-between">
 
                         <Button type="button" variant="outline" onClick={prevStep}>
@@ -1321,6 +1360,28 @@ const AddCar = () => {
                           * Ehliyet belgesi olmadan araç ekleyemezsiniz.
 
                         </p>
+                      <div className="rounded-lg border p-4 space-y-4">
+                        <div className="flex items-start space-x-3">
+                          <Checkbox
+                            id="ownerDeclaration"
+                            checked={ownerDeclarationAccepted}
+                            onCheckedChange={(checked) => setOwnerDeclarationAccepted(Boolean(checked))}
+                          />
+                          <label htmlFor="ownerDeclaration" className="text-sm leading-relaxed cursor-pointer">
+                            Aracın yasal kullanım hakkına sahip olduğumu ve paylaştığım bilgilerin doğru olduğunu beyan ederim.
+                          </label>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <Checkbox
+                            id="listingRules"
+                            checked={listingRulesAccepted}
+                            onCheckedChange={(checked) => setListingRulesAccepted(Boolean(checked))}
+                          />
+                          <label htmlFor="listingRules" className="text-sm leading-relaxed cursor-pointer">
+                            RideYo listeleme ve kiralama kurallarını okudum, kabul ediyorum.
+                          </label>
+                        </div>
+                      </div>
 
                       </div>
 
@@ -1334,7 +1395,7 @@ const AddCar = () => {
 
                         </Button>
 
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={loading || !ownerDeclarationAccepted || !listingRulesAccepted}>
 
                           {loading ? (
 
@@ -1389,4 +1450,8 @@ const AddCar = () => {
 
 
 export default AddCar;
+
+
+
+
 

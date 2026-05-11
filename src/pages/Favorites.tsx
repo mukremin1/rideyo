@@ -10,6 +10,25 @@ import { Car as CarType } from "@/types/car";
 import carCompact from "@/assets/car-compact.jpg";
 import carSedan from "@/assets/car-sedan.jpg";
 import carSuv from "@/assets/car-suv.jpg";
+interface FavoriteRow {
+  car_id: string;
+  cars: {
+    id: string;
+    name: string;
+    type: string;
+    price_per_minute: number;
+    price_per_hour: number;
+    price_per_day: number;
+    price_per_km: number | null;
+    km_packages: Record<string, number> | null;
+    image_url: string | null;
+    fuel_type: string;
+    transmission: string;
+    seats: number;
+    available: boolean;
+    location: string;
+  } | null;
+}
 
 const Favorites = () => {
   const { user } = useAuth();
@@ -37,8 +56,9 @@ const Favorites = () => {
 
       if (error) throw error;
 
-      const convertedCars: CarType[] = (favorites || []).map((fav: any) => {
+      const convertedCars: CarType[] = ((favorites || []) as FavoriteRow[]).flatMap((fav) => {
         const car = fav.cars;
+        if (!car) return [];
         let image = carCompact;
         if (car.type === "sedan") image = carSedan;
         if (car.type === "suv") image = carSuv;

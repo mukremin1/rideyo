@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+﻿import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -38,6 +38,15 @@ interface Car {
   latitude: number | null;
   longitude: number | null;
 }
+interface SubscriptionInfo {
+  tier: string;
+  discount_percentage: number;
+}
+interface ServiceZone {
+  id: string;
+  name: string | null;
+  city: string | null;
+}
 
 const CarDetail = () => {
   const { id } = useParams();
@@ -52,11 +61,11 @@ const CarDetail = () => {
   const [insurancePrice, setInsurancePrice] = useState(0);
   const [lockStatus, setLockStatus] = useState<string>("locked");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [subscription, setSubscription] = useState<any>(null);
+  const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [trafficDelayMinutes, setTrafficDelayMinutes] = useState(10);
   const [rentalDays, setRentalDays] = useState(1);
   const [rentalHours, setRentalHours] = useState(0.5);
-  const [serviceZones, setServiceZones] = useState<any[]>([]);
+  const [serviceZones, setServiceZones] = useState<ServiceZone[]>([]);
   const [pickupZoneId, setPickupZoneId] = useState<string>("");
   const [dropoffZoneId, setDropoffZoneId] = useState<string>("");
   const [pickupAddress, setPickupAddress] = useState("");
@@ -285,6 +294,17 @@ const CarDetail = () => {
       return;
     }
 
+    const nfcVerified = Boolean(user.user_metadata?.nfc_verified_at || user.user_metadata?.nfc_verified);
+    const livenessVerified = Boolean(user.user_metadata?.liveness_verified_at || user.user_metadata?.liveness_verified);
+    if (!nfcVerified || !livenessVerified) {
+      toast({
+        title: "Kimlik Dogrulamasi Gerekli",
+        description: "Kiralama öncesi NFC ve canlılık doğrulamasını tamamlayın.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedPricing) {
       toast({
         title: "Fiyat Seçimi Gerekli",
@@ -387,11 +407,12 @@ const CarDetail = () => {
           provisionFee,
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Rezervasyon hatası:", error);
+      const message = error instanceof Error ? error.message : "Bir hata oluştu";
       toast({
         title: "Rezervasyon Hatası",
-        description: error.message || "Bir hata oluştu",
+        description: message,
         variant: "destructive",
       });
     }
@@ -845,7 +866,7 @@ const CarDetail = () => {
 
                 <Button 
                   size="lg"
-                  className="w-full text-lg h-14"
+                  className="w-full text-lg h-14 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--accent)))] shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)] hover:opacity-95"
                   disabled={!car.available}
                   onClick={handleReserve}
                 >
@@ -865,3 +886,4 @@ const CarDetail = () => {
 };
 
 export default CarDetail;
+

@@ -14,6 +14,7 @@ interface DriverHistoryFormProps {
   userId: string;
   onVerified: (isApproved: boolean, riskLevel: string) => void;
 }
+type DbMutationResult = { data: unknown; error: { message?: string; details?: string } | null };
 
 const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
   const { toast } = useToast();
@@ -89,7 +90,7 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
 
       console.debug("Existing driver_history:", existing);
 
-      let result: any = null;
+      let result: DbMutationResult | null = null;
       let op: "insert" | "update";
 
       if (existing && existing.id) {
@@ -152,9 +153,10 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
       onVerified(isApproved, riskLevel);
 
       toast({ title: isApproved ? "Doğrulama Başarılı" : "Doğrulama Başarısız", description: message, variant: isApproved ? "default" : "destructive" });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Unhandled hata:", err);
-      toast({ title: "Beklenmeyen hata", description: err?.message ?? String(err), variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Beklenmeyen hata", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }

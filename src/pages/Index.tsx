@@ -58,7 +58,7 @@ const Index = () => {
             <Button
               size="sm"
               variant="secondary"
-              onClick={() => navigate("/subscription")}
+              onClick={() => navigate("/packages")}
               className="w-full md:w-auto whitespace-nowrap h-8 sm:h-9 px-3 text-[11px] sm:text-xs md:text-sm"
             >
               Paketleri Gör

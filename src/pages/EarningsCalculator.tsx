@@ -79,7 +79,7 @@ const EarningsCalculator = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="carType">Araç Tipi</Label>
-                  <Select value={carType} onValueChange={(value: any) => setCarType(value)}>
+                  <Select value={carType} onValueChange={(value) => setCarType(value as "compact" | "sedan" | "suv")}>
                     <SelectTrigger id="carType">
                       <SelectValue />
                     </SelectTrigger>

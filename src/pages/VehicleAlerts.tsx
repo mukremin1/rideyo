@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Car, CheckCircle, XCircle } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -24,6 +25,9 @@ interface VehicleAlert {
     name: string;
     plate_number: string;
   };
+}
+interface VehicleAlertRow extends Omit<VehicleAlert, "cars"> {
+  cars: VehicleAlert["cars"] | VehicleAlert["cars"][] | null;
 }
 
 const VehicleAlerts = () => {
@@ -70,7 +74,11 @@ const VehicleAlerts = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setAlerts(data as any || []);
+      const normalized: VehicleAlert[] = ((data ?? []) as VehicleAlertRow[]).map((row) => ({
+        ...row,
+        cars: Array.isArray(row.cars) ? row.cars[0] : row.cars ?? { name: "-", plate_number: "-" },
+      }));
+      setAlerts(normalized);
     } catch (error) {
       console.error("Uyarılar yüklenemedi:", error);
       toast.error("Uyarılar yüklenemedi");
@@ -96,7 +104,7 @@ const VehicleAlerts = () => {
   };
 
   const getAlertIcon = (type: string) => {
-    const icons: Record<string, any> = {
+    const icons: Record<string, LucideIcon> = {
       hood_open: AlertTriangle,
       accident: XCircle,
       speeding: AlertTriangle,

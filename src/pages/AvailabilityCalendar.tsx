@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,12 +35,12 @@ const AvailabilityCalendar = () => {
   const blockedDates = [
     {
       date: new Date(2024, 10, 22),
-      reason: "Periyodik bak?m",
+      reason: "Periyodik bakım",
       id: 1
     },
     {
       date: new Date(2024, 10, 23),
-      reason: "Periyodik bak?m",
+      reason: "Periyodik bakım",
       id: 2
     }
   ];
@@ -50,30 +50,30 @@ const AvailabilityCalendar = () => {
       id: 1,
       dates: "18-20 Kas 2024",
       renter: "Ahmet Y.",
-      type: "G?nl?k",
+      type: "Günlük",
       amount: "1.800"
     },
     {
       id: 2,
       dates: "25-26 Kas 2024",
       renter: "Zeynep K.",
-      type: "G?nl?k",
+      type: "Günlük",
       amount: "1.200"
     }
   ];
 
   const handleBlockDates = () => {
     if (selectedDates.length === 0) {
-      toast.error("L?tfen en az bir tarih se?in");
+      toast.error("Lütfen en az bir tarih seçin");
       return;
     }
     if (!blockReason.trim()) {
-      toast.error("L?tfen engelleme nedeni girin");
+      toast.error("Lütfen engelleme nedeni girin");
       return;
     }
 
     // API call yapilacak
-    toast.success(`${selectedDates.length} g?n engellendi`);
+    toast.success(`${selectedDates.length} gün engellendi`);
     setSelectedDates([]);
     setBlockReason("");
     setIsDialogOpen(false);
@@ -81,7 +81,7 @@ const AvailabilityCalendar = () => {
 
   const handleUnblockDate = (dateId: number) => {
     // API call yapilacak
-    toast.success("Tarih engeli kald?r?ld?");
+    toast.success("Tarih engeli kaldırıldı");
   };
 
   const isDateBooked = (date: Date) => {
@@ -107,9 +107,9 @@ const AvailabilityCalendar = () => {
       <main className="flex-1 container mx-auto px-4 pt-24 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-3">M?saitlik Takvimi</h1>
+            <h1 className="text-4xl font-bold mb-3">Müsaitlik Takvimi</h1>
             <p className="text-lg text-muted-foreground">
-              Ara?lar?n?z?n m?sait olmad??? g?nleri y?netin
+              Araçlarınızın müsait olmadığı günleri yönetin
             </p>
           </div>
 
@@ -120,8 +120,8 @@ const AvailabilityCalendar = () => {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Ara? Se?in</CardTitle>
-                      <CardDescription>Takvimde g?rmek istedi?iniz arac? se?in</CardDescription>
+                      <CardTitle>Araç Seçin</CardTitle>
+                      <CardDescription>Takvimde görmek istediğiniz aracı seçin</CardDescription>
                     </div>
                     <Car className="w-8 h-8 text-primary" />
                   </div>
@@ -130,7 +130,7 @@ const AvailabilityCalendar = () => {
                   {hasCars ? (
                     <Select value={selectedCar} onValueChange={setSelectedCar}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Ara? se?in" />
+                        <SelectValue placeholder="Araç seçin" />
                       </SelectTrigger>
                       <SelectContent>
                         {cars.map(car => (
@@ -142,9 +142,9 @@ const AvailabilityCalendar = () => {
                     </Select>
                   ) : (
                     <div className="flex flex-col items-start gap-3 rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-                      <p>Hen?z kay?tl? arac?n?z yok. Takvim g?r?n?m? i?in ?nce ara? ekleyin.</p>
+                      <p>Henüz kayıtlı aracınız yok. Takvim görünümü için önce araç ekleyin.</p>
                       <Button asChild size="sm">
-                        <Link to="/add-car">Ara? Ekle</Link>
+                        <Link to="/add-car">Araç Ekle</Link>
                       </Button>
                     </div>
                   )}
@@ -159,7 +159,7 @@ const AvailabilityCalendar = () => {
                       Takvim
                     </CardTitle>
                     <CardDescription>
-                      Tarih se?in ve m?saitli?i y?netin
+                      Tarih seçin ve müsaitliği yönetin
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -171,11 +171,11 @@ const AvailabilityCalendar = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 bg-destructive rounded"></div>
-                          <span className="text-sm">Engellenmi?</span>
+                          <span className="text-sm">Engellenmiş</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-primary rounded"></div>
-                          <span className="text-sm">Se?ili</span>
+                          <span className="text-sm">Seçili</span>
                         </div>
                       </div>
 
@@ -207,19 +207,19 @@ const AvailabilityCalendar = () => {
                         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                           <DialogTrigger asChild>
                             <Button className="w-full">
-                              {selectedDates.length} G?n? Engelle
+                              {selectedDates.length} Günü Engelle
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
                               <DialogTitle>Tarih Engelleme</DialogTitle>
                               <DialogDescription>
-                                Se?ili tarihlerde ara? kiralamaya kapal? olacak
+                                Seçili tarihlerde araç kiralamaya kapalı olacak
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <Label>Se?ili Tarihler</Label>
+                                <Label>Seçili Tarihler</Label>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                   {selectedDates.map((date, i) => (
                                     <Badge key={i} variant="secondary">
@@ -232,7 +232,7 @@ const AvailabilityCalendar = () => {
                                 <Label htmlFor="reason">Engelleme Nedeni</Label>
                                 <Textarea
                                   id="reason"
-                                  placeholder="?rn: Periyodik bak?m, ki?isel kullan?m"
+                                  placeholder="Örn: Periyodik bakım, kişisel kullanım"
                                   value={blockReason}
                                   onChange={(e) => setBlockReason(e.target.value)}
                                   className="mt-2"
@@ -247,7 +247,7 @@ const AvailabilityCalendar = () => {
                                   onClick={() => setIsDialogOpen(false)}
                                   className="flex-1"
                                 >
-                                  ?ptal
+                                  İptal
                                 </Button>
                               </div>
                             </div>
@@ -267,7 +267,7 @@ const AvailabilityCalendar = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Clock className="w-5 h-5" />
-                      Yakla?an Rezervasyonlar
+                      Yaklaşan Rezervasyonlar
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -281,7 +281,7 @@ const AvailabilityCalendar = () => {
                             </div>
                             <Badge variant="secondary">{booking.type}</Badge>
                           </div>
-                          <p className="text-sm font-semibold text-primary">?{booking.amount}</p>
+                          <p className="text-sm font-semibold text-primary">₺{booking.amount}</p>
                         </div>
                       ))}
                     </div>
@@ -290,9 +290,9 @@ const AvailabilityCalendar = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Engellenmi? Tarihler</CardTitle>
+                    <CardTitle>Engellenmiş Tarihler</CardTitle>
                     <CardDescription>
-                      Kiralama i?in kapal? g?nler
+                      Kiralama için kapalı günler
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -320,7 +320,7 @@ const AvailabilityCalendar = () => {
                       ))}
                       {blockedDates.length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">
-                          Engellenmi? tarih bulunmuyor
+                          Engellenmiş tarih bulunmuyor
                         </p>
                       )}
                     </div>
@@ -329,13 +329,13 @@ const AvailabilityCalendar = () => {
 
                 <Card className="bg-muted/50">
                   <CardHeader>
-                    <CardTitle className="text-sm">Kullan?m ?pu?lar?</CardTitle>
+                    <CardTitle className="text-sm">Kullanım İpuçları</CardTitle>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
-                    <p>Bak?m veya ki?isel kullan?m i?in tarihleri engelleyebilirsiniz.</p>
-                    <p>Rezerve edilmi? tarihler engellenemez.</p>
-                    <p>Ge?mi? tarihler se?ilemez.</p>
-                    <p>Bir tarihten engeli istedi?iniz zaman kald?rabilirsiniz.</p>
+                    <p>Bakım veya kişisel kullanım için tarihleri engelleyebilirsiniz.</p>
+                    <p>Rezerve edilmiş tarihler engellenemez.</p>
+                    <p>Geçmiş tarihler seçilemez.</p>
+                    <p>Bir tarihten engeli istediğiniz zaman kaldırabilirsiniz.</p>
                   </CardContent>
                 </Card>
               </div>

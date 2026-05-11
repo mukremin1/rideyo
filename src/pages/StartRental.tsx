@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -33,6 +33,12 @@ interface RentalState {
   carName: string;
 }
 
+interface VehicleControlResponse {
+  success?: boolean;
+  message?: string;
+  error?: string;
+}
+
 const StartRental = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,6 +64,9 @@ const StartRental = () => {
   const [distanceKm, setDistanceKm] = useState(0);
   const [lastAutoUnlockAt, setLastAutoUnlockAt] = useState<number | null>(null);
   const [autoUnlockArmed, setAutoUnlockArmed] = useState(true);
+  const [bookingValidationLoading, setBookingValidationLoading] = useState(true);
+  const [bookingValidated, setBookingValidated] = useState(false);
+  const [carUnlocked, setCarUnlocked] = useState(false);
 
   const AUTO_UNLOCK_DISTANCE_METERS = 30;
   const AUTO_UNLOCK_RESET_DISTANCE_METERS = 60;
@@ -122,7 +131,7 @@ const StartRental = () => {
           filter: `id=eq.${state.carId}`,
         },
         (payload) => {
-          const newData = payload.new as any;
+          const newData = payload.new as { latitude?: number | null; longitude?: number | null };
           if (newData.latitude && newData.longitude) {
             setCarGPSData({ latitude: newData.latitude, longitude: newData.longitude });
             // Konum güncelleme bildirimi gönder
@@ -200,6 +209,45 @@ const StartRental = () => {
     return () => clearInterval(timer);
   }, [rentalStarted, rentalStartTime]);
 
+  useEffect(() => {
+    const validateBooking = async () => {
+      if (!state?.bookingId || !user) {
+        setBookingValidationLoading(false);
+        setBookingValidated(false);
+        return;
+      }
+
+      setBookingValidationLoading(true);
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("id, user_id, payment_status")
+        .eq("id", state.bookingId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error || !data) {
+        toast.error("Kiralama kaydı doğrulanamadı.");
+        setBookingValidated(false);
+        setBookingValidationLoading(false);
+        navigate("/cars");
+        return;
+      }
+
+      if (data.payment_status !== "paid") {
+        toast.error("Kiralama başlatmak için ödeme tamamlanmalı.");
+        setBookingValidated(false);
+        setBookingValidationLoading(false);
+        navigate("/payment", { state });
+        return;
+      }
+
+      setBookingValidated(true);
+      setBookingValidationLoading(false);
+    };
+
+    void validateBooking();
+  }, [navigate, state, user]);
+
   if (!state) {
     return (
       <div className="min-h-screen bg-background">
@@ -212,6 +260,41 @@ const StartRental = () => {
                 Kiralama başlatmak için önce ödeme yapmanız gerekmektedir.
               </p>
               <Button onClick={() => navigate("/cars")}>Araçlara Git</Button>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-lg text-center">
+            <Card className="p-8">
+              <h1 className="text-2xl font-bold text-foreground mb-4">Giriş Gerekli</h1>
+              <p className="text-muted-foreground mb-6">Kiralama başlatmak için önce giriş yapın.</p>
+              <Button onClick={() => navigate("/auth")}>Giriş Yap</Button>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (bookingValidationLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-lg text-center">
+            <Card className="p-8">
+              <h1 className="text-xl font-semibold text-foreground mb-4">Kiralama Kontrol Ediliyor</h1>
+              <p className="text-muted-foreground">Rezervasyon ve ödeme bilgileri doğrulanıyor...</p>
             </Card>
           </div>
         </main>
@@ -240,11 +323,13 @@ const StartRental = () => {
 
       if (data.success) {
         toast.success(data.message);
+        setCarUnlocked(true);
       } else {
         throw new Error(data.error);
       }
-    } catch (error: any) {
-      toast.error(error.message || "Araç açılamadı");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Araç açılamadı";
+      toast.error(message);
     } finally {
       setUnlocking(false);
     }
@@ -268,19 +353,31 @@ const StartRental = () => {
 
       if (error) throw error;
 
-      if (data.success) {
-        toast.success(data.message);
+      const response = (data ?? {}) as VehicleControlResponse;
+      if (response.success) {
+        toast.success(response.message ?? "Araç kilitlendi.");
       } else {
-        throw new Error(data.error);
+        throw new Error(response.error ?? "Araç kilitlenemedi");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Araç kilitlenemedi");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Araç kilitlenemedi";
+      toast.error(message);
     } finally {
       setLocking(false);
     }
   };
 
   const handleStartRental = async () => {
+    if (!bookingValidated) {
+      toast.error("Rezervasyon doğrulanamadı. Tekrar deneyin.");
+      return;
+    }
+
+    if (!carUnlocked) {
+      toast.error("Kiralamayı başlatmadan önce aracın kilidini açın.");
+      return;
+    }
+
     if (!user || beforePhotos.length === 0) {
       toast.error("Lütfen önce araç fotoğrafı çekin");
       return;
@@ -316,7 +413,8 @@ const StartRental = () => {
 
       if (error) throw error;
 
-      if (data.success) {
+      const response = (data ?? {}) as VehicleControlResponse;
+      if (response.success) {
         toast.success("Kiralama başarıyla başlatıldı!");
         sendRentalNotification("start", state.carName);
         setRentalStarted(true);
@@ -327,10 +425,11 @@ const StartRental = () => {
         }
         setStep(4);
       } else {
-        throw new Error(data.error);
+        throw new Error(response.error ?? "Kiralama başlatılamadı");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Kiralama başlatılamadı");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Kiralama başlatılamadı";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -372,14 +471,16 @@ const StartRental = () => {
 
       if (error) throw error;
 
-      if (data.success) {
+      const response = (data ?? {}) as VehicleControlResponse;
+      if (response.success) {
         toast.success("Kiralama başarıyla bitirildi! Kapılar kilitlendi.");
         setRentalEnded(true);
       } else {
-        throw new Error(data.error);
+        throw new Error(response.error ?? "Kiralama bitirilemedi");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Kiralama bitirilemedi");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Kiralama bitirilemedi";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -488,8 +589,9 @@ const StartRental = () => {
       <Button 
         className="w-full mt-4" 
         onClick={() => setStep(3)}
+        disabled={!carUnlocked}
       >
-        Devam Et <ArrowRight className="w-4 h-4 ml-2" />
+        {carUnlocked ? "Devam Et" : "Önce Aracı Aç"} <ArrowRight className="w-4 h-4 ml-2" />
       </Button>
     </Card>
   );
@@ -538,7 +640,7 @@ const StartRental = () => {
 
       <Button 
         size="lg"
-        className="w-full gap-2"
+        className="w-full gap-2 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--accent)))] shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)] hover:opacity-95"
         onClick={handleStartRental}
         disabled={loading}
       >
@@ -750,4 +852,5 @@ const StartRental = () => {
 };
 
 export default StartRental;
+
 

@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
-import { useLocation } from "react-router-dom";
-import { Shield, SmartphoneNfc, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Shield, SmartphoneNfc } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +14,11 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 
-const REMIND_DELAY_MS = 24 * 60 * 60 * 1000;
-
 const NfcLoginVerificationPrompt = () => {
   const { user, loading } = useAuth();
-  const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [scanning, setScanning] = useState(false);
+  const [dismissedForSession, setDismissedForSession] = useState(false);
 
   const isNativeMobile = useMemo(() => {
     return Capacitor.isNativePlatform() && ["android", "ios"].includes(Capacitor.getPlatform());
@@ -32,25 +29,21 @@ const NfcLoginVerificationPrompt = () => {
     return `nfc_verified_${user.id}`;
   }, [user?.id]);
 
-  const remindKey = useMemo(() => {
-    if (!user?.id) return "";
-    return `nfc_remind_at_${user.id}`;
-  }, [user?.id]);
-
   useEffect(() => {
-    if (!isNativeMobile || loading || !user || !verifiedKey || !remindKey) {
+    if (!isNativeMobile || loading || !user || !verifiedKey) {
       setOpen(false);
       return;
     }
 
-    if (location.pathname === "/auth") {
-      setOpen(false);
-      return;
-    }
+    const isServerVerified = Boolean(
+      (user.user_metadata?.nfc_verified_at || user.user_metadata?.nfc_verified) &&
+        (user.user_metadata?.liveness_verified_at || user.user_metadata?.liveness_verified),
+    );
 
-    const isServerVerified = Boolean(user.user_metadata?.nfc_verified_at);
     if (isServerVerified) {
       localStorage.setItem(verifiedKey, "true");
+    } else {
+      localStorage.removeItem(verifiedKey);
     }
 
     const isVerified = isServerVerified || localStorage.getItem(verifiedKey) === "true";
@@ -59,80 +52,37 @@ const NfcLoginVerificationPrompt = () => {
       return;
     }
 
-    const remindAtRaw = localStorage.getItem(remindKey);
-    const remindAt = remindAtRaw ? Number(remindAtRaw) : 0;
-    setOpen(Number.isFinite(remindAt) ? Date.now() >= remindAt : true);
-  }, [isNativeMobile, loading, location.pathname, remindKey, user, verifiedKey]);
+    setOpen(!dismissedForSession);
+  }, [dismissedForSession, isNativeMobile, loading, user, verifiedKey]);
 
-  const persistVerifiedState = async () => {
-    if (!user) return false;
+  useEffect(() => {
+    if (!isNativeMobile) return;
 
-    const updatedData = {
-      ...(user.user_metadata ?? {}),
-      nfc_verified_at: new Date().toISOString(),
-      nfc_verified: true,
+    const handleActive = () => {
+      if (document.visibilityState === "visible") {
+        setDismissedForSession(false);
+      }
     };
 
-    const { error } = await supabase.auth.updateUser({ data: updatedData });
-    if (error) {
-      toast.error(error.message ?? "NFC dogrulama kaydi sunucuya yazilamadi.");
-      return false;
-    }
+    document.addEventListener("visibilitychange", handleActive);
+    window.addEventListener("focus", handleActive);
 
-    return true;
-  };
-
-  const markVerified = async () => {
-    const persisted = await persistVerifiedState();
-    if (!persisted) return;
-
-    if (!verifiedKey || !remindKey) return;
-    localStorage.setItem(verifiedKey, "true");
-    localStorage.removeItem(remindKey);
-    setOpen(false);
-    toast.success("NFC kimlik dogrulamasi tamamlandi.");
-  };
+    return () => {
+      document.removeEventListener("visibilitychange", handleActive);
+      window.removeEventListener("focus", handleActive);
+    };
+  }, [isNativeMobile]);
 
   const remindLater = () => {
-    if (!remindKey) return;
-    localStorage.setItem(remindKey, String(Date.now() + REMIND_DELAY_MS));
+    setDismissedForSession(true);
     setOpen(false);
-    toast.message("NFC dogrulama hatirlatmasi 24 saat sonra tekrar gosterilecek.");
+    toast.message("NFC doğrulama bu oturum için ertelendi. Uygulamaya tekrar girince yeniden gösterilecek.");
   };
 
-  const handleVerify = async () => {
-    const ReaderCtor = (window as any).NDEFReader;
-    if (!ReaderCtor) {
-      toast.error("Bu cihazda NFC tarama desteklenmiyor.");
-      return;
-    }
-
-    try {
-      setScanning(true);
-      const reader = new ReaderCtor();
-      await reader.scan();
-      toast.message("Kimliginizi telefona yaklastirin.");
-
-      const timeoutId = window.setTimeout(() => {
-        setScanning(false);
-        toast.error("NFC okuma zaman asimina ugradi. Tekrar deneyin.");
-      }, 20000);
-
-      reader.onreading = () => {
-        window.clearTimeout(timeoutId);
-        setScanning(false);
-        void markVerified();
-      };
-
-      reader.onreadingerror = () => {
-        window.clearTimeout(timeoutId);
-        setScanning(false);
-        toast.error("NFC okunamadi. Kimligi tekrar yaklastirin.");
-      };
-    } catch (error: any) {
-      setScanning(false);
-      toast.error(error?.message ?? "NFC dogrulama baslatilamadi.");
-    }
+  const goToVerificationPage = () => {
+    setDismissedForSession(true);
+    setOpen(false);
+    navigate("/identity-verification");
   };
 
   if (!isNativeMobile || !user) return null;
@@ -141,8 +91,8 @@ const NfcLoginVerificationPrompt = () => {
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen && !scanning) {
-          remindLater();
+        if (!nextOpen) {
+          toast.message("Lütfen bir seçim yapın: Daha Sonra Hatırlat veya Şimdi Doğrula.");
           return;
         }
         setOpen(nextOpen);
@@ -156,33 +106,26 @@ const NfcLoginVerificationPrompt = () => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            NFC Kimlik Dogrulamasi
+            NFC Kimlik Doğrulaması
           </DialogTitle>
           <DialogDescription className="leading-relaxed">
-            Guvenli kiralama icin giris sonrasi NFC ile kimlik dogrulamasi gereklidir.
+            Güvenli kiralama için giriş sonrası NFC ile kimlik doğrulaması gereklidir.
           </DialogDescription>
         </DialogHeader>
 
         <div className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
           <div className="flex items-start gap-2">
             <SmartphoneNfc className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <p>Dogrula secenegine bastiktan sonra kimliginizi telefonunuza yaklastirin.</p>
+            <p>Şimdi Doğrula ile NFC doğrulama sayfasına yönlendirilirsiniz.</p>
           </div>
         </div>
 
-        <DialogFooter className="sm:justify-between">
-          <Button type="button" variant="outline" onClick={remindLater} disabled={scanning}>
-            Daha Sonra Hatirlat
+        <DialogFooter className="flex-col gap-3 sm:flex-row sm:justify-between sm:gap-4">
+          <Button type="button" variant="outline" onClick={remindLater} className="w-full sm:w-auto">
+            Daha Sonra Hatırlat
           </Button>
-          <Button type="button" onClick={handleVerify} disabled={scanning}>
-            {scanning ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Taranıyor
-              </>
-            ) : (
-              "Dogrula"
-            )}
+          <Button type="button" onClick={goToVerificationPage} className="w-full sm:w-auto">
+            Şimdi Doğrula
           </Button>
         </DialogFooter>
       </DialogContent>

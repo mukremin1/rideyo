@@ -71,9 +71,9 @@ const BottomNav = () => {
         )}
 
         <Link
-          to={user ? "/subscription" : "/auth"}
+          to={user ? "/profile" : "/auth"}
           className={`${baseItemClass} ${
-            isActive(user ? "/subscription" : "/auth")
+            isActive(user ? "/profile" : "/auth")
               ? "text-primary bg-primary/10"
               : "text-muted-foreground hover:text-foreground"
           }`}

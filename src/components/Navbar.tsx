@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Car, User, LogOut, Plus, Heart, Bell, Shield, MessageCircle, AlertTriangle, Award, Calendar } from "lucide-react";
+import { Car, User, LogOut, Plus, Heart, Bell, Shield, ShieldCheck, MessageCircle, AlertTriangle, Award, Calendar } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import {
@@ -19,6 +19,10 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const isIdentityVerified = Boolean(
+    (user?.user_metadata?.nfc_verified_at || user?.user_metadata?.nfc_verified) &&
+      (user?.user_metadata?.liveness_verified_at || user?.user_metadata?.liveness_verified),
+  );
 
   useEffect(() => {
     if (user) {
@@ -131,6 +135,10 @@ const Navbar = () => {
                   <DropdownMenuContent align="end" className="w-56 bg-popover">
                     <DropdownMenuLabel>Hesabım</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      <User className="w-4 h-4 mr-2" />
+                      Profilim
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/favorites")}>
                       <Heart className="w-4 h-4 mr-2" />
                       Favorilerim
@@ -157,9 +165,19 @@ const Navbar = () => {
                       <Plus className="w-4 h-4 mr-2" />
                       Araç Ekle
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/subscription")}>
+                    <DropdownMenuItem onClick={() => navigate("/packages")}>
                       <Car className="w-4 h-4 mr-2" />
                       Abonelik
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (!isIdentityVerified) {
+                          navigate("/driver-score");
+                        }
+                      }}
+                    >
+                      <ShieldCheck className="w-4 h-4 mr-2" />
+                      {isIdentityVerified ? "Kimlik Doğrulandı" : "Kimlik Doğrula"}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate("/driver-score")}>

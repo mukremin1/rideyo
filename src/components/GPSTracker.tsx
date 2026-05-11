@@ -19,6 +19,14 @@ interface GPSData {
   battery_level: number;
   last_gps_update: string;
 }
+interface CarRealtimePayload {
+  latitude: number | null;
+  longitude: number | null;
+  speed: number | null;
+  heading: number | null;
+  battery_level: number | null;
+  last_gps_update: string | null;
+}
 
 const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
   const [gpsData, setGpsData] = useState<GPSData | null>(null);
@@ -58,15 +66,15 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
           filter: `id=eq.${carId}`,
         },
         (payload) => {
-          const newData = payload.new as any;
+          const newData = payload.new as CarRealtimePayload;
           if (newData.latitude && newData.longitude) {
             setGpsData({
               latitude: newData.latitude,
               longitude: newData.longitude,
-              speed: newData.speed,
-              heading: newData.heading,
-              battery_level: newData.battery_level,
-              last_gps_update: newData.last_gps_update,
+              speed: newData.speed ?? 0,
+              heading: newData.heading ?? 0,
+              battery_level: newData.battery_level ?? 0,
+              last_gps_update: newData.last_gps_update ?? new Date().toISOString(),
             });
             setIsOnline(true);
           }

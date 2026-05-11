@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import AddCar from "./pages/AddCar";
 import MyCars from "./pages/MyCars";
 import Subscription from "./pages/Subscription";
+import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import Favorites from "./pages/Favorites";
 import Notifications from "./pages/Notifications";
@@ -41,6 +42,7 @@ import Payment from "./pages/Payment";
 import CancellationPolicy from "./pages/CancellationPolicy";
 import MyBookings from "./pages/MyBookings";
 import StartRental from "./pages/StartRental";
+import IdentityVerification from "./pages/IdentityVerification";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +65,8 @@ const App = () => (
             <Route path="/add-car" element={<AddCar />} />
             <Route path="/my-cars" element={<MyCars />} />
             <Route path="/subscription" element={<Subscription />} />
+            <Route path="/packages" element={<Subscription />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/notifications" element={<Notifications />} />
@@ -89,6 +93,7 @@ const App = () => (
             <Route path="/cancellation-policy" element={<CancellationPolicy />} />
             <Route path="/my-bookings" element={<MyBookings />} />
             <Route path="/start-rental" element={<StartRental />} />
+            <Route path="/identity-verification" element={<IdentityVerification />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

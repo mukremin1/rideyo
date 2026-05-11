@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -75,6 +75,8 @@ const Payment = () => {
   const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
   const [selectedSavedCardId, setSelectedSavedCardId] = useState<string | null>(null);
   const [loadingSavedCards, setLoadingSavedCards] = useState(false);
+  const [bookingValidationLoading, setBookingValidationLoading] = useState(true);
+  const [bookingValidated, setBookingValidated] = useState(false);
 
   const state = location.state as PaymentState | null;
 
@@ -123,6 +125,49 @@ const Payment = () => {
 
     fetchSavedCards();
   }, [user]);
+
+  useEffect(() => {
+    const validateBooking = async () => {
+      if (!user || !bookingId) {
+        setBookingValidated(false);
+        setBookingValidationLoading(false);
+        return;
+      }
+
+      setBookingValidationLoading(true);
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("id, user_id, payment_status")
+        .eq("id", bookingId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error || !data) {
+        toast.error("Ödeme kaydı doğrulanamadı.");
+        setBookingValidated(false);
+        setBookingValidationLoading(false);
+        navigate("/cars");
+        return;
+      }
+
+      if (data.payment_status === "paid") {
+        toast.message("Bu rezervasyonun odemesi zaten tamamlanmis.");
+        navigate("/start-rental", {
+          state: {
+            bookingId,
+            carId: state?.carId,
+            carName,
+          },
+        });
+        return;
+      }
+
+      setBookingValidated(true);
+      setBookingValidationLoading(false);
+    };
+
+    void validateBooking();
+  }, [bookingId, carName, navigate, state?.carId, user]);
 
   const faqs = [
     {
@@ -231,6 +276,11 @@ const Payment = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!user || !bookingId || !bookingValidated) {
+      toast.error("Ödeme için rezervasyon doğrulaması tamamlanamadı.");
+      return;
+    }
+
     if (!validateCard()) return;
 
     setLoading(true);
@@ -238,8 +288,17 @@ const Payment = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      if (bookingId && user) {
-        await supabase.from("bookings").update({ payment_status: "paid" }).eq("id", bookingId);
+      const { data: updatedBooking, error: bookingUpdateError } = await supabase
+        .from("bookings")
+        .update({ payment_status: "paid" })
+        .eq("id", bookingId)
+        .eq("user_id", user.id)
+        .eq("payment_status", "pending")
+        .select("id")
+        .maybeSingle();
+
+      if (bookingUpdateError || !updatedBooking) {
+        throw new Error("Rezervasyon ödeme durumu güncellenemedi.");
       }
 
       if (saveCard && user && !selectedSavedCardId) {
@@ -339,6 +398,41 @@ const Payment = () => {
                 Ödeme yapmak için önce bir araç seçip rezervasyon yapmanız gerekmektedir.
               </p>
               <Button onClick={() => navigate("/cars")}>Araçlara Git</Button>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-lg text-center">
+            <Card className="p-8">
+              <h1 className="text-2xl font-bold text-foreground mb-4">Giriş Gerekli</h1>
+              <p className="text-muted-foreground mb-6">Ödeme adımı için önce hesabınıza giriş yapın.</p>
+              <Button onClick={() => navigate("/auth")}>Giriş Yap</Button>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (bookingValidationLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-lg text-center">
+            <Card className="p-8">
+              <h1 className="text-xl font-semibold text-foreground mb-3">Ödeme Kontrol Ediliyor</h1>
+              <p className="text-muted-foreground">Rezervasyon bilgileriniz doğrulanıyor...</p>
             </Card>
           </div>
         </main>
@@ -602,7 +696,11 @@ const Payment = () => {
                   </div>
 
                   <div className="pt-4">
-                    <Button type="submit" className="w-full h-12" disabled={loading}>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--accent)))] shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)] hover:opacity-95"
+                      disabled={loading || !bookingValidated}
+                    >
                       {loading ? (
                         <span className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -766,3 +864,4 @@ const Payment = () => {
 };
 
 export default Payment;
+
