@@ -8,8 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
-.env
+# dist — included for offline clone on other machines
+# .env — included for offline clone on other machines
 .env.local
 android/keystore.properties
 android/keystore/*.keystore
