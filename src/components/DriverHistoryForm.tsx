@@ -7,6 +7,7 @@ import { Badge } from "./ui/badge";
 import { Shield, AlertTriangle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_DRIVER_SCORE } from "@/lib/driverScore";
 
 const PENALTY_THRESHOLD = 70; // DB ile uyumlu tutun
 
@@ -37,11 +38,6 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
     return "low";
   };
 
-  const computeDriverScore = (points: number, accidents: number, violations: number) => {
-    const raw = 100 - (points + accidents * 10 + violations * 5);
-    return Math.max(0, Math.min(100, Math.round(raw)));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -53,7 +49,7 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
     }
 
     try {
-      const driverScore = computeDriverScore(driverData.penaltyPoints, driverData.totalAccidents, driverData.trafficViolations);
+      const driverScore = DEFAULT_DRIVER_SCORE;
 
       const isApproved = driverScore >= 60 &&
         driverData.penaltyPoints <= PENALTY_THRESHOLD &&

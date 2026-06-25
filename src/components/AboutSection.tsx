@@ -2,71 +2,60 @@ import { Shield, Users, Clock, Award } from "lucide-react";
 
 const AboutSection = () => {
   const stats = [
-    { icon: Users, value: "50,000+", label: "Mutlu Müşteri" },
-    { icon: Shield, value: "100%", label: "Güvenli Kiralama" },
-    { icon: Clock, value: "7/24", label: "Destek Hizmeti" },
+    { icon: Users, value: "50.000+", label: "Kayıtlı Kullanıcı" },
+    { icon: Shield, value: "%100", label: "Güvenli İşlem" },
+    { icon: Clock, value: "7/24", label: "Müşteri Desteği" },
     { icon: Award, value: "5 Yıl", label: "Sektör Deneyimi" },
   ];
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="bg-muted/30 py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Hakkımızda</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            RideYo olarak, Türkiye'nin dört bir yanında araç kiralama deneyimini yeniden tanımlıyoruz. 
-            Güvenilir, hızlı ve ekonomik çözümlerimizle her zaman yanınızdayız.
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 text-3xl font-bold text-foreground">RideYo Hakkında</h2>
+          <p className="mx-auto max-w-2xl text-muted-foreground">
+            RideYo, Türkiye genelinde araç kiralama deneyimini dijitalleştiren bir mobil platformdur.
+            Güvenilir filo, şeffaf fiyatlandırma ve kullanıcı odaklı hizmet anlayışıyla yanınızdayız.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          {stats.map((stat, index) => (
-            <div 
-              key={index} 
-              className="bg-card rounded-xl p-6 text-center shadow-sm border border-border"
+        <div className="mb-12 grid grid-cols-2 gap-6 md:grid-cols-4">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-border bg-card p-6 text-center shadow-sm"
             >
-              <stat.icon className="w-10 h-10 text-primary mx-auto mb-3" />
-              <div className="text-2xl font-bold text-foreground mb-1">{stat.value}</div>
+              <stat.icon className="mx-auto mb-3 h-10 w-10 text-primary" />
+              <div className="mb-1 text-2xl font-bold text-foreground">{stat.value}</div>
               <div className="text-sm text-muted-foreground">{stat.label}</div>
             </div>
           ))}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="grid items-center gap-8 md:grid-cols-2">
           <div>
-            <h3 className="text-2xl font-semibold text-foreground mb-4">Neden RideYo?</h3>
+            <h3 className="mb-4 text-2xl font-semibold text-foreground">Platform Avantajları</h3>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                  <span className="text-primary text-sm">✓</span>
-                </div>
-                <span className="text-muted-foreground">Geniş araç filosu ile her bütçeye uygun seçenekler</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                  <span className="text-primary text-sm">✓</span>
-                </div>
-                <span className="text-muted-foreground">Şeffaf fiyatlandırma, gizli maliyet yok</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                  <span className="text-primary text-sm">✓</span>
-                </div>
-                <span className="text-muted-foreground">Kapsamlı sigorta seçenekleri</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                  <span className="text-primary text-sm">✓</span>
-                </div>
-                <span className="text-muted-foreground">Kolay rezervasyon ve hızlı teslimat</span>
-              </li>
+              {[
+                "Geniş araç filosu ile farklı ihtiyaçlara uygun seçenekler",
+                "Şeffaf fiyatlandırma; gizli ücret yok",
+                "Kapsamlı sigorta ve ek sürücü seçenekleri",
+                "Hızlı rezervasyon, dijital doğrulama ve kolay teslim",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
+                    <span className="text-sm text-primary">✓</span>
+                  </div>
+                  <span className="text-muted-foreground">{item}</span>
+                </li>
+              ))}
             </ul>
           </div>
-          <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-8 text-center">
-            <blockquote className="text-lg italic text-foreground mb-4">
-              "Müşterilerimize en iyi deneyimi sunmak için sürekli kendimizi geliştiriyoruz."
+          <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 p-8 text-center">
+            <blockquote className="mb-4 text-lg italic text-foreground">
+              &ldquo;Her yolculuğun güvenli, kolay ve öngörülebilir olması için teknoloji ve hizmeti bir araya getiriyoruz.&rdquo;
             </blockquote>
-            <p className="text-muted-foreground text-sm">- RideYo Ekibi</p>
+            <p className="text-sm text-muted-foreground">— RideYo Ekibi</p>
           </div>
         </div>
       </div>

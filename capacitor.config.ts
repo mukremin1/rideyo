@@ -7,9 +7,9 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: '#8B5CF6',
+      backgroundColor: '#F8FAFC',
       showSpinner: false,
-      androidScaleType: 'CENTER_CROP',
+      androidScaleType: 'CENTER_INSIDE',
       splashFullScreen: true,
       splashImmersive: true,
     },
@@ -19,6 +19,7 @@ const config: CapacitorConfig = {
   },
   ios: {
     scheme: 'rideyo',
+    contentInset: 'automatic',
   },
 };
 

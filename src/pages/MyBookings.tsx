@@ -18,7 +18,8 @@ import {
   XCircle, 
   AlertCircle,
   RefreshCw,
-  FileText
+  FileText,
+  Play
 } from "lucide-react";
 import { format, isPast, isFuture, isToday, parseISO } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -285,6 +286,7 @@ const MyBookings = () => {
                     onClick={() => navigate("/payment", { 
                       state: { 
                         bookingId: booking.id,
+                        carId: booking.car_id,
                         carName: booking.cars?.name,
                         totalPrice: booking.total_price,
                         rentalType: booking.rental_type,
@@ -295,6 +297,25 @@ const MyBookings = () => {
                   >
                     <CreditCard className="w-4 h-4 mr-1" />
                     Ödeme Yap
+                  </Button>
+                )}
+
+                {booking.payment_status === "paid" &&
+                  !isPast(parseISO(booking.end_time)) && (
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      navigate("/start-rental", {
+                        state: {
+                          bookingId: booking.id,
+                          carId: booking.car_id,
+                          carName: booking.cars?.name,
+                        },
+                      })
+                    }
+                  >
+                    <Play className="w-4 h-4 mr-1" />
+                    Kiralamayı Başlat
                   </Button>
                 )}
                 

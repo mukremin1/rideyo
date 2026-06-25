@@ -6,12 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { MapPin, Users, Fuel, Settings, Shield, Clock, ArrowLeft, Star, Lock, Unlock, Navigation, Calendar, TrendingUp } from "lucide-react";
+import { MapPin, Users, Fuel, Settings, Shield, Clock, ArrowLeft, Star, Lock, Unlock, Navigation, Calendar, TrendingUp, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import InsurancePackages from "@/components/InsurancePackages";
 import CarLocationMap from "@/components/CarLocationMap";
+import { checkRentalEligibility } from "@/lib/rentalEligibility";
+import { fetchActiveCampaignForCarType, type ActiveCampaign } from "@/lib/campaigns";
+import { computeRentalPricing, ADDITIONAL_DRIVER_DAILY_FEE } from "@/lib/rentalPricing";
+import { createBookingRecord } from "@/lib/bookings";
+import { Checkbox } from "@/components/ui/checkbox";
 import carCompact from "@/assets/car-compact.jpg";
 import carSedan from "@/assets/car-sedan.jpg";
 import carSuv from "@/assets/car-suv.jpg";
@@ -70,8 +75,10 @@ const CarDetail = () => {
   const [dropoffZoneId, setDropoffZoneId] = useState<string>("");
   const [pickupAddress, setPickupAddress] = useState("");
   const [dropoffAddress, setDropoffAddress] = useState("");
-  const MINUTE_PROVISION_FEE = 300;
-  const DAY_PROVISION_FEE = 350;
+  const [campaign, setCampaign] = useState<ActiveCampaign | null>(null);
+  const [additionalDriverEnabled, setAdditionalDriverEnabled] = useState(false);
+  const [additionalDriverName, setAdditionalDriverName] = useState("");
+  const [additionalDriverLicense, setAdditionalDriverLicense] = useState("");
   const KM_PRICE_PER_UNIT = 15;
   const kmPackages = [
     { id: "100", label: "100 KM", price: 1000 },
@@ -247,6 +254,10 @@ const CarDetail = () => {
       if (data?.lock_status) {
         setLockStatus(data.lock_status);
       }
+      if (data?.type) {
+        const activeCampaign = await fetchActiveCampaignForCarType(data.type);
+        setCampaign(activeCampaign);
+      }
     } catch (error) {
       console.error("Araç yüklenirken hata:", error);
     } finally {
@@ -294,14 +305,16 @@ const CarDetail = () => {
       return;
     }
 
-    const nfcVerified = Boolean(user.user_metadata?.nfc_verified_at || user.user_metadata?.nfc_verified);
-    const livenessVerified = Boolean(user.user_metadata?.liveness_verified_at || user.user_metadata?.liveness_verified);
-    if (!nfcVerified || !livenessVerified) {
+    const eligibility = await checkRentalEligibility(user.id, user.user_metadata);
+    if (!eligibility.eligible) {
       toast({
-        title: "Kimlik Dogrulamasi Gerekli",
-        description: "Kiralama öncesi NFC ve canlılık doğrulamasını tamamlayın.",
+        title: "Doğrulama Gerekli",
+        description: eligibility.reason,
         variant: "destructive",
       });
+      if (eligibility.redirectTo) {
+        navigate(eligibility.redirectTo);
+      }
       return;
     }
 
@@ -332,79 +345,100 @@ const CarDetail = () => {
       return;
     }
 
+    if (selectedPricing === "day" && additionalDriverEnabled) {
+      if (!additionalDriverName.trim() || !additionalDriverLicense.trim()) {
+        toast({
+          title: "Ek Sürücü Bilgisi Eksik",
+          description: "Ek sürücü adı ve ehliyet numarasını girin.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     const startTime = new Date();
     const endTime = new Date();
-    let totalPrice = 0;
-    let rentalBase = 0;
-
-    // Calculate traffic delay (random 0-10 minutes for simulation)
     const simulatedTrafficDelay = Math.floor(Math.random() * 11);
     setTrafficDelayMinutes(simulatedTrafficDelay);
 
-    let provisionFee = 0;
-
-    if (selectedPricing === "minute" || selectedPricing === "hour") {
-      provisionFee = MINUTE_PROVISION_FEE;
-    } else if (selectedPricing === "day") {
-      provisionFee = DAY_PROVISION_FEE;
-    }
-
     if (selectedPricing === "hour") {
       endTime.setHours(endTime.getHours() + rentalHours);
-      rentalBase = car.price_per_hour * rentalHours;
-      totalPrice = rentalBase + provisionFee + kmPackagePrice;
     } else if (selectedPricing === "day") {
       endTime.setDate(endTime.getDate() + rentalDays);
-      rentalBase = car.price_per_day * rentalDays;
-      totalPrice = rentalBase + insurancePrice + provisionFee + kmPackagePrice;
-    } else if (selectedPricing === "minute") {
+    } else {
       endTime.setMinutes(endTime.getMinutes() + 30);
-      rentalBase = car.price_per_minute * 30;
-      totalPrice = rentalBase + provisionFee + kmPackagePrice;
     }
 
-    // Apply subscription discount
-    if (subscription) {
-      const discount = (totalPrice * subscription.discount_percentage) / 100;
-      totalPrice = totalPrice - discount;
-    }
+    const pricing = computeRentalPricing({
+      rentalType: selectedPricing,
+      pricePerMinute: car.price_per_minute,
+      pricePerHour: car.price_per_hour,
+      pricePerDay: car.price_per_day,
+      rentalHours,
+      rentalDays,
+      insurancePrice,
+      kmPackagePrice,
+      pickupZoneId,
+      dropoffZoneId,
+      subscriptionDiscountPercent: subscription?.discount_percentage,
+      campaignDiscountPercent: campaign?.discount_percentage,
+      additionalDriverEnabled: selectedPricing === "day" && additionalDriverEnabled,
+      additionalDriverDays: rentalDays,
+    });
 
     try {
-      const { data: bookingData, error: bookingError } = await supabase.from("bookings").insert({
+      const { data: bookingData, error: bookingError } = await createBookingRecord({
         car_id: car.id,
         user_id: user.id,
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
-        total_price: totalPrice,
+        total_price: pricing.totalPrice,
         rental_type: selectedPricing,
-        driver_history_checked: false,
-        driver_risk_level: null,
+        driver_history_checked: true,
+        driver_risk_level: "low",
         traffic_delay_minutes: simulatedTrafficDelay,
         pickup_zone_id: selectedPricing === "day" ? (pickupZoneId || null) : null,
         dropoff_zone_id: selectedPricing === "day" ? (dropoffZoneId || null) : null,
         pickup_address: selectedPricing === "day" ? (pickupAddress || null) : null,
         dropoff_address: selectedPricing === "day" ? (dropoffAddress || null) : null,
-        different_zone_fee: 0,
+        different_zone_fee: pricing.zoneFee,
         payment_status: "pending",
-      }).select().single();
+        additional_driver_enabled: selectedPricing === "day" && additionalDriverEnabled,
+        additional_driver_name:
+          selectedPricing === "day" && additionalDriverEnabled
+            ? additionalDriverName.trim()
+            : null,
+        additional_driver_license:
+          selectedPricing === "day" && additionalDriverEnabled
+            ? additionalDriverLicense.trim().toUpperCase()
+            : null,
+        additional_driver_fee: pricing.additionalDriverFee,
+      });
 
-      if (bookingError) throw bookingError;
+      if (bookingError || !bookingData) throw new Error(bookingError ?? "Rezervasyon oluşturulamadı.");
 
-      // Navigate to payment page with booking details
       navigate("/payment", {
         state: {
           bookingId: bookingData.id,
           carId: car.id,
           carName: car.name,
-          totalPrice: totalPrice,
+          totalPrice: pricing.totalPrice,
           rentalType: selectedPricing,
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString(),
-          rentalAmount: rentalBase,
+          rentalAmount: pricing.rentalBase,
           kmPackageLabel: selectedKmPackageData?.label,
           kmPackagePrice: selectedKmPackageData ? kmPackagePrice : undefined,
           insurancePrice: selectedInsurance ? insurancePrice : undefined,
-          provisionFee,
+          provisionFee: pricing.provisionFee,
+          zoneFee: pricing.zoneFee,
+          campaignDiscount: pricing.campaignDiscount,
+          subscriptionDiscount: pricing.subscriptionDiscount,
+          additionalDriverFee: pricing.additionalDriverFee,
+          additionalDriverName:
+            selectedPricing === "day" && additionalDriverEnabled
+              ? additionalDriverName.trim()
+              : undefined,
         }
       });
     } catch (error: unknown) {
@@ -417,6 +451,25 @@ const CarDetail = () => {
       });
     }
   };
+
+  const pricingBreakdown = selectedPricing
+    ? computeRentalPricing({
+        rentalType: selectedPricing,
+        pricePerMinute: car.price_per_minute,
+        pricePerHour: car.price_per_hour,
+        pricePerDay: car.price_per_day,
+        rentalHours,
+        rentalDays,
+        insurancePrice,
+        kmPackagePrice,
+        pickupZoneId,
+        dropoffZoneId,
+        subscriptionDiscountPercent: subscription?.discount_percentage,
+        campaignDiscountPercent: campaign?.discount_percentage,
+        additionalDriverEnabled: selectedPricing === "day" && additionalDriverEnabled,
+        additionalDriverDays: rentalDays,
+      })
+    : null;
 
   // Get appropriate image based on car type
   let carImage = carCompact;
@@ -439,6 +492,14 @@ const CarDetail = () => {
             <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
               <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
                 🎉 {subscription.tier.toUpperCase()} üyesi olarak %{subscription.discount_percentage} indirim kazanıyorsunuz!
+              </p>
+            </div>
+          )}
+
+          {campaign && (
+            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+              <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                🏷️ {campaign.name} — %{campaign.discount_percentage} kampanya indirimi uygulanacak
               </p>
             </div>
           )}
@@ -811,6 +872,68 @@ const CarDetail = () => {
                 {selectedPricing === "day" && (
                   <div className="border-t border-border pt-6 mb-6">
                     <h3 className="font-semibold text-foreground mb-4 text-lg flex items-center gap-2">
+                      <UserPlus className="w-5 h-5" />
+                      Ek Sürücü
+                    </h3>
+                    <div className="rounded-xl border border-border p-4 space-y-4">
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          id="additional-driver"
+                          checked={additionalDriverEnabled}
+                          onCheckedChange={(checked) => {
+                            const enabled = checked === true;
+                            setAdditionalDriverEnabled(enabled);
+                            if (!enabled) {
+                              setAdditionalDriverName("");
+                              setAdditionalDriverLicense("");
+                            }
+                          }}
+                        />
+                        <div className="flex-1">
+                          <label htmlFor="additional-driver" className="font-medium cursor-pointer">
+                            Ek sürücü ekle
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Günlük {ADDITIONAL_DRIVER_DAILY_FEE} ₺ — {rentalDays} gün için{" "}
+                            {(ADDITIONAL_DRIVER_DAILY_FEE * rentalDays).toLocaleString("tr-TR")} ₺
+                          </p>
+                        </div>
+                      </div>
+                      {additionalDriverEnabled && (
+                        <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                          <div>
+                            <label className="text-sm font-medium text-foreground mb-2 block">
+                              Ad Soyad
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Ek sürücünün adı soyadı"
+                              value={additionalDriverName}
+                              onChange={(e) => setAdditionalDriverName(e.target.value)}
+                              className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-foreground mb-2 block">
+                              Ehliyet Numarası
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Ek sürücü ehliyet no"
+                              value={additionalDriverLicense}
+                              onChange={(e) => setAdditionalDriverLicense(e.target.value.toUpperCase())}
+                              className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedPricing === "day" && (
+                  <div className="border-t border-border pt-6 mb-6">
+                    <h3 className="font-semibold text-foreground mb-4 text-lg flex items-center gap-2">
                       <MapPin className="w-5 h-5" />
                       Alış ve Bırakış Noktası
                     </h3>
@@ -856,13 +979,69 @@ const CarDetail = () => {
                     <Shield className="w-5 h-5" />
                     <span className="font-semibold">Güvenli Kiralama</span>
                   </div>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Tam kasko sigorta dahil</li>
-                    <li>• Yakıt bizden (ücretsiz)</li>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    <li>• Kapsamlı sigorta seçenekleri</li>
+                    <li>• Seçili planlarda yakıt desteği</li>
                     <li>• 7/24 yol yardım hizmeti</li>
-                    <li>• Ücretsiz iptal (15 dk önce)</li>
+                    <li>• Esnek iptal koşulları</li>
                   </ul>
                 </div>
+
+                {pricingBreakdown && (
+                  <div className="bg-muted/40 border border-border rounded-xl p-4 mb-6 space-y-2 text-sm">
+                    <p className="font-semibold text-foreground mb-2">Fiyat Özeti</p>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Kiralama bedeli</span>
+                      <span>{pricingBreakdown.rentalBase.toFixed(2)} ₺</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Provizyon</span>
+                      <span>{pricingBreakdown.provisionFee.toFixed(2)} ₺</span>
+                    </div>
+                    {pricingBreakdown.insurancePrice > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Sigorta</span>
+                        <span>{pricingBreakdown.insurancePrice.toFixed(2)} ₺</span>
+                      </div>
+                    )}
+                    {pricingBreakdown.kmPackagePrice > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">KM paketi</span>
+                        <span>{pricingBreakdown.kmPackagePrice.toFixed(2)} ₺</span>
+                      </div>
+                    )}
+                    {pricingBreakdown.zoneFee > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Farklı bölge ücreti</span>
+                        <span>{pricingBreakdown.zoneFee.toFixed(2)} ₺</span>
+                      </div>
+                    )}
+                    {pricingBreakdown.additionalDriverFee > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Ek sürücü ({rentalDays} gün × {ADDITIONAL_DRIVER_DAILY_FEE} ₺)
+                        </span>
+                        <span>{pricingBreakdown.additionalDriverFee.toFixed(2)} ₺</span>
+                      </div>
+                    )}
+                    {pricingBreakdown.subscriptionDiscount > 0 && (
+                      <div className="flex justify-between text-amber-600">
+                        <span>Abonelik indirimi</span>
+                        <span>-{pricingBreakdown.subscriptionDiscount.toFixed(2)} ₺</span>
+                      </div>
+                    )}
+                    {pricingBreakdown.campaignDiscount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Kampanya indirimi</span>
+                        <span>-{pricingBreakdown.campaignDiscount.toFixed(2)} ₺</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between pt-2 border-t font-bold text-base">
+                      <span>Toplam</span>
+                      <span className="text-primary">{pricingBreakdown.totalPrice.toFixed(2)} ₺</span>
+                    </div>
+                  </div>
+                )}
 
                 <Button 
                   size="lg"
@@ -871,8 +1050,8 @@ const CarDetail = () => {
                   onClick={handleReserve}
                 >
                   {!car.available 
-                    ? "Müsait Değil" 
-                    : "Hemen Kirala"}
+                    ? "Şu An Müsait Değil" 
+                    : "Rezervasyon Oluştur"}
                 </Button>
               </div>
             </div>

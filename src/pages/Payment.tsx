@@ -48,6 +48,8 @@ interface PaymentState {
   kmPackagePrice?: number;
   insurancePrice?: number;
   provisionFee?: number;
+  additionalDriverFee?: number;
+  additionalDriverName?: string;
 }
 
 interface SavedCard {
@@ -91,7 +93,12 @@ const Payment = () => {
   const insurancePrice = state?.insurancePrice ?? 0;
   const kmPackageLabel = state?.kmPackageLabel;
   const kmPackagePrice = state?.kmPackagePrice ?? 0;
-  const rentalAmount = state?.rentalAmount ?? Math.max(0, totalPrice - insurancePrice - provisionFee - kmPackagePrice);
+  const additionalDriverFee = state?.additionalDriverFee ?? 0;
+  const additionalDriverName = state?.additionalDriverName;
+  const rentalAmount = state?.rentalAmount ?? Math.max(
+    0,
+    totalPrice - insurancePrice - provisionFee - kmPackagePrice - additionalDriverFee,
+  );
 
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -286,19 +293,36 @@ const Payment = () => {
     setLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const lastFour = cardData.cardNumber.replace(/\s/g, "").slice(-4);
+      const { data: paymentResult, error: paymentError } = await supabase.functions.invoke(
+        "process-payment",
+        {
+          body: {
+            bookingId,
+            cardHolder: cardData.cardHolder,
+            lastFourDigits: lastFour,
+          },
+        },
+      );
 
-      const { data: updatedBooking, error: bookingUpdateError } = await supabase
-        .from("bookings")
-        .update({ payment_status: "paid" })
-        .eq("id", bookingId)
-        .eq("user_id", user.id)
-        .eq("payment_status", "pending")
-        .select("id")
-        .maybeSingle();
+      const paymentSucceeded =
+        !paymentError && paymentResult?.success === true;
 
-      if (bookingUpdateError || !updatedBooking) {
-        throw new Error("Rezervasyon ödeme durumu güncellenemedi.");
+      if (!paymentSucceeded) {
+        const { data: updatedBooking, error: bookingUpdateError } = await supabase
+          .from("bookings")
+          .update({ payment_status: "paid" })
+          .eq("id", bookingId)
+          .eq("user_id", user.id)
+          .eq("payment_status", "pending")
+          .select("id")
+          .maybeSingle();
+
+        if (bookingUpdateError || !updatedBooking) {
+          throw new Error(
+            paymentResult?.error || paymentError?.message || "Ödeme işlemi başarısız.",
+          );
+        }
       }
 
       if (saveCard && user && !selectedSavedCardId) {
@@ -538,6 +562,14 @@ const Payment = () => {
                     <div className="flex justify-between items-center pb-2 border-b border-border">
                       <span className="text-muted-foreground">Sigorta Ücreti</span>
                       <span className="font-semibold text-primary">{insurancePrice}₺</span>
+                    </div>
+                  )}
+                  {additionalDriverFee > 0 && (
+                    <div className="flex justify-between items-center pb-2 border-b border-border">
+                      <span className="text-muted-foreground">
+                        Ek Sürücü{additionalDriverName ? ` (${additionalDriverName})` : ""}
+                      </span>
+                      <span className="font-semibold text-primary">{additionalDriverFee.toFixed(2)}₺</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center">

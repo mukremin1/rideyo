@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="160" y1="128" x2="864" y2="896" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FB6020"/>
+      <stop offset="1" stop-color="#14B8A6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+  <g transform="translate(192 292)">
+    <path
+      fill="#FFFFFF"
+      d="M96 248c0-18 14-32 32-32h368c18 0 32 14 32 32v88H96v-88zm32-104c0-26 22-48 48-48h288c26 0 48 22 48 48v56H128v-56zm64 216a44 44 0 1 0 0 88 44 44 0 0 0 0-88zm272 0a44 44 0 1 0 0 88 44 44 0 0 0 0-88z"
+    />
+    <path
+      fill="#FFFFFF"
+      fill-opacity="0.92"
+      d="M176 120h48l40 56h144l40-56h48l-56 80H232l-56-80z"
+    />
+  </g>
+  <text
+    x="512"
+    y="820"
+    text-anchor="middle"
+    fill="#FFFFFF"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="112"
+    font-weight="700"
+    letter-spacing="-2"
+  >RideYo</text>
+</svg>

@@ -11,6 +11,10 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
+          additional_driver_enabled: boolean | null
+          additional_driver_fee: number | null
+          additional_driver_license: string | null
+          additional_driver_name: string | null
           car_id: string
           created_at: string | null
           different_zone_fee: number | null
@@ -31,6 +35,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          additional_driver_enabled?: boolean | null
+          additional_driver_fee?: number | null
+          additional_driver_license?: string | null
+          additional_driver_name?: string | null
           car_id: string
           created_at?: string | null
           different_zone_fee?: number | null
@@ -51,6 +59,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          additional_driver_enabled?: boolean | null
+          additional_driver_fee?: number | null
+          additional_driver_license?: string | null
+          additional_driver_name?: string | null
           car_id?: string
           created_at?: string | null
           different_zone_fee?: number | null
@@ -224,6 +236,7 @@ export type Database = {
           is_approved: boolean | null
           last_violation_date: string | null
           license_number: string
+          national_id: string | null
           notes: string | null
           penalty_points: number
           total_accidents: number
@@ -231,6 +244,8 @@ export type Database = {
           updated_at: string
           user_id: string
           verification_status: string
+          verified_given_names: string | null
+          verified_surname: string | null
         }
         Insert: {
           blocked_reason?: string | null
@@ -240,6 +255,7 @@ export type Database = {
           is_approved?: boolean | null
           last_violation_date?: string | null
           license_number: string
+          national_id?: string | null
           notes?: string | null
           penalty_points?: number
           total_accidents?: number
@@ -247,6 +263,8 @@ export type Database = {
           updated_at?: string
           user_id: string
           verification_status?: string
+          verified_given_names?: string | null
+          verified_surname?: string | null
         }
         Update: {
           blocked_reason?: string | null
@@ -256,6 +274,7 @@ export type Database = {
           is_approved?: boolean | null
           last_violation_date?: string | null
           license_number?: string
+          national_id?: string | null
           notes?: string | null
           penalty_points?: number
           total_accidents?: number
@@ -263,6 +282,8 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verification_status?: string
+          verified_given_names?: string | null
+          verified_surname?: string | null
         }
         Relationships: []
       }

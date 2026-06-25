@@ -64,15 +64,15 @@ function simulateLicenseCheck(licenseNumber: string): {
     };
   }
   
-  // "HIGH" içeren numaralar yüksek riskli
+  // "HIGH" test anahtarı — artık normal kayıt gibi 100 puan
   if (cleaned.includes("HIGH") || cleaned.includes("YUKSEK")) {
     return {
       exists: true,
       isValid: true,
       isBlocked: false,
-      penaltyPoints: 75,
-      trafficViolations: 6,
-      totalAccidents: 3,
+      penaltyPoints: 0,
+      trafficViolations: 0,
+      totalAccidents: 0,
       expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       licenseClass: "B",
     };
@@ -90,42 +90,21 @@ function simulateLicenseCheck(licenseNumber: string): {
     };
   }
   
-  // Normal geçerli ehliyet - rastgele değerler
-  const seed = cleaned.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const penaltyPoints = seed % 50; // 0-49 arası ceza puanı
-  const violations = seed % 4; // 0-3 arası ihlal
-  const accidents = seed % 2; // 0-1 arası kaza
-  
+  // Temiz kayıt — sürücü puanı 100’den başlar, ceza/kaza/ihlal yok
   return {
     exists: true,
     isValid: true,
     isBlocked: false,
-    penaltyPoints,
-    trafficViolations: violations,
-    totalAccidents: accidents,
+    penaltyPoints: 0,
+    trafficViolations: 0,
+    totalAccidents: 0,
     expiryDate: new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     holderName: "****** ******", // Gizlilik için maskeli
     licenseClass: "B",
   };
 }
 
-// Risk seviyesi hesaplama
-function calculateRiskLevel(penaltyPoints: number, accidents: number, violations: number): string {
-  if (penaltyPoints >= 70 || accidents >= 3 || violations >= 5) return "high";
-  if (penaltyPoints >= 30 || accidents >= 2 || violations >= 3) return "medium";
-  return "low";
-}
-
-// Sürücü puanı hesaplama
-function calculateDriverScore(penaltyPoints: number, accidents: number, violations: number): number {
-  // Daha yumuşak puanlama sistemi - cezalar daha az etkili
-  const penaltyDeduction = Math.min(penaltyPoints * 0.5, 30); // Max 30 puan ceza puanı için
-  const accidentDeduction = accidents * 5; // Kaza başına 5 puan
-  const violationDeduction = violations * 2; // İhlal başına 2 puan
-
-  const raw = 100 - (penaltyDeduction + accidentDeduction + violationDeduction);
-  return Math.max(0, Math.min(100, Math.round(raw)));
-}
+const DEFAULT_DRIVER_SCORE = 100;
 
 serve(async (req) => {
   // CORS preflight
@@ -134,9 +113,9 @@ serve(async (req) => {
   }
 
   try {
-    const { licenseNumber, userId } = await req.json();
-    
-    console.log(`[verify-license] Checking license: ${licenseNumber} for user: ${userId}`);
+    const { licenseNumber, userId, nationalId, surname, givenNames } = await req.json();
+
+    console.log(`[verify-license] Checking license: ${licenseNumber} for user: ${userId}, nationalId: ${nationalId ?? "—"}`);
     
     if (!licenseNumber) {
       return new Response(
@@ -191,10 +170,6 @@ serve(async (req) => {
           canRent: false,
           reason: "blocked",
           data: {
-            penaltyPoints: licenseData.penaltyPoints,
-            trafficViolations: licenseData.trafficViolations,
-            totalAccidents: licenseData.totalAccidents,
-            riskLevel: "high",
             driverScore: 0,
           }
         }),
@@ -211,8 +186,6 @@ serve(async (req) => {
           canRent: false,
           reason: "expired",
           data: {
-            expiryDate: licenseData.expiryDate,
-            riskLevel: "high",
             driverScore: 0,
           }
         }),
@@ -220,50 +193,52 @@ serve(async (req) => {
       );
     }
 
-    // 6. Risk değerlendirmesi
-    const riskLevel = calculateRiskLevel(
-      licenseData.penaltyPoints, 
-      licenseData.totalAccidents, 
-      licenseData.trafficViolations
-    );
-    const driverScore = calculateDriverScore(
-      licenseData.penaltyPoints,
-      licenseData.totalAccidents,
-      licenseData.trafficViolations
-    );
-
-    // 7. Yüksek riskli sürücüler kiralayamaz
-    const canRent = riskLevel !== "high" && driverScore >= 60;
-    
-    let message = "";
-    if (!canRent) {
-      if (riskLevel === "high") {
-        message = "Sürücü geçmişiniz nedeniyle şu an araç kiralama hizmetimizden yararlanamazsınız.";
-      } else if (driverScore < 60) {
-        message = `Sürücü puanınız (${driverScore}) kiralama için gereken minimum puanın (60) altında.`;
-      }
-    } else {
-      message = "Ehliyet doğrulaması başarılı! Araç kiralayabilirsiniz.";
-    }
-
-    // 8. Eğer userId varsa, veritabanına kaydet
+    // 6. Başarılı doğrulama — her sürücü 100 puan ile başlar, kullanıma göre güncellenir
+    const driverScore = DEFAULT_DRIVER_SCORE;
+    const canRent = true;
+    const message = "Ehliyet doğrulaması başarılı! Araç kiralayabilirsiniz.";
     if (userId) {
       const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
       const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Önceki kayıtlı TC Kimlik No ile eşleşme kontrolü
+      if (nationalId) {
+        const { data: existingRecord } = await supabase
+          .from('driver_history')
+          .select('national_id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (existingRecord?.national_id && existingRecord.national_id !== nationalId) {
+          console.warn(`[verify-license] TC Kimlik No mismatch for user ${userId}: stored=${existingRecord.national_id}, provided=${nationalId}`);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              canRent: false,
+              error: "Kimlik kartı bilgisi daha önce kayıtlı kimlikle eşleşmiyor. Lütfen destek ile iletişime geçin.",
+              reason: "identity_mismatch",
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
 
       const { error: upsertError } = await supabase
         .from('driver_history')
         .upsert({
           user_id: userId,
           license_number: licenseNumber.replace(/\s/g, '').toUpperCase(),
-          penalty_points: licenseData.penaltyPoints,
-          traffic_violations: licenseData.trafficViolations,
-          total_accidents: licenseData.totalAccidents,
+          penalty_points: 0,
+          traffic_violations: 0,
+          total_accidents: 0,
           driver_score: driverScore,
           is_approved: canRent,
           verification_status: canRent ? "verified" : "rejected",
           blocked_reason: !canRent ? message : null,
+          national_id: nationalId ?? null,
+          verified_surname: surname ?? null,
+          verified_given_names: givenNames ?? null,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' });
 
@@ -274,7 +249,7 @@ serve(async (req) => {
       }
     }
 
-    console.log(`[verify-license] Result - canRent: ${canRent}, score: ${driverScore}, risk: ${riskLevel}`);
+    console.log(`[verify-license] Result - canRent: ${canRent}, score: ${driverScore}`);
 
     return new Response(
       JSON.stringify({
@@ -283,12 +258,6 @@ serve(async (req) => {
         message,
         data: {
           driverScore,
-          riskLevel,
-          penaltyPoints: licenseData.penaltyPoints,
-          trafficViolations: licenseData.trafficViolations,
-          totalAccidents: licenseData.totalAccidents,
-          expiryDate: licenseData.expiryDate,
-          licenseClass: licenseData.licenseClass,
           isApproved: canRent,
           verificationStatus: canRent ? "verified" : "rejected",
         }

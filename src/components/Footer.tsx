@@ -1,5 +1,6 @@
-import { Car, MessageSquare, Smartphone, MapPin, Phone, XCircle, RefreshCcw } from "lucide-react";
+import { MessageSquare, Smartphone, MapPin, Phone, XCircle, RefreshCcw } from "lucide-react";
 import { Link } from "react-router-dom";
+import BrandLogo from "./BrandLogo";
 
 const WHATSAPP_NUMBER = "+905395263293";
 const COMPANY_PHONE = "0539 526 32 93";
@@ -11,12 +12,11 @@ const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-8">
           <div className="col-span-2 md:col-span-3 lg:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src="/logo-512x512.png" alt="RideYo logo" className="w-10 h-10 rounded-md object-contain" />
-              <span className="text-xl font-bold text-foreground">RideYo</span>
-            </Link>
-            <p className="text-muted-foreground text-sm mb-4">
-              Türkiye'nin en hızlı ve kolay araç kiralama platformu
+            <div className="mb-4">
+              <BrandLogo size="md" />
+            </div>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Türkiye&apos;nin dijital araç kiralama platformu. Güvenli, şeffaf ve mobil öncelikli deneyim.
             </p>
             
             {/* Contact Info */}
@@ -37,7 +37,7 @@ const Footer = () => {
             <div className="space-y-2">
               <p className="text-sm font-medium text-foreground flex items-center gap-2">
                 <Smartphone className="w-4 h-4" />
-                Mobil Uygulamamız
+                Mobil Uygulama
               </p>
               <div className="flex flex-col gap-2">
                 <a 
@@ -98,9 +98,8 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/owner-dashboard" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Sahip Paneli</Link></li>
               <li><Link to="/earnings-calculator" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Kazanç Hesaplayıcı</Link></li>
-              <li><Link to="/car-comparison" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Araç Karşılaştırma</Link></li>
               <li><Link to="/availability-calendar" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Müsaitlik Takvimi</Link></li>
-              <li><Link to="/owner-guide" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Rehber</Link></li>
+              <li><Link to="/owner-guide" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Araç Sahibi Rehberi</Link></li>
             </ul>
           </div>
 
@@ -162,8 +161,8 @@ const Footer = () => {
                 <p className="text-muted-foreground">İade yok</p>
               </div>
             </div>
-            <Link to="/cancellation-policy" className="inline-block mt-4 text-primary hover:underline text-sm font-medium">
-              Detaylı bilgi için tıklayın →
+            <Link to="/cancellation-policy" className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
+              Detaylı iptal koşullarını inceleyin
             </Link>
           </div>
         </div>
@@ -214,7 +213,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} RideYo Tüm hakları saklıdır</p>
+          <p>&copy; {new Date().getFullYear()} RideYo. Tüm hakları saklıdır.</p>
         </div>
       </div>
     </footer>

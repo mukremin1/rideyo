@@ -1,92 +1,84 @@
-import { Car, Calendar, CreditCard, CheckCircle, MapPin, Shield } from "lucide-react";
+import { Car, Calendar, CreditCard, CheckCircle, MapPin, Shield, UserPlus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
 
 const ReservationSteps = () => {
   const steps = [
     {
       icon: Car,
-      title: "Araç Seçin",
-      description: "İhtiyacınıza uygun aracı seçin. Fiyat, özellik ve konuma göre filtreleyin."
+      title: "Araç Seçimi",
+      description: "Fiyat, konum ve araç tipine göre filtreleyerek size uygun aracı belirleyin.",
     },
     {
       icon: Calendar,
-      title: "Tarih Belirleyin",
-      description: "Kiralama sürenizi dakika, saat veya gün olarak belirleyin."
+      title: "Süre Belirleme",
+      description: "Dakikalık, saatlik veya günlük kiralama süresini ihtiyacınıza göre planlayın.",
     },
     {
       icon: MapPin,
-      title: "Alış/Bırakış Noktası",
-      description: "Aracı teslim alacağınız ve bırakacağınız noktayı seçin."
+      title: "Teslim Noktası",
+      description: "Alış ve bırakış konumunu seçerek rotanızı netleştirin.",
     },
     {
       icon: Shield,
-      title: "Sigorta Paketi",
-      description: "İhtiyacınıza uygun sigorta paketini tercih edin."
+      title: "Sigorta ve Ek Hizmetler",
+      description: "Sigorta paketi ve isteğe bağlı ek sürücü seçeneklerini yapılandırın.",
     },
     {
       icon: CreditCard,
       title: "Güvenli Ödeme",
-      description: "Kredi kartı veya banka kartı ile güvenli ödeme yapın."
+      description: "Kredi veya banka kartınızla güvenli ödeme altyapısı üzerinden işlemi tamamlayın.",
     },
     {
       icon: CheckCircle,
       title: "Rezervasyon Onayı",
-      description: "Rezervasyonunuz anında onaylanır ve aracınız hazır olur."
-    }
+      description: "Onay sonrası rezervasyon detaylarınız hesabınızda görüntülenir.",
+    },
   ];
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="bg-background py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Rezervasyon Adımları
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
+            Rezervasyon Süreci
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Sadece birkaç adımda aracınızı kiralayın. Hızlı, kolay ve güvenli.
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+            Birkaç adımda rezervasyonunuzu oluşturun. Tüm süreç mobil uygulama üzerinden yönetilir.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {steps.map((step, index) => (
-            <div 
-              key={index}
-              className="relative bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group"
+            <div
+              key={step.title}
+              className="group relative rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-lg"
             >
-              {/* Step Number */}
-              <div className="absolute -top-3 -left-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
+              <div className="absolute -left-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                 {index + 1}
               </div>
-              
-              {/* Icon */}
-              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <step.icon className="w-7 h-7 text-primary" />
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+                <step.icon className="h-7 w-7 text-primary" />
               </div>
-              
-              {/* Content */}
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                {step.title}
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                {step.description}
-              </p>
-
-              {/* Connector Line (for non-last items) */}
-              {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-border" />
-              )}
+              <h3 className="mb-2 text-xl font-semibold text-foreground">{step.title}</h3>
+              <p className="text-sm text-muted-foreground">{step.description}</p>
             </div>
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-12">
-          <a 
-            href="/cars"
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold hover:bg-primary/90 transition-colors"
-          >
-            <Car className="w-5 h-5" />
-            Hemen Araç Seçin
-          </a>
+        <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button asChild size="lg">
+            <Link to="/cars">
+              <Car className="mr-2 h-5 w-5" />
+              Araç Filosunu Görüntüle
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="outline">
+            <Link to="/identity-verification">
+              <UserPlus className="mr-2 h-5 w-5" />
+              Kimlik Doğrulaması
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

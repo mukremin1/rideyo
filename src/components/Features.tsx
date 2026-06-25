@@ -3,68 +3,63 @@ import { Shield, Zap, CreditCard, Clock, Fuel, Smartphone } from "lucide-react";
 const features = [
   {
     icon: Zap,
-    title: "Hızlı Kiralama",
-    description: "2 dakikada araç kirala ve yola çık",
+    title: "Hızlı Rezervasyon",
+    description: "Birkaç adımda rezervasyon oluşturun, ödemenizi tamamlayın ve yola çıkın.",
   },
   {
     icon: CreditCard,
-    title: "KM Paketleri",
-    description: "Dakikalık, saatlik, günlük ve km paketleri",
+    title: "Esnek Fiyatlandırma",
+    description: "Dakikalık, saatlik ve günlük kiralama ile kilometre paketleri arasından seçim yapın.",
   },
   {
     icon: Fuel,
-    title: "Yakıt Bizden",
-    description: "Yakıt masrafları tarafımızdan karşılanır",
+    title: "Yakıt Desteği",
+    description: "Seçili kiralama planlarında yakıt masrafları tarafımızca karşılanır.",
   },
   {
     icon: Shield,
-    title: "Güvenli",
-    description: "Tam sigortalı ve bakımlı araçlar",
+    title: "Güvenli Deneyim",
+    description: "Kimlik doğrulama, sigorta seçenekleri ve bakımlı araç filosu ile güvenle sürün.",
   },
   {
     icon: Clock,
-    title: "7/24 Hizmet",
-    description: "İstediğin zaman, istediğin yerde",
+    title: "7/24 Erişim",
+    description: "İstediğiniz zaman rezervasyon oluşturun, destek ekibimize ulaşın.",
   },
   {
     icon: Smartphone,
-    title: "Kolay Kullanım",
-    description: "Sezgisel mobil uygulama",
+    title: "Mobil Öncelikli",
+    description: "Tüm süreçleri telefonunuzdan yönetin; harita, ödeme ve kiralama tek uygulamada.",
   },
 ];
 
 const Features = () => {
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="bg-muted/30 py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="inline-block px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-4">
-            <span className="text-sm font-semibold text-accent">Özellikler</span>
+        <div className="mb-16 text-center">
+          <div className="mb-4 inline-block rounded-full border border-accent/20 bg-accent/10 px-4 py-2">
+            <span className="text-sm font-semibold text-accent">Avantajlar</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
+          <h2 className="mb-4 text-4xl font-bold text-foreground sm:text-5xl">
             Neden RideYo?
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Modern araç kiralama deneyimi için ihtiyacın olan her şey
+          <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
+            Modern mobil kiralama deneyimi için ihtiyaç duyduğunuz tüm hizmetler tek platformda.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <div 
-              key={index}
-              className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center mb-6 shadow-md">
-                <feature.icon className="w-7 h-7 text-white" />
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-md">
+                <feature.icon className="h-7 w-7 text-white" />
               </div>
-              
-              <h3 className="text-xl font-bold text-foreground mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-muted-foreground">
-                {feature.description}
-              </p>
+              <h3 className="mb-3 text-xl font-bold text-foreground">{feature.title}</h3>
+              <p className="text-muted-foreground">{feature.description}</p>
             </div>
           ))}
         </div>

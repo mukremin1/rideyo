@@ -1,5 +1,5 @@
 import { Capacitor } from "@capacitor/core";
-import { CapacitorNfc, type NfcEvent } from "@capgo/capacitor-nfc";
+import { CapacitorNfc, type NfcEvent, type NfcTag } from "@capgo/capacitor-nfc";
 
 type NfcFailureReason = "unsupported" | "disabled" | "timeout" | "error";
 
@@ -33,6 +33,30 @@ const withTimeout = <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
   });
 };
 
+// Turkish ID cards (T.C. Kimlik Kartı) are ISO 14443-4 smart cards — they appear as
+// "android.nfc.tech.IsoDep" on Android. Simple sticker tags (NfcA/NfcV only) are rejected.
+// On iOS the plugin does not populate techTypes, so we fall back to accepting any tag with a UID.
+export const isValidIdCardTag = (tag: NfcTag | null | undefined): boolean => {
+  if (!tag) return false;
+  if (!tag.id || tag.id.length === 0) return false;
+
+  const techs = (tag.techTypes ?? []).map((t) => t.toLowerCase());
+  if (techs.length > 0) {
+    return techs.some((t) => t.includes("isodep") || t.includes("iso-dep") || t.includes("iso7816"));
+  }
+
+  // iOS: techTypes not populated by this plugin — accept any tag that has a valid UID.
+  return true;
+};
+
+export const abortNfcScan = async (): Promise<void> => {
+  try {
+    await CapacitorNfc.stopScanning();
+  } catch {
+    // best effort
+  }
+};
+
 export const scanNfcOnce = async (options?: ScanOnceOptions): Promise<NfcScanResult> => {
   const timeoutMs = options?.timeoutMs ?? 20000;
   const platform = Capacitor.getPlatform();
@@ -51,6 +75,12 @@ export const scanNfcOnce = async (options?: ScanOnceOptions): Promise<NfcScanRes
       return { ok: false, reason: "disabled" };
     }
 
+    // Show the Android alert BEFORE starting the timeout so the dialog display time
+    // does not count against the scan window.
+    if (platform === "android" && options?.alertMessage) {
+      window.alert(options.alertMessage);
+    }
+
     const scanPromise = new Promise<NfcEvent>((resolve, reject) => {
       void (async () => {
         const listener = await CapacitorNfc.addListener("nfcEvent", async (event) => {
@@ -64,11 +94,6 @@ export const scanNfcOnce = async (options?: ScanOnceOptions): Promise<NfcScanRes
         });
 
         try {
-          // `alertMessage` is iOS-only in this plugin. Show a simple fallback alert on Android.
-          if (platform === "android" && options?.alertMessage) {
-            window.alert(options.alertMessage);
-          }
-
           await CapacitorNfc.startScanning({
             invalidateAfterFirstRead: true,
             alertMessage: platform === "ios" ? options?.alertMessage : undefined,

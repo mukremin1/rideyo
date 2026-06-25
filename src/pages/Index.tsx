@@ -35,33 +35,33 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-16 md:pb-0 overflow-x-hidden pt-[calc(env(safe-area-inset-top)+4.5rem)] md:pt-[calc(env(safe-area-inset-top)+5rem)]">
       <Navbar />
 
-      <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white py-1.5 md:py-2.5 px-3 sm:px-4 overflow-x-hidden">
-        <div className="container mx-auto grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+      <div className="overflow-x-hidden bg-gradient-to-r from-primary via-primary/95 to-accent py-2 px-3 text-primary-foreground sm:px-4 md:py-2.5">
+        <div className="container mx-auto grid grid-cols-1 items-center gap-2 md:grid-cols-[minmax(0,1fr)_auto]">
           <div className="flex min-w-0 items-center gap-2 text-left">
-            <Crown className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-            <span className="min-w-0 text-[13px] sm:text-sm font-semibold leading-tight break-words tracking-tight">
-              Aylık aboneliklerle %25'e varan indirimler!
+            <Crown className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+            <span className="min-w-0 break-words text-[13px] font-medium leading-tight sm:text-sm">
+              Abonelik planlarıyla %25&apos;e varan indirim fırsatları
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:flex items-stretch gap-2 w-full md:w-auto">
+          <div className="grid w-full grid-cols-1 items-stretch gap-2 sm:grid-cols-2 md:flex md:w-auto">
             {notifSupported && notifPermission !== "granted" && (
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={requestNotifPermission}
-                className="w-full md:w-auto whitespace-nowrap h-8 sm:h-9 px-3 text-[11px] sm:text-xs md:text-sm"
+                className="h-8 w-full whitespace-nowrap px-3 text-[11px] sm:h-9 sm:text-xs md:w-auto md:text-sm"
               >
-                <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
-                Bildirimleri Aç
+                <Bell className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Bildirimleri Etkinleştir
               </Button>
             )}
             <Button
               size="sm"
               variant="secondary"
               onClick={() => navigate("/packages")}
-              className="w-full md:w-auto whitespace-nowrap h-8 sm:h-9 px-3 text-[11px] sm:text-xs md:text-sm"
+              className="h-8 w-full whitespace-nowrap px-3 text-[11px] sm:h-9 sm:text-xs md:w-auto md:text-sm"
             >
-              Paketleri Gör
+              Planları İncele
             </Button>
           </div>
         </div>
@@ -73,12 +73,12 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
             <div className="min-w-0">
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 flex items-center gap-2 break-words">
-                <MapPin className="w-7 h-7 sm:w-8 sm:h-8 text-primary shrink-0" />
-                Araçları Haritada Gör
+              <h2 className="mb-2 flex items-center gap-2 break-words text-2xl font-bold text-foreground sm:text-3xl">
+                <MapPin className="h-7 w-7 shrink-0 text-primary sm:h-8 sm:w-8" />
+                Harita Üzerinden Keşfedin
               </h2>
-              <p className="text-muted-foreground break-words">
-                Konumunuza yakın araçları haritada görüntüleyin
+              <p className="break-words text-muted-foreground">
+                Konumunuza yakın müsait araçları harita üzerinde görüntüleyin.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">

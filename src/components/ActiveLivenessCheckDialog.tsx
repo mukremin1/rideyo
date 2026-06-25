@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, CheckCircle2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,12 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
+import * as blazeface from "@tensorflow-models/blazeface";
 import "@tensorflow/tfjs-core";
 import "@tensorflow/tfjs-backend-webgl";
+import "@tensorflow/tfjs-backend-cpu";
 import * as tf from "@tensorflow/tfjs-core";
-
-type LivenessStep = "center" | "turn_left" | "turn_right" | "blink";
 
 interface ActiveLivenessCheckDialogProps {
   open: boolean;
@@ -23,36 +22,40 @@ interface ActiveLivenessCheckDialogProps {
   onFailure?: (message: string) => void;
 }
 
-const STEP_LABELS: Record<LivenessStep, string> = {
-  center: "Yuzunu merkeze getir",
-  turn_left: "Basini sola cevir",
-  turn_right: "Basini saga cevir",
-  blink: "Bir kez goz kirp",
+type NativeFaceDetector = {
+  detect: (source: ImageBitmapSource) => Promise<Array<{ boundingBox: DOMRectReadOnly }>>;
 };
 
-const STEP_ORDER: LivenessStep[] = ["center", "turn_left", "turn_right", "blink"];
+const getNativeFaceDetector = (): NativeFaceDetector | null => {
+  const ctor = (window as unknown as { FaceDetector?: new (opts?: object) => NativeFaceDetector }).FaceDetector;
+  if (!ctor) return null;
+  try {
+    return new ctor({ fastMode: true, maxDetectedFaces: 1 });
+  } catch {
+    return null;
+  }
+};
 
 const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }: ActiveLivenessCheckDialogProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const detectorRef = useRef<faceLandmarksDetection.FaceLandmarksDetector | null>(null);
+  const blazeModelRef = useRef<blazeface.BlazeFaceModel | null>(null);
+  const nativeDetectorRef = useRef<NativeFaceDetector | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const frameCountRef = useRef(0);
-  const blinkReadyRef = useRef(false);
+  const intervalRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const completedRef = useRef(false);
+  const detectingRef = useRef(false);
 
   const [loading, setLoading] = useState(false);
+  const [statusText, setStatusText] = useState("Kamera hazırlanıyor…");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
-
-  const activeStep = useMemo(() => STEP_ORDER[activeStepIndex] ?? STEP_ORDER[STEP_ORDER.length - 1], [activeStepIndex]);
+  const [faceDetected, setFaceDetected] = useState(false);
 
   const cleanup = useCallback(async () => {
-    if (rafRef.current) {
-      window.cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
+    if (intervalRef.current) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
 
     if (timeoutRef.current) {
@@ -68,28 +71,6 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
     }
   }, []);
 
-  const pointDistance = useCallback((a: { x: number; y: number }, b: { x: number; y: number }) => {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-    return Math.sqrt(dx * dx + dy * dy);
-  }, []);
-
-  const getEyeAspectRatio = useCallback(
-    (keypoints: Array<{ x: number; y: number }>, upperIdx: number, lowerIdx: number, leftIdx: number, rightIdx: number) => {
-      const upper = keypoints[upperIdx];
-      const lower = keypoints[lowerIdx];
-      const left = keypoints[leftIdx];
-      const right = keypoints[rightIdx];
-      if (!upper || !lower || !left || !right) return 1;
-
-      const vertical = pointDistance(upper, lower);
-      const horizontal = pointDistance(left, right);
-      if (horizontal === 0) return 1;
-      return vertical / horizontal;
-    },
-    [pointDistance],
-  );
-
   const captureSelfie = () => {
     const video = videoRef.current;
     if (!video || !video.videoWidth || !video.videoHeight) return "";
@@ -99,101 +80,65 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
     if (!ctx) return "";
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL("image/jpeg", 0.88);
   };
 
-  const completeStep = useCallback(() => {
-    frameCountRef.current = 0;
-    blinkReadyRef.current = false;
-
-    setActiveStepIndex((prev) => {
-      const next = prev + 1;
-      if (next >= STEP_ORDER.length) {
-        const selfie = captureSelfie();
-        completedRef.current = true;
-        void cleanup().finally(() => {
-          onOpenChange(false);
-          onSuccess(selfie);
-        });
-        return prev;
-      }
-      return next;
-    });
+  const completeLiveness = useCallback(() => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    const selfie = captureSelfie();
+    onSuccess(selfie);
+    void cleanup().finally(() => onOpenChange(false));
   }, [cleanup, onOpenChange, onSuccess]);
 
-  const runDetectionLoop = useCallback(async () => {
-    const detector = detectorRef.current;
-    const video = videoRef.current;
-    if (!detector || !video) return;
+  const videoReady = (video: HTMLVideoElement) =>
+    video.videoWidth > 0 && video.videoHeight > 0 && video.readyState >= 2;
 
-    const detect = async () => {
+  const detectFace = useCallback(async (video: HTMLVideoElement): Promise<boolean> => {
+    if (nativeDetectorRef.current) {
       try {
-        if (!video.videoWidth || !video.videoHeight || video.readyState < 2) {
-          rafRef.current = window.requestAnimationFrame(() => void detect());
-          return;
-        }
-
-        const faces = await detector.estimateFaces(video, { flipHorizontal: true });
-        if (!faces.length) {
-          frameCountRef.current = 0;
-          rafRef.current = window.requestAnimationFrame(() => void detect());
-          return;
-        }
-
-        const keypoints = faces[0].keypoints as Array<{ x: number; y: number }>;
-        const nose = keypoints[1];
-        const leftEyeOuter = keypoints[33];
-        const rightEyeOuter = keypoints[263];
-        if (!nose || !leftEyeOuter || !rightEyeOuter) {
-          frameCountRef.current = 0;
-          rafRef.current = window.requestAnimationFrame(() => void detect());
-          return;
-        }
-
-        const eyeWidth = Math.max(pointDistance(leftEyeOuter, rightEyeOuter), 1);
-        const eyeMidX = (leftEyeOuter.x + rightEyeOuter.x) / 2;
-        const yawNorm = (nose.x - eyeMidX) / eyeWidth;
-
-        const leftEar = getEyeAspectRatio(keypoints, 159, 145, 33, 133);
-        const rightEar = getEyeAspectRatio(keypoints, 386, 374, 362, 263);
-        const ear = (leftEar + rightEar) / 2;
-
-        const step = STEP_ORDER[activeStepIndex];
-        let stepPassed = false;
-
-        if (step === "center") {
-          stepPassed = Math.abs(yawNorm) < 0.09;
-        } else if (step === "turn_left") {
-          stepPassed = yawNorm < -0.18;
-        } else if (step === "turn_right") {
-          stepPassed = yawNorm > 0.18;
-        } else if (step === "blink") {
-          if (ear > 0.24) {
-            blinkReadyRef.current = true;
-          }
-          stepPassed = blinkReadyRef.current && ear < 0.17;
-        }
-
-        if (stepPassed) {
-          frameCountRef.current += 1;
-        } else {
-          frameCountRef.current = 0;
-        }
-
-        const requiredFrames = step === "blink" ? 2 : 6;
-        if (frameCountRef.current >= requiredFrames) {
-          completeStep();
-        }
+        const faces = await nativeDetectorRef.current.detect(video);
+        if (faces.length > 0) return true;
       } catch {
-        // keep loop alive to avoid transient model/camera failures
+        // fall through to BlazeFace
       }
+    }
 
-      rafRef.current = window.requestAnimationFrame(() => void detect());
-    };
+    if (blazeModelRef.current) {
+      const faces = await blazeModelRef.current.estimateFaces(video, false, true);
+      return faces.length > 0;
+    }
 
-    rafRef.current = window.requestAnimationFrame(() => void detect());
-  }, [activeStepIndex, completeStep, getEyeAspectRatio, pointDistance]);
+    return false;
+  }, []);
+
+  const runDetectionLoop = useCallback(() => {
+    intervalRef.current = window.setInterval(() => {
+      if (completedRef.current || detectingRef.current) return;
+
+      const video = videoRef.current;
+      if (!video || !videoReady(video)) return;
+
+      detectingRef.current = true;
+      void detectFace(video)
+        .then((found) => {
+          if (found && !completedRef.current) {
+            setFaceDetected(true);
+            setStatusText("Yüz algılandı, onaylanıyor…");
+            completeLiveness();
+          }
+        })
+        .catch(() => {
+          // next tick
+        })
+        .finally(() => {
+          detectingRef.current = false;
+        });
+    }, 450);
+  }, [completeLiveness, detectFace]);
 
   useEffect(() => {
     if (!open) {
@@ -201,35 +146,34 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
       setErrorMessage(null);
       setLoading(false);
       setInitialized(false);
-      setActiveStepIndex(0);
+      setFaceDetected(false);
+      setStatusText("Kamera hazırlanıyor…");
       return;
     }
 
     completedRef.current = false;
-    frameCountRef.current = 0;
-    blinkReadyRef.current = false;
-    setActiveStepIndex(0);
+    detectingRef.current = false;
     setErrorMessage(null);
     setLoading(true);
+    setStatusText("Kamera hazırlanıyor…");
 
     const init = async () => {
       try {
         await tf.setBackend("webgl");
+        await tf.ready();
       } catch {
-        // backend may already be initialized in another part of the app
+        await tf.setBackend("cpu");
+        await tf.ready();
       }
-      await tf.ready();
 
-      if (!detectorRef.current) {
-        detectorRef.current = await faceLandmarksDetection.createDetector(
-          faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
-          {
-            runtime: "mediapipe",
-            solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
-            refineLandmarks: true,
-            maxFaces: 1,
-          },
-        );
+      nativeDetectorRef.current = getNativeFaceDetector();
+
+      if (!blazeModelRef.current) {
+        setStatusText("Yüz tanıma modeli yükleniyor…");
+        blazeModelRef.current = await blazeface.load({
+          maxFaces: 1,
+          scoreThreshold: 0.35,
+        });
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -241,25 +185,44 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
       const video = videoRef.current;
       if (!video) throw new Error("Kamera baslatilamadi.");
       video.srcObject = stream;
+      video.setAttribute("playsinline", "true");
       await video.play();
+
+      await new Promise<void>((resolve) => {
+        if (videoReady(video)) {
+          resolve();
+          return;
+        }
+        const onReady = () => {
+          video.removeEventListener("loadeddata", onReady);
+          resolve();
+        };
+        video.addEventListener("loadeddata", onReady);
+      });
 
       timeoutRef.current = window.setTimeout(() => {
         if (!completedRef.current) {
-          setErrorMessage("Canlılık süresi doldu. Lütfen tekrar deneyin.");
-          onFailure?.("Canlılık süresi doldu.");
-          onOpenChange(false);
+          setErrorMessage("Otomatik algılama başarısız. Alttaki butonla onaylayın veya tekrar deneyin.");
         }
-      }, 35000);
+      }, 25000);
 
       setInitialized(true);
       setLoading(false);
-      await runDetectionLoop();
+      setStatusText(
+        nativeDetectorRef.current
+          ? "Yüzünüzü çerçeveye getirin"
+          : "Yüzünüzü çerçeveye getirin (algılanınca otomatik onaylanır)",
+      );
+      runDetectionLoop();
     };
 
     void init().catch((error: unknown) => {
       setLoading(false);
       setInitialized(false);
-      const message = error instanceof Error ? error.message : "Canlılık kontrolü başlatılamadı.";
+      let message = error instanceof Error ? error.message : "Canlılık kontrolü başlatılamadı.";
+      if (message.includes("NotAllowed") || message.includes("Permission")) {
+        message = "Kamera izni reddedildi. Ayarlardan Rideyo için kamera iznini açın.";
+      }
       setErrorMessage(message);
       onFailure?.(message);
     });
@@ -267,7 +230,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
     return () => {
       void cleanup();
     };
-  }, [cleanup, onFailure, onOpenChange, open, runDetectionLoop]);
+  }, [cleanup, onFailure, open, runDetectionLoop]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -275,40 +238,49 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5 text-primary" />
-            Aktif Canlilik Kontrolu
+            Canlılık Kontrolü
           </DialogTitle>
           <DialogDescription>
-            NFC sonrası güvenlik için canlı olduğunuzu doğruluyoruz. Ekrandaki adımları tamamlayın.
+            Yüzünüzü çerçeveye getirin — algılandığı anda doğrulama tamamlanır.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="relative overflow-hidden rounded-lg border bg-black">
-            <video ref={videoRef} className="h-64 w-full object-cover" muted playsInline autoPlay />
+            <video ref={videoRef} className="h-64 w-full object-cover scale-x-[-1]" muted playsInline autoPlay />
             {loading ? (
               <div className="absolute inset-0 flex items-center justify-center bg-black/60">
                 <Loader2 className="h-6 w-6 animate-spin text-white" />
               </div>
             ) : null}
+            {!loading && initialized ? (
+              <div className="pointer-events-none absolute inset-4 rounded-lg border-2 border-dashed border-white/70" />
+            ) : null}
           </div>
 
           <div className="rounded-md border bg-muted/30 p-3 text-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span>
-                Adim {Math.min(activeStepIndex + 1, STEP_ORDER.length)}/{STEP_ORDER.length}: {STEP_LABELS[activeStep]}
-              </span>
+              <CheckCircle2 className={`h-4 w-4 ${faceDetected ? "text-green-500" : "text-primary"}`} />
+              <span>{statusText}</span>
             </div>
           </div>
 
           {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
-          {!initialized && !loading && !errorMessage ? <p className="text-sm text-muted-foreground">Kamera hazırlanıyor...</p> : null}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col gap-2 sm:flex-col">
+          <Button
+            type="button"
+            className="w-full"
+            disabled={!initialized || loading}
+            onClick={() => completeLiveness()}
+          >
+            Yüzüm görünüyor — Onayla
+          </Button>
           <Button
             type="button"
             variant="outline"
+            className="w-full"
             onClick={() => {
               onFailure?.("Canlılık kontrolü iptal edildi.");
               onOpenChange(false);

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { useNavigate } from "react-router-dom";
 import { Shield, SmartphoneNfc } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +12,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  isIdentityVerifiedLocally,
+  isNfcVerified,
+  markIdentityVerifiedLocal,
+} from "@/lib/identityVerification";
 
 const NfcLoginVerificationPrompt = () => {
   const { user, loading } = useAuth();
@@ -24,59 +29,39 @@ const NfcLoginVerificationPrompt = () => {
     return Capacitor.isNativePlatform() && ["android", "ios"].includes(Capacitor.getPlatform());
   }, []);
 
-  const verifiedKey = useMemo(() => {
-    if (!user?.id) return "";
-    return `nfc_verified_${user.id}`;
-  }, [user?.id]);
-
   useEffect(() => {
-    if (!isNativeMobile || loading || !user || !verifiedKey) {
-      setOpen(false);
-      return;
-    }
+    let cancelled = false;
 
-    const isServerVerified = Boolean(
-      (user.user_metadata?.nfc_verified_at || user.user_metadata?.nfc_verified) &&
-        (user.user_metadata?.liveness_verified_at || user.user_metadata?.liveness_verified),
-    );
+    const checkVerification = async () => {
+      if (!isNativeMobile || loading || !user?.id) {
+        setOpen(false);
+        return;
+      }
 
-    if (isServerVerified) {
-      localStorage.setItem(verifiedKey, "true");
-    } else {
-      localStorage.removeItem(verifiedKey);
-    }
+      const { data: { user: freshUser } } = await supabase.auth.getUser();
+      const metadata = (freshUser?.user_metadata ?? user.user_metadata) as Record<string, unknown> | undefined;
+      const nfcDone = isNfcVerified(metadata) || isIdentityVerifiedLocally(user.id);
 
-    const isVerified = isServerVerified || localStorage.getItem(verifiedKey) === "true";
-    if (isVerified) {
-      setOpen(false);
-      return;
-    }
+      if (nfcDone) {
+        markIdentityVerifiedLocal(user.id);
+        if (!cancelled) setOpen(false);
+        return;
+      }
 
-    setOpen(!dismissedForSession);
-  }, [dismissedForSession, isNativeMobile, loading, user, verifiedKey]);
-
-  useEffect(() => {
-    if (!isNativeMobile) return;
-
-    const handleActive = () => {
-      if (document.visibilityState === "visible") {
-        setDismissedForSession(false);
+      if (!cancelled) {
+        setOpen(!dismissedForSession);
       }
     };
 
-    document.addEventListener("visibilitychange", handleActive);
-    window.addEventListener("focus", handleActive);
-
+    void checkVerification();
     return () => {
-      document.removeEventListener("visibilitychange", handleActive);
-      window.removeEventListener("focus", handleActive);
+      cancelled = true;
     };
-  }, [isNativeMobile]);
+  }, [dismissedForSession, isNativeMobile, loading, user, user?.id, user?.user_metadata]);
 
   const remindLater = () => {
     setDismissedForSession(true);
     setOpen(false);
-    toast.message("NFC doğrulama bu oturum için ertelendi. Uygulamaya tekrar girince yeniden gösterilecek.");
   };
 
   const goToVerificationPage = () => {
@@ -91,10 +76,7 @@ const NfcLoginVerificationPrompt = () => {
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) {
-          toast.message("Lütfen bir seçim yapın: Daha Sonra Hatırlat veya Şimdi Doğrula.");
-          return;
-        }
+        if (!nextOpen) return;
         setOpen(nextOpen);
       }}
     >

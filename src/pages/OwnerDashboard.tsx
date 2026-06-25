@@ -1,117 +1,220 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  TrendingUp, 
-  Car, 
-  Calendar, 
-  DollarSign, 
+import {
+  TrendingUp,
+  Car,
+  Calendar,
+  DollarSign,
   Star,
   Clock,
-  MapPin,
   Users,
-  AlertCircle
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNav from "@/components/BottomNav";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { format, isWithinInterval, parseISO } from "date-fns";
+import { tr } from "date-fns/locale";
+
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
+type OwnerCar = {
+  id: string;
+  name: string;
+  type: string;
+  plate: string;
+  status: string;
+  totalRentals: number;
+  monthlyEarnings: number;
+  rating: number;
+  nextBooking: string;
+};
+
+type OwnerRental = {
+  id: string;
+  carName: string;
+  renter: string;
+  startDate: string;
+  endDate: string;
+  amount: number;
+  status: string;
+  rating: number | null;
+};
+
 const OwnerDashboard = () => {
+  const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalEarnings: 0,
+    monthlyEarnings: 0,
+    totalRentals: 0,
+    activeRentals: 0,
+    averageRating: 0,
+    totalCars: 0,
+  });
+  const [recentRentals, setRecentRentals] = useState<OwnerRental[]>([]);
+  const [cars, setCars] = useState<OwnerCar[]>([]);
 
-  // Mock data - gerçek uygulamada API'den gelecek
-  const stats = {
-    totalEarnings: "45.280",
-    monthlyEarnings: "12.450",
-    totalRentals: 156,
-    activeRentals: 3,
-    averageRating: 4.8,
-    totalCars: 4
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchDashboardData();
+    } else if (!authLoading) {
+      setLoading(false);
+    }
+  }, [user, authLoading]);
+
+  const fetchDashboardData = async () => {
+    if (!user) return;
+    setLoading(true);
+
+    try {
+      const { data: ownerCars } = await supabase
+        .from("cars")
+        .select("id, name, type, plate_number, available")
+        .eq("owner_id", user.id);
+
+      const carList = ownerCars ?? [];
+      const carIds = carList.map((c) => c.id);
+
+      if (carIds.length === 0) {
+        setStats({
+          totalEarnings: 0,
+          monthlyEarnings: 0,
+          totalRentals: 0,
+          activeRentals: 0,
+          averageRating: 0,
+          totalCars: 0,
+        });
+        setCars([]);
+        setRecentRentals([]);
+        return;
+      }
+
+      const { data: bookings } = await supabase
+        .from("bookings")
+        .select("id, car_id, user_id, start_time, end_time, total_price, payment_status, rental_type")
+        .in("car_id", carIds)
+        .order("created_at", { ascending: false });
+
+      const paidBookings = (bookings ?? []).filter((b) => b.payment_status === "paid");
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const totalEarnings = paidBookings.reduce((sum, b) => sum + b.total_price, 0);
+      const monthlyEarnings = paidBookings
+        .filter((b) => parseISO(b.start_time) >= monthStart)
+        .reduce((sum, b) => sum + b.total_price, 0);
+
+      const activeRentals = paidBookings.filter((b) =>
+        isWithinInterval(now, { start: parseISO(b.start_time), end: parseISO(b.end_time) }),
+      ).length;
+
+      const renterIds = [...new Set(paidBookings.map((b) => b.user_id))];
+      const { data: profiles } = renterIds.length
+        ? await supabase.from("profiles").select("id, full_name").in("id", renterIds)
+        : { data: [] };
+
+      const profileMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name ?? "Kiracı"]));
+
+      const { data: reviews } = await supabase
+        .from("reviews")
+        .select("car_id, rating")
+        .in("car_id", carIds);
+
+      const avgRating =
+        reviews && reviews.length > 0
+          ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          : 0;
+
+      const carBookingsMap = new Map<string, typeof paidBookings>();
+      for (const booking of paidBookings) {
+        const list = carBookingsMap.get(booking.car_id) ?? [];
+        list.push(booking);
+        carBookingsMap.set(booking.car_id, list);
+      }
+
+      const mappedCars: OwnerCar[] = carList.map((car) => {
+        const carBookings = carBookingsMap.get(car.id) ?? [];
+        const carMonthly = carBookings
+          .filter((b) => parseISO(b.start_time) >= monthStart)
+          .reduce((sum, b) => sum + b.total_price, 0);
+
+        const activeOnCar = carBookings.some((b) =>
+          isWithinInterval(now, { start: parseISO(b.start_time), end: parseISO(b.end_time) }),
+        );
+
+        const upcoming = carBookings
+          .filter((b) => parseISO(b.start_time) > now)
+          .sort((a, b) => parseISO(a.start_time).getTime() - parseISO(b.start_time).getTime())[0];
+
+        const carReviews = (reviews ?? []).filter((r) => r.car_id === car.id);
+        const carRating =
+          carReviews.length > 0
+            ? carReviews.reduce((sum, r) => sum + r.rating, 0) / carReviews.length
+            : 0;
+
+        let status = "available";
+        if (!car.available) status = "maintenance";
+        else if (activeOnCar) status = "rented";
+
+        return {
+          id: car.id,
+          name: car.name,
+          type: car.type,
+          plate: car.plate_number ?? "—",
+          status,
+          totalRentals: carBookings.length,
+          monthlyEarnings: carMonthly,
+          rating: Math.round(carRating * 10) / 10,
+          nextBooking: upcoming
+            ? format(parseISO(upcoming.start_time), "d MMM yyyy", { locale: tr })
+            : "Rezervasyon yok",
+        };
+      });
+
+      const carNameMap = new Map(carList.map((c) => [c.id, c.name]));
+
+      const mappedRentals: OwnerRental[] = paidBookings.slice(0, 20).map((b) => {
+        const start = parseISO(b.start_time);
+        const end = parseISO(b.end_time);
+        let status = "completed";
+        if (isWithinInterval(now, { start, end })) status = "active";
+        else if (start > now) status = "upcoming";
+
+        return {
+          id: b.id,
+          carName: carNameMap.get(b.car_id) ?? "Araç",
+          renter: profileMap.get(b.user_id) ?? "Kiracı",
+          startDate: format(start, "d MMM yyyy", { locale: tr }),
+          endDate: format(end, "d MMM yyyy", { locale: tr }),
+          amount: b.total_price,
+          status,
+          rating: null,
+        };
+      });
+
+      setStats({
+        totalEarnings,
+        monthlyEarnings,
+        totalRentals: paidBookings.length,
+        activeRentals,
+        averageRating: Math.round(avgRating * 10) / 10,
+        totalCars: carList.length,
+      });
+      setCars(mappedCars);
+      setRecentRentals(mappedRentals);
+    } catch (error) {
+      console.error("Owner dashboard yüklenemedi:", error);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const recentRentals = [
-    {
-      id: 1,
-      carName: "Toyota Corolla",
-      renter: "Ahmet Y.",
-      startDate: "15 Kas 2024",
-      endDate: "17 Kas 2024",
-      amount: "1.200",
-      status: "completed",
-      rating: 5
-    },
-    {
-      id: 2,
-      carName: "Honda Civic",
-      renter: "Zeynep K.",
-      startDate: "18 Kas 2024",
-      endDate: "20 Kas 2024",
-      amount: "1.350",
-      status: "active",
-      rating: null
-    },
-    {
-      id: 3,
-      carName: "Volkswagen Golf",
-      renter: "Mehmet D.",
-      startDate: "10 Kas 2024",
-      endDate: "12 Kas 2024",
-      amount: "950",
-      status: "completed",
-      rating: 4
-    }
-  ];
-
-  const cars = [
-    {
-      id: 1,
-      name: "Toyota Corolla",
-      type: "Sedan",
-      plate: "34 ABC 123",
-      status: "active",
-      totalRentals: 45,
-      monthlyEarnings: "4.200",
-      rating: 4.9,
-      nextBooking: "22 Kas 2024"
-    },
-    {
-      id: 2,
-      name: "Honda Civic",
-      type: "Sedan",
-      plate: "34 DEF 456",
-      status: "rented",
-      totalRentals: 38,
-      monthlyEarnings: "3.800",
-      rating: 4.7,
-      nextBooking: "25 Kas 2024"
-    },
-    {
-      id: 3,
-      name: "Volkswagen Golf",
-      type: "Kompakt",
-      plate: "34 GHI 789",
-      status: "maintenance",
-      totalRentals: 52,
-      monthlyEarnings: "3.150",
-      rating: 4.8,
-      nextBooking: "Bakımda"
-    },
-    {
-      id: 4,
-      name: "Ford Focus",
-      type: "Kompakt",
-      plate: "34 JKL 012",
-      status: "available",
-      totalRentals: 21,
-      monthlyEarnings: "1.300",
-      rating: 5.0,
-      nextBooking: "Rezervasyon yok"
-    }
-  ];
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: BadgeVariant; label: string }> = {
@@ -119,16 +222,32 @@ const OwnerDashboard = () => {
       rented: { variant: "secondary", label: "Kiralandı" },
       maintenance: { variant: "destructive", label: "Bakımda" },
       available: { variant: "outline", label: "Müsait" },
-      completed: { variant: "secondary", label: "Tamamlandı" }
+      completed: { variant: "secondary", label: "Tamamlandı" },
+      upcoming: { variant: "outline", label: "Yaklaşan" },
     };
     const config = variants[status] || variants.available;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
+  const formatMoney = (value: number) =>
+    value.toLocaleString("tr-TR", { maximumFractionDigits: 0 });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-8 mt-20 text-center text-muted-foreground">
+          Yükleniyor...
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <Navbar />
-      
+
       <main className="flex-1 container mx-auto px-4 py-8 mt-20 mb-20">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
@@ -144,70 +263,51 @@ const OwnerDashboard = () => {
             </Link>
           </div>
 
-          {/* İstatistik Kartları */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <DollarSign className="w-8 h-8 text-primary" />
-                </div>
-                <p className="text-2xl font-bold">₺{stats.totalEarnings}</p>
+                <DollarSign className="w-8 h-8 text-primary mb-2" />
+                <p className="text-2xl font-bold">₺{formatMoney(stats.totalEarnings)}</p>
                 <p className="text-xs text-muted-foreground">Toplam Kazanç</p>
               </CardContent>
             </Card>
-
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <TrendingUp className="w-8 h-8 text-green-600" />
-                </div>
-                <p className="text-2xl font-bold">₺{stats.monthlyEarnings}</p>
+                <TrendingUp className="w-8 h-8 text-green-600 mb-2" />
+                <p className="text-2xl font-bold">₺{formatMoney(stats.monthlyEarnings)}</p>
                 <p className="text-xs text-muted-foreground">Bu Ay</p>
               </CardContent>
             </Card>
-
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <Calendar className="w-8 h-8 text-blue-600" />
-                </div>
+                <Calendar className="w-8 h-8 text-blue-600 mb-2" />
                 <p className="text-2xl font-bold">{stats.totalRentals}</p>
                 <p className="text-xs text-muted-foreground">Toplam Kiralama</p>
               </CardContent>
             </Card>
-
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <Clock className="w-8 h-8 text-orange-600" />
-                </div>
+                <Clock className="w-8 h-8 text-orange-600 mb-2" />
                 <p className="text-2xl font-bold">{stats.activeRentals}</p>
                 <p className="text-xs text-muted-foreground">Aktif Kiralama</p>
               </CardContent>
             </Card>
-
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <Star className="w-8 h-8 text-yellow-600" />
-                </div>
-                <p className="text-2xl font-bold">{stats.averageRating}</p>
+                <Star className="w-8 h-8 text-yellow-600 mb-2" />
+                <p className="text-2xl font-bold">{stats.averageRating || "—"}</p>
                 <p className="text-xs text-muted-foreground">Ortalama Puan</p>
               </CardContent>
             </Card>
-
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <Car className="w-8 h-8 text-purple-600" />
-                </div>
+                <Car className="w-8 h-8 text-purple-600 mb-2" />
                 <p className="text-2xl font-bold">{stats.totalCars}</p>
                 <p className="text-xs text-muted-foreground">Toplam Araç</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="overview">Genel Bakış</TabsTrigger>
@@ -223,23 +323,27 @@ const OwnerDashboard = () => {
                     <CardDescription>En son gerçekleşen kiralama işlemleri</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {recentRentals.slice(0, 3).map(rental => (
-                        <div key={rental.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex-1">
-                            <p className="font-semibold">{rental.carName}</p>
-                            <p className="text-sm text-muted-foreground">{rental.renter}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {rental.startDate} - {rental.endDate}
-                            </p>
+                    {recentRentals.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Henüz kiralama yok.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {recentRentals.slice(0, 3).map((rental) => (
+                          <div key={rental.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex-1">
+                              <p className="font-semibold">{rental.carName}</p>
+                              <p className="text-sm text-muted-foreground">{rental.renter}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {rental.startDate} - {rental.endDate}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-primary">₺{formatMoney(rental.amount)}</p>
+                              {getStatusBadge(rental.status)}
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold text-primary">₺{rental.amount}</p>
-                            {getStatusBadge(rental.status)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -255,22 +359,16 @@ const OwnerDashboard = () => {
                         Yeni Araç Ekle
                       </Button>
                     </Link>
-                    <Link to="/earnings-calculator" className="block">
+                    <Link to="/availability-calendar" className="block">
                       <Button className="w-full justify-start" variant="outline">
-                        <DollarSign className="w-4 h-4 mr-2" />
-                        Kazanç Hesapla
-                      </Button>
-                    </Link>
-                    <Link to="/car-comparison" className="block">
-                      <Button className="w-full justify-start" variant="outline">
-                        <TrendingUp className="w-4 h-4 mr-2" />
-                        Araç Karşılaştır
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Müsaitlik Takvimi
                       </Button>
                     </Link>
                     <Link to="/my-cars" className="block">
                       <Button className="w-full justify-start" variant="outline">
                         <Calendar className="w-4 h-4 mr-2" />
-                        Rezervasyonları Görüntüle
+                        Araçlarım
                       </Button>
                     </Link>
                   </CardContent>
@@ -279,53 +377,51 @@ const OwnerDashboard = () => {
             </TabsContent>
 
             <TabsContent value="cars" className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                {cars.map(car => (
-                  <Card key={car.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle>{car.name}</CardTitle>
-                          <CardDescription>{car.type} • {car.plate}</CardDescription>
+              {cars.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    Henüz araç eklemediniz.
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  {cars.map((car) => (
+                    <Card key={car.id}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle>{car.name}</CardTitle>
+                            <CardDescription>{car.type} • {car.plate}</CardDescription>
+                          </div>
+                          {getStatusBadge(car.status)}
                         </div>
-                        {getStatusBadge(car.status)}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-muted/50 rounded-lg">
-                          <p className="text-xs text-muted-foreground mb-1">Toplam Kiralama</p>
-                          <p className="text-xl font-bold">{car.totalRentals}</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-3 bg-muted/50 rounded-lg">
+                            <p className="text-xs text-muted-foreground mb-1">Toplam Kiralama</p>
+                            <p className="text-xl font-bold">{car.totalRentals}</p>
+                          </div>
+                          <div className="p-3 bg-muted/50 rounded-lg">
+                            <p className="text-xs text-muted-foreground mb-1">Aylık Kazanç</p>
+                            <p className="text-xl font-bold text-primary">₺{formatMoney(car.monthlyEarnings)}</p>
+                          </div>
                         </div>
-                        <div className="p-3 bg-muted/50 rounded-lg">
-                          <p className="text-xs text-muted-foreground mb-1">Aylık Kazanç</p>
-                          <p className="text-xl font-bold text-primary">₺{car.monthlyEarnings}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-yellow-600 fill-yellow-600" />
+                            <span className="font-semibold">{car.rating || "—"}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="w-4 h-4" />
+                            {car.nextBooking}
+                          </div>
                         </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Star className="w-4 h-4 text-yellow-600 fill-yellow-600" />
-                          <span className="font-semibold">{car.rating}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          {car.nextBooking}
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <Button className="flex-1" variant="outline" size="sm">
-                          Düzenle
-                        </Button>
-                        <Button className="flex-1" variant="outline" size="sm">
-                          Detaylar
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="rentals" className="space-y-6">
@@ -335,57 +431,40 @@ const OwnerDashboard = () => {
                   <CardDescription>Geçmiş ve aktif kiralama işlemleri</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {recentRentals.map(rental => (
-                      <div key={rental.id} className="p-4 border rounded-lg">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-lg">{rental.carName}</h4>
-                            <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                              <Users className="w-4 h-4" />
-                              {rental.renter}
-                            </p>
+                  {recentRentals.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Henüz kiralama yok.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {recentRentals.map((rental) => (
+                        <div key={rental.id} className="p-4 border rounded-lg">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h4 className="font-semibold text-lg">{rental.carName}</h4>
+                              <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                <Users className="w-4 h-4" />
+                                {rental.renter}
+                              </p>
+                            </div>
+                            {getStatusBadge(rental.status)}
                           </div>
-                          {getStatusBadge(rental.status)}
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
-                          <div>
-                            <p className="text-xs text-muted-foreground">Başlangıç</p>
-                            <p className="font-semibold text-sm">{rental.startDate}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Bitiş</p>
-                            <p className="font-semibold text-sm">{rental.endDate}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Tutar</p>
-                            <p className="font-semibold text-sm text-primary">₺{rental.amount}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Değerlendirme</p>
-                            <div className="flex items-center gap-1">
-                              {rental.rating ? (
-                                <>
-                                  <Star className="w-4 h-4 text-yellow-600 fill-yellow-600" />
-                                  <span className="font-semibold text-sm">{rental.rating}</span>
-                                </>
-                              ) : (
-                                <span className="text-sm text-muted-foreground">Bekleniyor</span>
-                              )}
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Başlangıç</p>
+                              <p className="font-semibold text-sm">{rental.startDate}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Bitiş</p>
+                              <p className="font-semibold text-sm">{rental.endDate}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Tutar</p>
+                              <p className="font-semibold text-sm text-primary">₺{formatMoney(rental.amount)}</p>
                             </div>
                           </div>
                         </div>
-
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">Detayları Gör</Button>
-                          {rental.status === "completed" && (
-                            <Button variant="outline" size="sm">Fatura İndir</Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

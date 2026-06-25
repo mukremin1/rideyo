@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="70" y1="55" x2="430" y2="445" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FB6020"/>
+      <stop offset="1" stop-color="#14B8A6"/>
+    </linearGradient>
+  </defs>
+  <rect width="2732" height="2732" fill="#FFFBF7"/>
+  <circle cx="1366" cy="1180" r="720" fill="#FB6020" opacity="0.06"/>
+  <circle cx="1366" cy="1180" r="520" fill="#14B8A6" opacity="0.05"/>
+  <g transform="translate(1116 916)">
+    <rect width="500" height="500" rx="108" fill="url(#bg)"/>
+    <g transform="translate(94 152)">
+      <path
+        fill="#FFFFFF"
+        d="M24 132c0-10 8-18 18-18h228c10 0 18 8 18 18v44H24v-44zm18-52c0-13 11-24 24-24h168c13 0 24 11 24 24v28H42V80zm36 108a22 22 0 1 0 0 44 22 22 0 0 0 0-44zm204 0a22 22 0 1 0 0 44 22 22 0 0 0 0-44z"
+      />
+      <path
+        fill="#FFFFFF"
+        fill-opacity="0.92"
+        d="M84 60h36l28 40h116l28-40h36l-40 56H124L84 60z"
+      />
+    </g>
+  </g>
+  <text
+    x="1366"
+    y="1580"
+    text-anchor="middle"
+    fill="#111827"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="132"
+    font-weight="700"
+    letter-spacing="-3"
+  >RideYo</text>
+  <text
+    x="1366"
+    y="1688"
+    text-anchor="middle"
+    fill="#6B7280"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="52"
+    font-weight="500"
+  >Smart Car Rental</text>
+</svg>
