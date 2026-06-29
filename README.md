@@ -1,73 +1,45 @@
-# Welcome to your Lovable project
+# RideYo
 
-## Project info
+Car-sharing / rental app (React + Vite + Supabase + Capacitor).
 
-**URL**: https://lovable.dev/projects/0db773dd-9530-4362-a44e-3059b271f6c6
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/0db773dd-9530-4362-a44e-3059b271f6c6) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Local setup
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run setup
+npm run env:init          # creates .env from .env.example
+# Edit .env with Supabase keys (Dashboard → Project Settings → API)
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Optional local API proxy (web only):
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+# Add to .env: VITE_SERVER_API_URL=http://localhost:3001
+npm run dev:full
+```
 
-**Use GitHub Codespaces**
+## Mobile (Android)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+# .env must NOT contain localhost URLs
+npm run mobile:sync
+cd android && ./gradlew assembleDebug
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
 
-## What technologies are used for this project?
+## Deploy checklist
 
-This project is built with:
+```sh
+npm run deploy:check
+npm run supabase:deploy:payment   # needs SUPABASE_ACCESS_TOKEN
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Edge function secrets template: `supabase/secrets.example.env`
 
-## How can I deploy this project?
+## Stack
 
-Simply open [Lovable](https://lovable.dev/projects/0db773dd-9530-4362-a44e-3059b271f6c6) and click on Share -> Publish.
+- Vite, TypeScript, React, shadcn-ui, Tailwind CSS
+- Supabase (auth, DB, edge functions)
+- Capacitor (Android / iOS)
+- iyzico (payments, sandbox)
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)

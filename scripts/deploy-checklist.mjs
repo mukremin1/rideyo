@@ -55,7 +55,7 @@ if (existsSync(envPath)) {
     pass(".env mobil", "VITE_SERVER_API_URL yok — APK için doğru");
   }
 } else {
-  fail(".env", "dosya bulunamadı");
+  fail(".env", "dosya bulunamadı", "npm run env:init → .env.example'dan oluştur, Supabase anahtarlarını doldur");
 }
 
 // 3. Migration file

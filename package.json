@@ -22,6 +22,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "setup": "npm ci --legacy-peer-deps",
+    "env:init": "node scripts/init-env.mjs",
     "supabase:deploy:payment": "node scripts/deploy-payment.mjs",
     "deploy:check": "node scripts/deploy-checklist.mjs",
     "supabase:migrate": "npx supabase db push",

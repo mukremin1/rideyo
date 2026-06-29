@@ -9,8 +9,12 @@ lerna-debug.log*
 
 node_modules
 # dist — included for offline clone on other machines
-# .env — included for offline clone on other machines
+.env
 .env.local
+supabase/.temp/
+supabase/secrets.env
+android/.gradle/
+.claude/
 android/keystore.properties
 android/keystore/*.keystore
 android/keystore/*.jks
