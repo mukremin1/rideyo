@@ -1,0 +1,132 @@
+{
+  "support": {
+    "page": {
+      "title": "Kundenservice",
+      "subtitle": "Unser KI-Assistent hilft Ihnen zuerst, danach können Sie mit dem Live-Support sprechen",
+      "aiBadge": "KI zuerst",
+      "whatsappContact": "Kontakt per WhatsApp",
+      "phone": "Telefon",
+      "whatsappMessage": "Hallo, ich möchte Informationen über RideYo erhalten.",
+      "welcome": "Hallo! Willkommen beim RideYo-Kundenservice. Unser KI-Assistent hilft Ihnen zuerst. Sie können später auch mit dem Live-Support sprechen. Wie kann ich Ihnen helfen?",
+      "placeholder": "Nachricht eingeben...",
+      "sendFailed": "Nachricht konnte nicht gesendet werden",
+      "streamError": "Stream konnte nicht gestartet werden"
+    },
+    "contact": {
+      "title": "Kontakt",
+      "reachUs": "So erreichen Sie uns",
+      "addressLabel": "Adresse",
+      "address": "Atatürk-Platz, Devlet Sahil Yolu Cd.\nTrabzon, Türkei",
+      "phoneLabel": "Telefon",
+      "phone": "+90 (462) 123 45 67",
+      "emailLabel": "E-Mail",
+      "email": "destek@ride-yo.com",
+      "hoursTitle": "Geschäftszeiten",
+      "hoursWeekday": "Montag – Freitag: 09:00 – 18:00",
+      "hoursSaturday": "Samstag: 10:00 – 16:00",
+      "hoursSunday": "Sonntag: Geschlossen",
+      "sendMessage": "Nachricht senden",
+      "namePlaceholder": "Ihr vollständiger Name",
+      "emailPlaceholder": "Ihre E-Mail-Adresse",
+      "phonePlaceholder": "Ihre Telefonnummer",
+      "subjectPlaceholder": "Betreff",
+      "messagePlaceholder": "Ihre Nachricht",
+      "submit": "Senden",
+      "toastTitle": "Nachricht empfangen",
+      "toastDesc": "Wir melden uns so schnell wie möglich bei Ihnen."
+    },
+    "about": {
+      "title": "Über uns",
+      "intro": "RideYo ist die innovativste Car-Sharing-Plattform der Türkei. Gegründet im Jahr 2024, ist es unsere Mission, Menschen zu helfen, ihre Fahrzeuge effizienter zu nutzen, und Fahrzeugeigentümern zu ermöglichen, mit ihren Autos Einkommen zu erzielen.",
+      "visionTitle": "Unsere Vision",
+      "vision": "Ein Ökosystem schaffen, in dem jeder bei Bedarf zuverlässig auf ein Fahrzeug zugreifen kann, indem wir den urbanen Verkehr nachhaltiger, wirtschaftlicher und flexibler gestalten.",
+      "missionTitle": "Unsere Mission",
+      "mission": "Mit unserem technologie- und vertrauensorientierten Ansatz eine sichere Brücke zwischen Fahrzeugeigentümern und Mietern bauen und flexible Minuten-, Stunden- und Tagesmietoptionen für jedes Budget anbieten.",
+      "valuesTitle": "Unsere Werte",
+      "values": {
+        "trust": "Vertrauen: Die Sicherheit aller Nutzer auf unserer Plattform hat für uns Priorität.",
+        "transparency": "Transparenz: Wir haben klare Preise und offene Kommunikationsrichtlinien.",
+        "sustainability": "Nachhaltigkeit: Wir reduzieren den CO₂-Fußabdruck, indem wir Car Sharing fördern.",
+        "innovation": "Innovation: Wir bieten das beste Erlebnis mit sich ständig weiterentwickelnder Technologie."
+      },
+      "howTitle": "Wie arbeiten wir?",
+      "how": "RideYo ermöglicht es Fahrzeugeigentümern, ungenutzte Fahrzeuge auf der Plattform zu vermieten. Mieter können Fahrzeuge einfach pro Minute, Stunde oder Tag mieten. Alle Transaktionen erfolgen digital über unsere sichere Zahlungsinfrastruktur.",
+      "closing": "Unsere Geschichte begann in Trabzon und wird bald in der gesamten Türkei expandieren. Seien Sie Teil dieser Reise!"
+    },
+    "faq": {
+      "title": "Häufig gestellte Fragen",
+      "subtitle": "Alles, was Sie über RideYo wissen möchten",
+      "generalTitle": "Allgemeine Fragen",
+      "renterTitle": "Für Mieter",
+      "ownerTitle": "Für Fahrzeugeigentümer",
+      "notFoundTitle": "Ihre Frage nicht gefunden?",
+      "notFoundDesc": "Zögern Sie nicht, uns zu kontaktieren",
+      "contactLink": "Zur Kontaktseite →",
+      "general": [
+        { "q": "Wie funktioniert RideYo?", "a": "RideYo ist eine Plattform, die es Fahrzeugeigentümern ermöglicht, ungenutzte Fahrzeuge zu vermieten. Nutzer können pro Minute, Stunde oder Tag mieten. Alle Transaktionen werden sicher über die App abgewickelt." },
+        { "q": "In welchen Städten sind Sie tätig?", "a": "Derzeit sind wir in Trabzon aktiv. Wir planen, bald nach Istanbul, Ankara, Izmir und anderen Großstädten zu expandieren." },
+        { "q": "Ist die Zahlung sicher?", "a": "Ja, alle Zahlungen werden über unsere sichere Zahlungsinfrastruktur abgewickelt. Ihre Kartendaten sind verschlüsselt und PCI-DSS-konform." },
+        { "q": "Gibt es eine mobile App?", "a": "Ja! RideYo hat eine mobile App für iOS und Android. Sie können auch über Ihren Webbrowser darauf zugreifen." }
+      ],
+      "renter": [
+        { "q": "Was brauche ich, um ein Auto zu mieten?", "a": "Erstellen Sie zuerst ein Konto und schließen Sie die Identitätsverifizierung ab. Wählen Sie dann ein passendes Auto, legen Sie die Mietdauer fest und bezahlen Sie über die App." },
+        { "q": "Welche Dokumente werden benötigt?", "a": "Ein gültiger Personalausweis und mindestens 2 Jahre Führerschein sind erforderlich. Sie müssen zwischen 21 und 70 Jahre alt sein und einen Mindest-Fahrerscore von 60 haben." },
+        { "q": "Wie wird der Preis berechnet?", "a": "Jedes Auto hat Minuten-, Stunden- und Tagespreise. Die Gebühren werden automatisch basierend auf Ihrer Mietdauer berechnet." },
+        { "q": "Gibt es eine Mindestmietdauer?", "a": "Mindestens 30 Minuten bei Minutenmiete, 1 Stunde bei Stundenmiete und 1 Tag bei Tagesmiete." },
+        { "q": "Wie lautet die Stornierungsrichtlinie?", "a": "Kostenlose Stornierung bis 24 Stunden vor Beginn. 50 % Rückerstattung bei 12–24 Stunden, keine Rückerstattung innerhalb von 12 Stunden oder bei Nichterscheinen." },
+        { "q": "Wie werden Abholung und Rückgabe gehandhabt?", "a": "Koordinieren Sie sich mit dem Eigentümer und führen Sie Abholung und Rückgabe am vereinbarten Ort durch." },
+        { "q": "Was passiert bei einem Unfall?", "a": "Alle Fahrzeuge sind versichert. Kontaktieren Sie bei einem Unfall sofort den RideYo-Support (24/7)." },
+        { "q": "Wer zahlt den Kraftstoff?", "a": "Kraftstoff ist Sache des Mieters. Geben Sie das Auto mit dem gleichen Tankstand wie bei der Abholung zurück." },
+        { "q": "Was ist mit Verkehrsstrafen?", "a": "Verkehrsstrafen während der Mietzeit gehören zum Mieter." },
+        { "q": "Was ist der Fahrerscore?", "a": "Der Fahrerscore wird aus Ihrer Miethistorie, Bewertungen, Strafpunkten und Verkehrsregister berechnet." }
+      ],
+      "owner": [
+        { "q": "Wie kann ich mein Auto vermieten?", "a": "Erstellen Sie ein Fahrzeugeigentümer-Konto und fügen Sie Ihre Fahrzeugdetails auf der Seite „Auto hinzufügen“ hinzu." },
+        { "q": "Welche Dokumente werden benötigt?", "a": "Fahrzeugschein, Kfz-Haftpflichtversicherung, optional Vollkasko, Personalausweis und Autofotos sind erforderlich." },
+        { "q": "Wie viel kann ich verdienen?", "a": "Einnahmen hängen von Fahrzeugtyp, Preisgestaltung und Mietfrequenz ab. RideYo erhebt eine Provision von 15 %." },
+        { "q": "Was ist mit der Versicherung?", "a": "Alle Mieten sind durch die RideYo Mini-Kaskoversicherung abgedeckt. Eine obligatorische Kfz-Haftpflichtversicherung ist für jedes Fahrzeug erforderlich." },
+        { "q": "Wie und wann werden Zahlungen ausgezahlt?", "a": "RideYo kassiert die Zahlung vom Mieter, zieht 15 % Provision ab und überweist den Restbetrag innerhalb von 7 Werktagen." },
+        { "q": "Wie kann ich mein Auto schützen?", "a": "Verfolgen Sie Ihr Auto in Echtzeit per GPS. Alle Mieter durchlaufen Identitäts- und Führerscheinverifizierung." },
+        { "q": "Kann ich Reservierungen ablehnen?", "a": "Ja, Sie können eingehende Reservierungsanfragen annehmen oder ablehnen." },
+        { "q": "Was, wenn mein Auto beschädigt wird?", "a": "Benachrichtigen Sie RideYo sofort. Versicherte Schäden werden von der Versicherung abgedeckt." },
+        { "q": "Was ist mit Steuern?", "a": "Einkünfte aus Autovermietung sind steuerpflichtig. RideYo stellt monatliche Einkommensberichte bereit." },
+        { "q": "Wie sollte ich Mieter auswählen?", "a": "Prüfen Sie Fahrerscore, Bewertungen, Miethistorie und Identitätsverifizierung." }
+      ]
+    },
+    "install": {
+      "title": "RideYo-App installieren",
+      "subtitle": "Installieren Sie die App auf Ihrem Handy und haben Sie sie überall dabei. Funktioniert auch ohne Internet!",
+      "installedTitle": "App installiert! 🎉",
+      "installedDesc": "RideYo ist jetzt auf Ihrem Gerät installiert. Öffnen Sie die App über Ihren Startbildschirm.",
+      "installButton": "App installieren",
+      "installHint": "Mit einem Tipp installieren — kein App Store nötig!",
+      "howToInstall": "Wie installiere ich?",
+      "howToInstallDesc": "Verwenden Sie „Zum Home-Bildschirm“ im Browsermenü",
+      "iphoneTitle": "iPhone (Safari)",
+      "iphoneSteps": ["Tippen Sie auf die Teilen-Schaltfläche", "Suchen Sie „Zum Home-Bildschirm“", "Tippen Sie auf „Hinzufügen“"],
+      "androidTitle": "Android (Chrome)",
+      "androidSteps": ["Tippen Sie auf die Menü-Schaltfläche (⋮)", "Suchen Sie „Zum Startbildschirm hinzufügen“", "Tippen Sie auf „Hinzufügen“"],
+      "fastAccessTitle": "Schnellzugriff",
+      "fastAccessDesc": "Direkt vom Startbildschirm öffnen — keine Browsersuche nötig",
+      "offlineTitle": "Funktioniert offline",
+      "offlineDesc": "Ohne Internet nutzbar; Daten werden zwischengespeichert",
+      "secureTitle": "Sicher",
+      "secureDesc": "Alle Daten sind verschlüsselt; Ihre Privatsphäre ist geschützt"
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "unreadCount": "{{count}} ungelesene Benachrichtigungen",
+      "markAllRead": "Alle als gelesen markieren",
+      "empty": "Sie haben noch keine Benachrichtigungen",
+      "markRead": "Gelesen",
+      "loadError": "Benachrichtigungen konnten nicht geladen werden",
+      "allMarkedRead": "Alle Benachrichtigungen als gelesen markiert",
+      "types": {
+        "booking": "Buchung",
+        "campaign": "Kampagne",
+        "system": "System",
+        "review": "Bewertung"
+      }
+    }
+  }
+}

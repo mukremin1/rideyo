@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
@@ -13,6 +14,7 @@ import carSedan from "@/assets/car-sedan.jpg";
 import carSuv from "@/assets/car-suv.jpg";
 
 const Cars = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [cars, setCars] = useState<CarType[]>([]);
@@ -21,7 +23,6 @@ const Cars = () => {
   useEffect(() => {
     fetchCars();
 
-    // Subscribe to real-time updates
     const channel = supabase
       .channel("cars-updates")
       .on(
@@ -46,13 +47,11 @@ const Cars = () => {
 
       if (error) {
         console.error("Araçlar yüklenirken hata:", error);
-        toast.error("Araçlar yüklenemedi");
+        toast.error(t("cars.loadError"));
         return;
       }
 
-      // Convert database format to component format
       const convertedCars: CarType[] = (data || []).map((car) => {
-        // Select image based on car type
         let image = carCompact;
         if (car.type === "sedan") image = carSedan;
         if (car.type === "suv") image = carSuv;
@@ -78,7 +77,7 @@ const Cars = () => {
       setCars(convertedCars);
     } catch (error) {
       console.error("Araçlar yüklenirken hata:", error);
-      toast.error("Bir hata oluştu");
+      toast.error(t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -91,6 +90,8 @@ const Cars = () => {
     return matchesSearch && matchesType;
   });
 
+  const carTypes = ["compact", "sedan", "suv"] as const;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -99,10 +100,10 @@ const Cars = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
-              Müsait Araçlar
+              {t("cars.title")}
             </h1>
             <p className="text-xl text-muted-foreground">
-              Yakınındaki araçları keşfet ve hemen kirala
+              {t("cars.subtitle")}
             </p>
           </div>
 
@@ -111,7 +112,7 @@ const Cars = () => {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input 
-                  placeholder="Araç veya lokasyon ara..."
+                  placeholder={t("cars.searchPlaceholder")}
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -119,7 +120,7 @@ const Cars = () => {
               </div>
               <Button variant="outline" className="sm:w-auto">
                 <SlidersHorizontal className="w-5 h-5 mr-2" />
-                Filtrele
+                {t("cars.filter")}
               </Button>
             </div>
 
@@ -129,35 +130,24 @@ const Cars = () => {
                 size="sm"
                 onClick={() => setSelectedType(null)}
               >
-                Tümü
+                {t("cars.all")}
               </Button>
-              <Button 
-                variant={selectedType === "compact" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedType("compact")}
-              >
-                Kompakt
-              </Button>
-              <Button 
-                variant={selectedType === "sedan" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedType("sedan")}
-              >
-                Sedan
-              </Button>
-              <Button 
-                variant={selectedType === "suv" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedType("suv")}
-              >
-                SUV
-              </Button>
+              {carTypes.map((type) => (
+                <Button 
+                  key={type}
+                  variant={selectedType === type ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedType(type)}
+                >
+                  {t(`cars.types.${type}`)}
+                </Button>
+              ))}
             </div>
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-xl text-muted-foreground">Yükleniyor...</p>
+              <p className="text-xl text-muted-foreground">{t("common.loading")}</p>
             </div>
           ) : (
             <>
@@ -171,8 +161,8 @@ const Cars = () => {
                 <div className="text-center py-12">
                   <p className="text-xl text-muted-foreground">
                     {cars.length === 0 
-                      ? "Henüz eklenmiş araç bulunmuyor" 
-                      : "Aramanıza uygun araç bulunamadı"}
+                      ? t("cars.noCars") 
+                      : t("cars.noResults")}
                   </p>
                 </div>
               )}

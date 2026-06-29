@@ -22,7 +22,8 @@ import {
   Play
 } from "lucide-react";
 import { format, isPast, isFuture, isToday, parseISO } from "date-fns";
-import { tr } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { useDateLocale } from "@/hooks/useDateLocale";
 import { toast } from "sonner";
 import { isBookingPaid } from "@/lib/paymentStatus";
 import { invokeEdgeFunction } from "@/lib/serverApi";
@@ -62,6 +63,8 @@ interface Booking {
 const MyBookings = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState<string | null>(null);
@@ -96,7 +99,7 @@ const MyBookings = () => {
       setBookings(data || []);
     } catch (error) {
       console.error("Rezervasyonları getirme hatası:", error);
-      toast.error("Rezervasyonlar yüklenirken bir hata oluştu");
+      toast.error(t("bookings.loadError"));
     } finally {
       setLoading(false);
     }
@@ -107,7 +110,7 @@ const MyBookings = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Oturum bulunamadı");
+        throw new Error(t("bookings.sessionNotFound"));
       }
 
       const { data, error } = await invokeEdgeFunction(
@@ -122,14 +125,14 @@ const MyBookings = () => {
       );
 
       if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || "İptal başarısız");
+        throw new Error(data?.error || error?.message || t("bookings.cancelActionFailed"));
       }
 
-      toast.success("Rezervasyon iptal edildi");
+      toast.success(t("bookings.cancelSuccess"));
       fetchBookings();
     } catch (error) {
       console.error("İptal hatası:", error);
-      toast.error(error instanceof Error ? error.message : "Rezervasyon iptal edilirken bir hata oluştu");
+      toast.error(error instanceof Error ? error.message : t("bookings.cancelFailed"));
     } finally {
       setCancelling(null);
     }
@@ -141,18 +144,18 @@ const MyBookings = () => {
     const endTime = parseISO(booking.end_time);
 
     if (booking.payment_status === "cancelled") {
-      return { label: "İptal Edildi", variant: "destructive" as const, icon: XCircle };
+      return { label: t("bookings.statusCancelled"), variant: "destructive" as const, icon: XCircle };
     }
     if (booking.payment_status === "pending") {
-      return { label: "Ödeme Bekliyor", variant: "secondary" as const, icon: AlertCircle };
+      return { label: t("bookings.statusPendingPayment"), variant: "secondary" as const, icon: AlertCircle };
     }
     if (isPast(endTime)) {
-      return { label: "Tamamlandı", variant: "default" as const, icon: CheckCircle2 };
+      return { label: t("bookings.statusCompleted"), variant: "default" as const, icon: CheckCircle2 };
     }
     if (isPast(startTime) && isFuture(endTime)) {
-      return { label: "Aktif", variant: "default" as const, icon: Car };
+      return { label: t("bookings.statusActive"), variant: "default" as const, icon: Car };
     }
-    return { label: "Yaklaşan", variant: "outline" as const, icon: Clock };
+    return { label: t("bookings.statusUpcoming"), variant: "outline" as const, icon: Clock };
   };
 
   const filterBookings = (type: string) => {
@@ -176,9 +179,11 @@ const MyBookings = () => {
 
   const getRentalTypeLabel = (type: string) => {
     switch (type) {
-      case "minute": return "Dakikalık";
-      case "hourly": return "Saatlik";
-      case "daily": return "Günlük";
+      case "minute": return t("payment.typeMinute");
+      case "hour":
+      case "hourly": return t("payment.typeHour");
+      case "day":
+      case "daily": return t("payment.typeDay");
       default: return type;
     }
   };
@@ -190,7 +195,7 @@ const MyBookings = () => {
         <div className="container mx-auto px-4 pt-24 pb-12 flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">Yükleniyor...</p>
+            <p className="text-muted-foreground">{t("common.loading")}</p>
           </div>
         </div>
         <Footer />
@@ -209,14 +214,14 @@ const MyBookings = () => {
                 <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Calendar className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">Giriş Yapmalısınız</CardTitle>
+                <CardTitle className="text-2xl">{t("bookings.loginTitle")}</CardTitle>
                 <CardDescription>
-                  Rezervasyonlarınızı görüntülemek için giriş yapmanız gerekmektedir.
+                  {t("bookings.loginDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button onClick={() => navigate("/auth")} size="lg" className="w-full">
-                  Giriş Yap / Üye Ol
+                  {t("bookings.loginButton")}
                 </Button>
               </CardContent>
             </Card>
@@ -254,7 +259,7 @@ const MyBookings = () => {
           <div className="flex-1 p-4 sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
               <div>
-                <h3 className="font-semibold text-lg">{booking.cars?.name || "Araç"}</h3>
+                <h3 className="font-semibold text-lg">{booking.cars?.name || t("bookings.defaultCarName")}</h3>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <MapPin className="w-3 h-3" />
                   {booking.cars?.location}
@@ -270,13 +275,13 @@ const MyBookings = () => {
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  {format(parseISO(booking.start_time), "d MMMM yyyy, HH:mm", { locale: tr })}
+                  {format(parseISO(booking.start_time), "d MMMM yyyy, HH:mm", { locale: dateLocale })}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4" />
                 <span>
-                  {format(parseISO(booking.end_time), "d MMMM yyyy, HH:mm", { locale: tr })}
+                  {format(parseISO(booking.end_time), "d MMMM yyyy, HH:mm", { locale: dateLocale })}
                 </span>
               </div>
             </div>
@@ -284,11 +289,11 @@ const MyBookings = () => {
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t">
               <div className="flex items-center gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">Kiralama Tipi</p>
+                  <p className="text-xs text-muted-foreground">{t("bookings.rentalTypeLabel")}</p>
                   <p className="font-medium">{getRentalTypeLabel(booking.rental_type)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Toplam Tutar</p>
+                  <p className="text-xs text-muted-foreground">{t("bookings.totalAmount")}</p>
                   <p className="font-semibold text-primary">{booking.total_price.toLocaleString("tr-TR")} ₺</p>
                 </div>
               </div>
@@ -310,7 +315,7 @@ const MyBookings = () => {
                     })}
                   >
                     <CreditCard className="w-4 h-4 mr-1" />
-                    Ödeme Yap
+                    {t("bookings.pay")}
                   </Button>
                 )}
 
@@ -320,7 +325,7 @@ const MyBookings = () => {
                   <Button
                     size="sm"
                     onClick={() =>
-                      navigate("/start-rental", {
+                      navigate(`/start-rental?bookingId=${booking.id}`, {
                         state: {
                           bookingId: booking.id,
                           carId: booking.car_id,
@@ -330,7 +335,7 @@ const MyBookings = () => {
                     }
                   >
                     <Play className="w-4 h-4 mr-1" />
-                    Kiralamayı Başlat
+                    {t("bookings.startRental")}
                   </Button>
                 )}
                 
@@ -343,21 +348,20 @@ const MyBookings = () => {
                         ) : (
                           <>
                             <XCircle className="w-4 h-4 mr-1" />
-                            İptal Et
+                            {t("bookings.cancelBooking")}
                           </>
                         )}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Rezervasyonu İptal Et</AlertDialogTitle>
+                        <AlertDialogTitle>{t("bookings.cancelDialogTitle")}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Bu rezervasyonu iptal etmek istediğinizden emin misiniz? 
-                          İptal koşulları için iptal politikamızı inceleyebilirsiniz.
+                          {t("bookings.cancelDialogDesc")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                        <AlertDialogCancel>{t("bookings.cancelDialogDismiss")}</AlertDialogCancel>
                         <AlertDialogAction onClick={() => cancelBooking(booking.id)}>
                           İptal Et
                         </AlertDialogAction>
@@ -372,7 +376,7 @@ const MyBookings = () => {
                   onClick={() => navigate("/rental-agreement")}
                 >
                   <FileText className="w-4 h-4 mr-1" />
-                  Sözleşme
+                  {t("bookings.agreement")}
                 </Button>
               </div>
             </div>
@@ -386,10 +390,10 @@ const MyBookings = () => {
     <div className="text-center py-12">
       <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
       <h3 className="text-lg font-medium mb-2">{message}</h3>
-      <p className="text-muted-foreground mb-6">Araç kiralayarak hemen başlayabilirsiniz.</p>
+      <p className="text-muted-foreground mb-6">{t("bookings.emptyHint")}</p>
       <Button onClick={() => navigate("/cars")}>
         <Car className="w-4 h-4 mr-2" />
-        Araçları İncele
+        {t("bookings.browseCars")}
       </Button>
     </div>
   );
@@ -402,34 +406,34 @@ const MyBookings = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Rezervasyonlarım</h1>
-              <p className="text-muted-foreground">Tüm kiralama geçmişinizi görüntüleyin</p>
+              <h1 className="text-3xl font-bold text-foreground">{t("bookings.title")}</h1>
+              <p className="text-muted-foreground">{t("bookings.subtitle")}</p>
             </div>
             <Button variant="outline" onClick={fetchBookings}>
               <RefreshCw className="w-4 h-4 mr-2" />
-              Yenile
+              {t("bookings.refresh")}
             </Button>
           </div>
 
           <Tabs defaultValue="all" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="all">
-                Tümü ({bookings.length})
+                {t("bookings.tabAll")} ({bookings.length})
               </TabsTrigger>
               <TabsTrigger value="active">
-                Aktif ({filterBookings("active").length})
+                {t("bookings.tabActive")} ({filterBookings("active").length})
               </TabsTrigger>
               <TabsTrigger value="upcoming">
-                Yaklaşan ({filterBookings("upcoming").length})
+                {t("bookings.tabUpcoming")} ({filterBookings("upcoming").length})
               </TabsTrigger>
               <TabsTrigger value="completed">
-                Geçmiş ({filterBookings("completed").length})
+                {t("bookings.tabPast")} ({filterBookings("completed").length})
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="all" className="space-y-4">
               {bookings.length === 0 ? (
-                <EmptyState message="Henüz rezervasyonunuz bulunmuyor" />
+                <EmptyState message={t("bookings.emptyAll")} />
               ) : (
                 bookings.map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
@@ -439,7 +443,7 @@ const MyBookings = () => {
 
             <TabsContent value="active" className="space-y-4">
               {filterBookings("active").length === 0 ? (
-                <EmptyState message="Aktif rezervasyonunuz bulunmuyor" />
+                <EmptyState message={t("bookings.emptyActive")} />
               ) : (
                 filterBookings("active").map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
@@ -449,7 +453,7 @@ const MyBookings = () => {
 
             <TabsContent value="upcoming" className="space-y-4">
               {filterBookings("upcoming").length === 0 ? (
-                <EmptyState message="Yaklaşan rezervasyonunuz bulunmuyor" />
+                <EmptyState message={t("bookings.emptyUpcoming")} />
               ) : (
                 filterBookings("upcoming").map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
@@ -459,7 +463,7 @@ const MyBookings = () => {
 
             <TabsContent value="completed" className="space-y-4">
               {filterBookings("completed").length === 0 ? (
-                <EmptyState message="Tamamlanmış rezervasyonunuz bulunmuyor" />
+                <EmptyState message={t("bookings.emptyPast")} />
               ) : (
                 filterBookings("completed").map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />

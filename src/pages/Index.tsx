@@ -13,9 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Crown, MapPin, Bell } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const {
     latitude,
     longitude,
@@ -40,7 +42,7 @@ const Index = () => {
           <div className="flex min-w-0 items-center gap-2 text-left">
             <Crown className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
             <span className="min-w-0 break-words text-[13px] font-medium leading-tight sm:text-sm">
-              Abonelik planlarıyla %25&apos;e varan indirim fırsatları
+              {t("home.promoBanner")}
             </span>
           </div>
           <div className="grid w-full grid-cols-1 items-stretch gap-2 sm:grid-cols-2 md:flex md:w-auto">
@@ -52,7 +54,7 @@ const Index = () => {
                 className="h-8 w-full whitespace-nowrap px-3 text-[11px] sm:h-9 sm:text-xs md:w-auto md:text-sm"
               >
                 <Bell className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Bildirimleri Etkinleştir
+                {t("home.enableNotifications")}
               </Button>
             )}
             <Button
@@ -61,7 +63,7 @@ const Index = () => {
               onClick={() => navigate("/packages")}
               className="h-8 w-full whitespace-nowrap px-3 text-[11px] sm:h-9 sm:text-xs md:w-auto md:text-sm"
             >
-              Planları İncele
+              {t("home.viewPlans")}
             </Button>
           </div>
         </div>
@@ -75,17 +77,17 @@ const Index = () => {
             <div className="min-w-0">
               <h2 className="mb-2 flex items-center gap-2 break-words text-2xl font-bold text-foreground sm:text-3xl">
                 <MapPin className="h-7 w-7 shrink-0 text-primary sm:h-8 sm:w-8" />
-                Harita Üzerinden Keşfedin
+                {t("home.mapTitle")}
               </h2>
               <p className="break-words text-muted-foreground">
-                Konumunuza yakın müsait araçları harita üzerinde görüntüleyin.
+                {t("home.mapDesc")}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               {!userLocation && !locationLoading && (
                 <Button variant="outline" onClick={requestLocationPermission} className="w-full sm:w-auto whitespace-normal">
                   <MapPin className="w-4 h-4 mr-2" />
-                  Konumu Etkinleştir
+                  {t("home.enableLocation")}
                 </Button>
               )}
               <Button
@@ -93,7 +95,7 @@ const Index = () => {
                 onClick={() => setShowMap(!showMap)}
                 className="w-full sm:w-auto whitespace-normal"
               >
-                {showMap ? "Haritayı Gizle" : "Haritayı Göster"}
+                {showMap ? t("home.hideMap") : t("home.showMap")}
               </Button>
             </div>
           </div>

@@ -1,0 +1,40 @@
+{
+  "admin": {
+    "noAccess": "Vous n'avez pas accès à cette page",
+    "title": "Panneau d'administration",
+    "subtitle": "Gestion des campagnes et du système",
+    "newCampaign": "Nouvelle campagne",
+    "editCampaign": "Modifier la campagne",
+    "createCampaign": "Créer une nouvelle campagne",
+    "campaignName": "Nom de la campagne",
+    "description": "Description",
+    "discountPercent": "Pourcentage de réduction (%)",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "carTypesLabel": "Types de véhicules (laisser vide pour tous les véhicules)",
+    "active": "Active",
+    "inactive": "Inactive",
+    "update": "Mettre à jour",
+    "create": "Créer",
+    "cancel": "Annuler",
+    "discountBadge": "{{percent}} % de réduction",
+    "startLabel": "Début :",
+    "endLabel": "Fin :",
+    "carsLabel": "Véhicules :",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette campagne ?",
+    "empty": "Aucune campagne créée pour le moment",
+    "toast": {
+      "updateError": "Impossible de mettre à jour la campagne",
+      "updateSuccess": "Campagne mise à jour",
+      "createError": "Impossible de créer la campagne",
+      "createSuccess": "Campagne créée",
+      "deleteError": "Impossible de supprimer la campagne",
+      "deleteSuccess": "Campagne supprimée"
+    },
+    "carTypes": {
+      "compact": "Compacte",
+      "sedan": "Berline",
+      "suv": "SUV"
+    }
+  }
+}

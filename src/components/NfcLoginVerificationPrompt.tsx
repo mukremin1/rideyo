@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Shield, SmartphoneNfc } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import {
 const NfcLoginVerificationPrompt = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [dismissedForSession, setDismissedForSession] = useState(false);
 
@@ -88,26 +90,26 @@ const NfcLoginVerificationPrompt = () => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            NFC Kimlik Doğrulaması
+            {t("verification.nfcPrompt.title")}
           </DialogTitle>
           <DialogDescription className="leading-relaxed">
-            Güvenli kiralama için giriş sonrası NFC ile kimlik doğrulaması gereklidir.
+            {t("verification.nfcPrompt.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
           <div className="flex items-start gap-2">
             <SmartphoneNfc className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <p>Şimdi Doğrula ile NFC doğrulama sayfasına yönlendirilirsiniz.</p>
+            <p>{t("verification.nfcPrompt.hint")}</p>
           </div>
         </div>
 
         <DialogFooter className="flex-col gap-3 sm:flex-row sm:justify-between sm:gap-4">
           <Button type="button" variant="outline" onClick={remindLater} className="w-full sm:w-auto">
-            Daha Sonra Hatırlat
+            {t("verification.nfcPrompt.remindLater")}
           </Button>
           <Button type="button" onClick={goToVerificationPage} className="w-full sm:w-auto">
-            Şimdi Doğrula
+            {t("verification.nfcPrompt.verifyNow")}
           </Button>
         </DialogFooter>
       </DialogContent>

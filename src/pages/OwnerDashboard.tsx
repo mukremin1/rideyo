@@ -19,8 +19,9 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { isBookingPaid } from "@/lib/paymentStatus";
+import { useTranslation } from "react-i18next";
 import { format, isWithinInterval, parseISO } from "date-fns";
-import { tr } from "date-fns/locale";
+import { useDateLocale } from "@/hooks/useDateLocale";
 
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
@@ -48,6 +49,8 @@ type OwnerRental = {
 };
 
 const OwnerDashboard = () => {
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
@@ -121,7 +124,7 @@ const OwnerDashboard = () => {
         ? await supabase.from("profiles").select("id, full_name").in("id", renterIds)
         : { data: [] };
 
-      const profileMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name ?? "Kiracı"]));
+      const profileMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name ?? t("owner.common.renter")]));
 
       const { data: reviews } = await supabase
         .from("reviews")
@@ -174,8 +177,8 @@ const OwnerDashboard = () => {
           monthlyEarnings: carMonthly,
           rating: Math.round(carRating * 10) / 10,
           nextBooking: upcoming
-            ? format(parseISO(upcoming.start_time), "d MMM yyyy", { locale: tr })
-            : "Rezervasyon yok",
+            ? format(parseISO(upcoming.start_time), "d MMM yyyy", { locale: dateLocale })
+            : t("owner.common.noBooking"),
         };
       });
 
@@ -190,10 +193,10 @@ const OwnerDashboard = () => {
 
         return {
           id: b.id,
-          carName: carNameMap.get(b.car_id) ?? "Araç",
-          renter: profileMap.get(b.user_id) ?? "Kiracı",
-          startDate: format(start, "d MMM yyyy", { locale: tr }),
-          endDate: format(end, "d MMM yyyy", { locale: tr }),
+          carName: carNameMap.get(b.car_id) ?? t("owner.common.car"),
+          renter: profileMap.get(b.user_id) ?? t("owner.common.renter"),
+          startDate: format(start, "d MMM yyyy", { locale: dateLocale }),
+          endDate: format(end, "d MMM yyyy", { locale: dateLocale }),
           amount: b.total_price,
           status,
           rating: null,
@@ -218,16 +221,16 @@ const OwnerDashboard = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: BadgeVariant; label: string }> = {
-      active: { variant: "default", label: "Aktif" },
-      rented: { variant: "secondary", label: "Kiralandı" },
-      maintenance: { variant: "destructive", label: "Bakımda" },
-      available: { variant: "outline", label: "Müsait" },
-      completed: { variant: "secondary", label: "Tamamlandı" },
-      upcoming: { variant: "outline", label: "Yaklaşan" },
+    const variants: Record<string, { variant: BadgeVariant; labelKey: string }> = {
+      active: { variant: "default", labelKey: "active" },
+      rented: { variant: "secondary", labelKey: "rented" },
+      maintenance: { variant: "destructive", labelKey: "maintenance" },
+      available: { variant: "outline", labelKey: "available" },
+      completed: { variant: "secondary", labelKey: "completed" },
+      upcoming: { variant: "outline", labelKey: "upcoming" },
     };
     const config = variants[status] || variants.available;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return <Badge variant={config.variant}>{t(`owner.common.status.${config.labelKey}`)}</Badge>;
   };
 
   const formatMoney = (value: number) =>
@@ -238,7 +241,7 @@ const OwnerDashboard = () => {
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-8 mt-20 text-center text-muted-foreground">
-          Yükleniyor...
+          {t("owner.common.loading")}
         </main>
         <Footer />
       </div>
@@ -253,20 +256,20 @@ const OwnerDashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Araç Sahibi Paneli</h1>
-              <p className="text-muted-foreground">Araçlarınızı ve kazançlarınızı yönetin</p>
+              <h1 className="text-4xl font-bold mb-2">{t("owner.dashboard.title")}</h1>
+              <p className="text-muted-foreground">{t("owner.dashboard.subtitle")}</p>
             </div>
             <div className="flex gap-2">
               <Link to="/owner/payout">
                 <Button variant="outline" size="lg">
                   <DollarSign className="w-4 h-4 mr-2" />
-                  Hakediş Ayarları
+                  {t("owner.dashboard.payoutSettings")}
                 </Button>
               </Link>
               <Link to="/add-car">
                 <Button size="lg">
                   <Car className="w-4 h-4 mr-2" />
-                  Araç Ekle
+                  {t("owner.dashboard.addCar")}
                 </Button>
               </Link>
             </div>
@@ -277,63 +280,63 @@ const OwnerDashboard = () => {
               <CardContent className="pt-6">
                 <DollarSign className="w-8 h-8 text-primary mb-2" />
                 <p className="text-2xl font-bold">₺{formatMoney(stats.totalEarnings)}</p>
-                <p className="text-xs text-muted-foreground">Toplam Kazanç</p>
+                <p className="text-xs text-muted-foreground">{t("owner.dashboard.totalEarnings")}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
                 <TrendingUp className="w-8 h-8 text-green-600 mb-2" />
                 <p className="text-2xl font-bold">₺{formatMoney(stats.monthlyEarnings)}</p>
-                <p className="text-xs text-muted-foreground">Bu Ay</p>
+                <p className="text-xs text-muted-foreground">{t("owner.dashboard.thisMonth")}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
                 <Calendar className="w-8 h-8 text-blue-600 mb-2" />
                 <p className="text-2xl font-bold">{stats.totalRentals}</p>
-                <p className="text-xs text-muted-foreground">Toplam Kiralama</p>
+                <p className="text-xs text-muted-foreground">{t("owner.dashboard.totalRentals")}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
                 <Clock className="w-8 h-8 text-orange-600 mb-2" />
                 <p className="text-2xl font-bold">{stats.activeRentals}</p>
-                <p className="text-xs text-muted-foreground">Aktif Kiralama</p>
+                <p className="text-xs text-muted-foreground">{t("owner.dashboard.activeRentals")}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
                 <Star className="w-8 h-8 text-yellow-600 mb-2" />
                 <p className="text-2xl font-bold">{stats.averageRating || "—"}</p>
-                <p className="text-xs text-muted-foreground">Ortalama Puan</p>
+                <p className="text-xs text-muted-foreground">{t("owner.dashboard.averageRating")}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
                 <Car className="w-8 h-8 text-purple-600 mb-2" />
                 <p className="text-2xl font-bold">{stats.totalCars}</p>
-                <p className="text-xs text-muted-foreground">Toplam Araç</p>
+                <p className="text-xs text-muted-foreground">{t("owner.dashboard.totalCars")}</p>
               </CardContent>
             </Card>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="overview">Genel Bakış</TabsTrigger>
-              <TabsTrigger value="cars">Araçlarım</TabsTrigger>
-              <TabsTrigger value="rentals">Kiralamalar</TabsTrigger>
+              <TabsTrigger value="overview">{t("owner.dashboard.tabs.overview")}</TabsTrigger>
+              <TabsTrigger value="cars">{t("owner.dashboard.tabs.cars")}</TabsTrigger>
+              <TabsTrigger value="rentals">{t("owner.dashboard.tabs.rentals")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Son Kiralamalar</CardTitle>
-                    <CardDescription>En son gerçekleşen kiralama işlemleri</CardDescription>
+                    <CardTitle>{t("owner.dashboard.recentRentals")}</CardTitle>
+                    <CardDescription>{t("owner.dashboard.recentRentalsDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {recentRentals.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Henüz kiralama yok.</p>
+                      <p className="text-sm text-muted-foreground">{t("owner.dashboard.noRentals")}</p>
                     ) : (
                       <div className="space-y-4">
                         {recentRentals.slice(0, 3).map((rental) => (
@@ -358,26 +361,26 @@ const OwnerDashboard = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Hızlı Eylemler</CardTitle>
-                    <CardDescription>Sık kullanılan işlemler</CardDescription>
+                    <CardTitle>{t("owner.dashboard.quickActions")}</CardTitle>
+                    <CardDescription>{t("owner.dashboard.quickActionsDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <Link to="/add-car" className="block">
                       <Button className="w-full justify-start" variant="outline">
                         <Car className="w-4 h-4 mr-2" />
-                        Yeni Araç Ekle
+                        {t("owner.dashboard.addNewCar")}
                       </Button>
                     </Link>
                     <Link to="/availability-calendar" className="block">
                       <Button className="w-full justify-start" variant="outline">
                         <Calendar className="w-4 h-4 mr-2" />
-                        Müsaitlik Takvimi
+                        {t("owner.dashboard.availabilityCalendar")}
                       </Button>
                     </Link>
                     <Link to="/my-cars" className="block">
                       <Button className="w-full justify-start" variant="outline">
                         <Calendar className="w-4 h-4 mr-2" />
-                        Araçlarım
+                        {t("owner.dashboard.myCars")}
                       </Button>
                     </Link>
                   </CardContent>
@@ -389,7 +392,7 @@ const OwnerDashboard = () => {
               {cars.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    Henüz araç eklemediniz.
+                    {t("owner.dashboard.noCars")}
                   </CardContent>
                 </Card>
               ) : (
@@ -408,11 +411,11 @@ const OwnerDashboard = () => {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="p-3 bg-muted/50 rounded-lg">
-                            <p className="text-xs text-muted-foreground mb-1">Toplam Kiralama</p>
+                            <p className="text-xs text-muted-foreground mb-1">{t("owner.dashboard.carTotalRentals")}</p>
                             <p className="text-xl font-bold">{car.totalRentals}</p>
                           </div>
                           <div className="p-3 bg-muted/50 rounded-lg">
-                            <p className="text-xs text-muted-foreground mb-1">Aylık Kazanç</p>
+                            <p className="text-xs text-muted-foreground mb-1">{t("owner.dashboard.carMonthlyEarnings")}</p>
                             <p className="text-xl font-bold text-primary">₺{formatMoney(car.monthlyEarnings)}</p>
                           </div>
                         </div>
@@ -436,12 +439,12 @@ const OwnerDashboard = () => {
             <TabsContent value="rentals" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Tüm Kiralamalar</CardTitle>
-                  <CardDescription>Geçmiş ve aktif kiralama işlemleri</CardDescription>
+                  <CardTitle>{t("owner.dashboard.allRentals")}</CardTitle>
+                  <CardDescription>{t("owner.dashboard.allRentalsDesc")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {recentRentals.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Henüz kiralama yok.</p>
+                    <p className="text-sm text-muted-foreground">{t("owner.dashboard.noRentals")}</p>
                   ) : (
                     <div className="space-y-4">
                       {recentRentals.map((rental) => (
@@ -458,15 +461,15 @@ const OwnerDashboard = () => {
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div>
-                              <p className="text-xs text-muted-foreground">Başlangıç</p>
+                              <p className="text-xs text-muted-foreground">{t("owner.dashboard.startDate")}</p>
                               <p className="font-semibold text-sm">{rental.startDate}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-muted-foreground">Bitiş</p>
+                              <p className="text-xs text-muted-foreground">{t("owner.dashboard.endDate")}</p>
                               <p className="font-semibold text-sm">{rental.endDate}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-muted-foreground">Tutar</p>
+                              <p className="text-xs text-muted-foreground">{t("owner.dashboard.amount")}</p>
                               <p className="font-semibold text-sm text-primary">₺{formatMoney(rental.amount)}</p>
                             </div>
                           </div>

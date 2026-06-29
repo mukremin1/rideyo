@@ -35,24 +35,27 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import BrandLogo from "./BrandLogo";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
-const navLinks = [
-  { to: "/", label: "Ana Sayfa" },
-  { to: "/cars", label: "Araç Filosu" },
-  { to: "/#how-it-works", label: "Nasıl Çalışır", hash: true },
-  { to: "/owner-dashboard", label: "Araç Sahipleri" },
-  { to: "/support", label: "Destek" },
-];
+import { useTranslation } from "react-i18next";
 
 const Navbar = () => {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = [
+    { to: "/", label: t("nav.home") },
+    { to: "/cars", label: t("nav.fleet") },
+    { to: "/#how-it-works", label: t("nav.howItWorks"), hash: true },
+    { to: "/owner-dashboard", label: t("nav.owners") },
+    { to: "/support", label: t("nav.support") },
+  ];
 
   const isIdentityVerified = Boolean(
     (user?.user_metadata?.nfc_verified_at || user?.user_metadata?.nfc_verified) &&
@@ -144,21 +147,22 @@ const Navbar = () => {
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5 md:gap-2">
+            <LanguageSwitcher />
             {user ? (
               <>
                 <Link to="/my-bookings" className="hidden lg:inline-flex">
                   <Button variant="ghost" size="sm" className="font-medium">
                     <Calendar className="mr-2 h-4 w-4" />
-                    Rezervasyonlarım
+                    {t("nav.myBookings")}
                   </Button>
                 </Link>
                 <Link to="/favorites" className="hidden md:inline-flex">
-                  <Button variant="ghost" size="icon" aria-label="Favoriler">
+                  <Button variant="ghost" size="icon" aria-label={t("nav.favorites")}>
                     <Heart className="h-5 w-5" />
                   </Button>
                 </Link>
                 <Link to="/notifications" className="hidden md:inline-flex">
-                  <Button variant="ghost" size="icon" className="relative" aria-label="Bildirimler">
+                  <Button variant="ghost" size="icon" className="relative" aria-label={t("nav.notifications")}>
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
                       <Badge className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center p-0 text-[10px]">
@@ -170,7 +174,7 @@ const Navbar = () => {
 
                 <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="xl:hidden" aria-label="Menü">
+                    <Button variant="ghost" size="icon" className="xl:hidden" aria-label={t("nav.menu")}>
                       <Menu className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
@@ -183,7 +187,7 @@ const Navbar = () => {
                     <div className="mt-6 space-y-6">
                       <div>
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Keşfet
+                          {t("nav.explore")}
                         </p>
                         <div className="space-y-1">
                           {navLinks.map((link) =>
@@ -211,17 +215,17 @@ const Navbar = () => {
                       </div>
                       <div>
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Kiralama
+                          {t("nav.rental")}
                         </p>
                         <div className="space-y-1">
                           <button type="button" onClick={() => go("/my-bookings")} className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium hover:bg-muted">
-                            Rezervasyonlarım
+                            {t("nav.myBookings")}
                           </button>
                           <button type="button" onClick={() => go("/favorites")} className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium hover:bg-muted">
-                            Favorilerim
+                            {t("nav.favorites")}
                           </button>
                           <button type="button" onClick={() => go("/packages")} className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium hover:bg-muted">
-                            Abonelik Planları
+                            {t("nav.subscriptionPlans")}
                           </button>
                         </div>
                       </div>
@@ -233,75 +237,75 @@ const Navbar = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="default" size="sm" className="h-9 gap-2 px-3 font-medium">
                       <User className="h-4 w-4" />
-                      <span className="hidden sm:inline">Hesabım</span>
+                      <span className="hidden sm:inline">{t("nav.account")}</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-60 bg-popover">
                     <DropdownMenuLabel className="font-normal">
-                      <p className="text-sm font-semibold">Hesabım</p>
+                      <p className="text-sm font-semibold">{t("nav.account")}</p>
                       <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel className="text-xs text-muted-foreground">Profil</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">{t("profile.title")}</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate("/profile")}>
                         <User className="mr-2 h-4 w-4" />
-                        Profil Bilgileri
+                        {t("nav.profileInfo")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/identity-verification")}>
                         <ShieldCheck className="mr-2 h-4 w-4" />
-                        {isIdentityVerified ? "Kimlik Doğrulandı" : "Kimlik Doğrulama"}
+                        {isIdentityVerified ? t("nav.identityVerified") : t("nav.identityVerify")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/driver-score")}>
                         <Award className="mr-2 h-4 w-4" />
-                        Sürücü Puanı
+                        {t("nav.driverScore")}
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
 
                     <DropdownMenuSeparator />
 
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel className="text-xs text-muted-foreground">Kiralama</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">{t("nav.rental")}</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
                         <Calendar className="mr-2 h-4 w-4" />
-                        Rezervasyonlarım
+                        {t("nav.myBookings")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/favorites")}>
                         <Heart className="mr-2 h-4 w-4" />
-                        Favorilerim
+                        {t("nav.favorites")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/packages")}>
                         <CreditCard className="mr-2 h-4 w-4" />
-                        Abonelik Planları
+                        {t("nav.subscriptionPlans")}
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
 
                     <DropdownMenuSeparator />
 
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel className="text-xs text-muted-foreground">Araç Sahibi</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">{t("nav.owner")}</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate("/owner-dashboard")}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Sahip Paneli
+                        {t("nav.ownerPanel")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/my-cars")}>
                         <Car className="mr-2 h-4 w-4" />
-                        Araçlarım
+                        {t("nav.myCars")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/add-car")}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Araç Ekle
+                        {t("nav.addCar")}
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
 
                     <DropdownMenuSeparator />
 
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel className="text-xs text-muted-foreground">Destek</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">{t("nav.support")}</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate("/notifications")}>
                         <Bell className="mr-2 h-4 w-4" />
-                        Bildirimler
+                        {t("nav.notifications")}
                         {unreadCount > 0 && (
                           <Badge variant="secondary" className="ml-auto">
                             {unreadCount}
@@ -310,11 +314,11 @@ const Navbar = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/vehicle-alerts")}>
                         <AlertTriangle className="mr-2 h-4 w-4" />
-                        Araç Uyarıları
+                        {t("nav.vehicleAlerts")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/support")}>
                         <MessageCircle className="mr-2 h-4 w-4" />
-                        Destek Merkezi
+                        {t("nav.supportCenter")}
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
 
@@ -323,7 +327,7 @@ const Navbar = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => navigate("/admin")}>
                           <Shield className="mr-2 h-4 w-4" />
-                          Yönetim Paneli
+                          {t("nav.adminPanel")}
                         </DropdownMenuItem>
                       </>
                     )}
@@ -331,7 +335,7 @@ const Navbar = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
-                      Oturumu Kapat
+                      {t("nav.signOut")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -340,7 +344,7 @@ const Navbar = () => {
               <>
                 <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="xl:hidden" aria-label="Menü">
+                    <Button variant="ghost" size="icon" className="xl:hidden" aria-label={t("nav.menu")}>
                       <Menu className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
@@ -377,12 +381,12 @@ const Navbar = () => {
                 </Sheet>
                 <Link to="/auth" className="hidden md:inline-flex">
                   <Button variant="ghost" size="sm" className="font-medium">
-                    Giriş Yap
+                    {t("nav.signIn")}
                   </Button>
                 </Link>
                 <Link to="/auth">
                   <Button variant="default" size="sm" className="h-9 font-medium">
-                    Kayıt Ol
+                    {t("nav.signUp")}
                   </Button>
                 </Link>
               </>

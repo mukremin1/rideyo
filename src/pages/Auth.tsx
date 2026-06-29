@@ -1,5 +1,7 @@
-﻿import { useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation, Trans } from "react-i18next";
+import type { TFunction } from "i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,27 +14,30 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Car, User, KeyRound } from "lucide-react";
 import { z } from "zod";
 
-const signInSchema = z.object({
-  email: z.string().email({ message: "Gecerli bir e-posta adresi girin" }),
-  password: z.string().min(6, { message: "Şifre en az 6 karakter olmalı" }),
-});
-
-const signUpSchema = z
-  .object({
-    email: z.string().email({ message: "Gecerli bir e-posta adresi girin" }),
-    password: z.string().min(6, { message: "Şifre en az 6 karakter olmalı" }),
-    confirmPassword: z.string().min(6, { message: "Şifre tekrarı en az 6 karakter olmalı" }),
-    fullName: z.string().min(2, { message: "Ad soyad en az 2 karakter olmalı" }),
-    phone: z.string().min(10, { message: "Gecerli bir telefon numarasi girin" }).optional(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Şifreler eşleşmiyor",
-    path: ["confirmPassword"],
+const createSignInSchema = (t: TFunction) =>
+  z.object({
+    email: z.string().email({ message: t("auth.validation.emailInvalid") }),
+    password: z.string().min(6, { message: t("auth.validation.passwordMin") }),
   });
+
+const createSignUpSchema = (t: TFunction) =>
+  z
+    .object({
+      email: z.string().email({ message: t("auth.validation.emailInvalid") }),
+      password: z.string().min(6, { message: t("auth.validation.passwordMin") }),
+      confirmPassword: z.string().min(6, { message: t("auth.validation.confirmPasswordMin") }),
+      fullName: z.string().min(2, { message: t("auth.validation.fullNameMin") }),
+      phone: z.string().min(10, { message: t("auth.validation.phoneInvalid") }).optional(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("auth.validation.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
 
 type UserType = "renter" | "car_owner";
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,6 +47,9 @@ const Auth = () => {
   const [userType, setUserType] = useState<UserType>("renter");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const signInSchema = useMemo(() => createSignInSchema(t), [t]);
+  const signUpSchema = useMemo(() => createSignUpSchema(t), [t]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +70,7 @@ const Auth = () => {
     }
 
     if (!termsAccepted) {
-      toast.error("Kayıt için sözleşme ve gizlilik koşullarını kabul etmelisiniz.");
+      toast.error(t("auth.toast.termsRequired"));
       return;
     }
 
@@ -86,7 +94,7 @@ const Auth = () => {
 
       if (error) {
         if (error.message.toLowerCase().includes("already registered")) {
-          toast.error("Bu e-posta adresi zaten kayitli");
+          toast.error(t("auth.toast.emailAlreadyRegistered"));
         } else {
           toast.error(error.message);
         }
@@ -113,17 +121,17 @@ const Auth = () => {
 
         const successMessage =
           userType === "car_owner"
-            ? "Araç sahibi olarak kayıt başarılı! Artık araç ekleyebilirsiniz."
-            : "Kayıt başarılı! Artık araç kiralayabilirsiniz.";
+            ? t("auth.toast.signUpSuccessCarOwner")
+            : t("auth.toast.signUpSuccessRenter");
 
         toast.success(successMessage);
         navigate("/");
       } else {
-        toast.success("Kayıt oluşturuldu. Lütfen e-posta adresinizi doğrulayın.");
+        toast.success(t("auth.toast.signUpVerifyEmail"));
       }
     } catch (error) {
       console.error("Kayıt hatası:", error);
-      toast.error("Bir hata oluştu");
+      toast.error(t("auth.toast.genericError"));
     } finally {
       setLoading(false);
     }
@@ -151,9 +159,9 @@ const Auth = () => {
 
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
-          toast.error("E-posta veya sifre hatali");
+          toast.error(t("auth.toast.invalidCredentials"));
         } else if (error.message.toLowerCase().includes("email not confirmed")) {
-          toast.error("E-posta adresinizi doğruladıktan sonra giriş yapabilirsiniz.");
+          toast.error(t("auth.toast.emailNotConfirmed"));
         } else {
           toast.error(error.message);
         }
@@ -161,12 +169,12 @@ const Auth = () => {
       }
 
       if (data.user) {
-        toast.success("Giriş başarılı!");
+        toast.success(t("auth.toast.signInSuccess"));
         navigate("/");
       }
     } catch (error) {
       console.error("Giriş hatası:", error);
-      toast.error("Bir hata oluştu");
+      toast.error(t("auth.toast.genericError"));
     } finally {
       setLoading(false);
     }
@@ -185,18 +193,18 @@ const Auth = () => {
         <Card className="p-8">
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin">Giriş Yap</TabsTrigger>
-              <TabsTrigger value="signup">Üye Ol</TabsTrigger>
+              <TabsTrigger value="signin">{t("auth.tabs.signIn")}</TabsTrigger>
+              <TabsTrigger value="signup">{t("auth.tabs.signUp")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">E-posta</Label>
+                  <Label htmlFor="signin-email">{t("auth.fields.email")}</Label>
                   <Input
                     id="signin-email"
                     type="email"
-                    placeholder="ornek@email.com"
+                    placeholder={t("auth.placeholders.email")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -204,11 +212,11 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Şifre</Label>
+                  <Label htmlFor="signin-password">{t("auth.fields.password")}</Label>
                   <Input
                     id="signin-password"
                     type="password"
-                    placeholder="********"
+                    placeholder={t("auth.placeholders.password")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -216,7 +224,7 @@ const Auth = () => {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+                  {loading ? t("auth.signIn.submitting") : t("auth.signIn.submit")}
                 </Button>
               </form>
             </TabsContent>
@@ -224,7 +232,7 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-3">
-                  <Label>Hesap Turu</Label>
+                  <Label>{t("auth.fields.accountType")}</Label>
                   <RadioGroup
                     value={userType}
                     onValueChange={(value) => setUserType(value as UserType)}
@@ -237,8 +245,8 @@ const Auth = () => {
                         className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                       >
                         <User className="mb-2 h-6 w-6" />
-                        <span className="text-sm font-medium">Kiracı</span>
-                        <span className="text-xs text-muted-foreground text-center mt-1">Araç kiralamak istiyorum</span>
+                        <span className="text-sm font-medium">{t("auth.signUp.renter")}</span>
+                        <span className="text-xs text-muted-foreground text-center mt-1">{t("auth.signUp.renterDesc")}</span>
                       </Label>
                     </div>
                     <div>
@@ -248,19 +256,19 @@ const Auth = () => {
                         className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                       >
                         <KeyRound className="mb-2 h-6 w-6" />
-                        <span className="text-sm font-medium">Araç Sahibi</span>
-                        <span className="text-xs text-muted-foreground text-center mt-1">Aracımı kiraya vermek istiyorum</span>
+                        <span className="text-sm font-medium">{t("auth.signUp.carOwner")}</span>
+                        <span className="text-xs text-muted-foreground text-center mt-1">{t("auth.signUp.carOwnerDesc")}</span>
                       </Label>
                     </div>
                   </RadioGroup>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Ad Soyad</Label>
+                  <Label htmlFor="signup-name">{t("auth.fields.fullName")}</Label>
                   <Input
                     id="signup-name"
                     type="text"
-                    placeholder="Adiniz Soyadiniz"
+                    placeholder={t("auth.placeholders.fullName")}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
@@ -268,22 +276,22 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-phone">Telefon</Label>
+                  <Label htmlFor="signup-phone">{t("auth.fields.phone")}</Label>
                   <Input
                     id="signup-phone"
                     type="tel"
-                    placeholder="05XX XXX XX XX"
+                    placeholder={t("auth.placeholders.phone")}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">E-posta</Label>
+                  <Label htmlFor="signup-email">{t("auth.fields.email")}</Label>
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="ornek@email.com"
+                    placeholder={t("auth.placeholders.email")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -291,11 +299,11 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Şifre</Label>
+                  <Label htmlFor="signup-password">{t("auth.fields.password")}</Label>
                   <Input
                     id="signup-password"
                     type="password"
-                    placeholder="********"
+                    placeholder={t("auth.placeholders.password")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -303,11 +311,11 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-confirm-password">Şifre Tekrar</Label>
+                  <Label htmlFor="signup-confirm-password">{t("auth.fields.confirmPassword")}</Label>
                   <Input
                     id="signup-confirm-password"
                     type="password"
-                    placeholder="********"
+                    placeholder={t("auth.placeholders.password")}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -317,17 +325,23 @@ const Auth = () => {
                 <div className="flex items-start space-x-3">
                   <Checkbox id="signup-terms" checked={termsAccepted} onCheckedChange={(checked) => setTermsAccepted(Boolean(checked))} />
                   <label htmlFor="signup-terms" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-                    <Link to="/rental-agreement" className="text-primary hover:underline">Kiralama Sözleşmesi</Link> ve <Link to="/privacy" className="text-primary hover:underline">Gizlilik Politikası</Link> koşullarını kabul ediyorum.
+                    <Trans
+                      i18nKey="auth.signUp.termsAccept"
+                      components={{
+                        rentalLink: <Link to="/rental-agreement" className="text-primary hover:underline" />,
+                        privacyLink: <Link to="/privacy" className="text-primary hover:underline" />,
+                      }}
+                    />
                   </label>
                 </div>
 
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Kayıt olunuyor..." : "Üye Ol"}
+                  {loading ? t("auth.signUp.submitting") : t("auth.signUp.submit")}
                 </Button>
 
                 {userType === "car_owner" && (
                   <p className="text-xs text-muted-foreground text-center mt-2">
-                    Araç sahibi olarak kaydolarak aracınızı platforma ekleyebilir ve gelir elde edebilirsiniz.
+                    {t("auth.signUp.carOwnerHint")}
                   </p>
                 )}
               </form>

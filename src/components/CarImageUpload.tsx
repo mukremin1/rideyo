@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -11,6 +12,7 @@ interface CarImageUploadProps {
 }
 
 const CarImageUpload = ({ onImageUploaded, currentImageUrl, userId }: CarImageUploadProps) => {
+  const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -19,50 +21,45 @@ const CarImageUpload = ({ onImageUploaded, currentImageUrl, userId }: CarImageUp
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error("Lütfen bir resim dosyası seçin");
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("components.carImageUpload.invalidFile"));
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Dosya boyutu 5MB'dan küçük olmalıdır");
+      toast.error(t("components.carImageUpload.fileTooLarge"));
       return;
     }
 
     setUploading(true);
 
     try {
-      // Create unique file name
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
-      // Upload to Supabase Storage
       const { data, error } = await supabase.storage
-        .from('car-images')
+        .from("car-images")
         .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
+          cacheControl: "3600",
+          upsert: false,
         });
 
       if (error) {
         console.error("Upload error:", error);
-        toast.error("Fotoğraf yüklenirken hata oluştu");
+        toast.error(t("components.carImageUpload.uploadError"));
         return;
       }
 
-      // Get public URL
       const { data: urlData } = supabase.storage
-        .from('car-images')
+        .from("car-images")
         .getPublicUrl(data.path);
 
       setPreviewUrl(urlData.publicUrl);
       onImageUploaded(urlData.publicUrl);
-      toast.success("Fotoğraf başarıyla yüklendi");
+      toast.success(t("components.carImageUpload.uploadSuccess"));
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Fotoğraf yüklenirken hata oluştu");
+      toast.error(t("components.carImageUpload.uploadError"));
     } finally {
       setUploading(false);
     }
@@ -90,7 +87,7 @@ const CarImageUpload = ({ onImageUploaded, currentImageUrl, userId }: CarImageUp
         <div className="relative">
           <img
             src={previewUrl}
-            alt="Araç fotoğrafı"
+            alt={t("components.carImageUpload.altText")}
             className="w-full h-48 object-cover rounded-lg border"
           />
           <Button
@@ -111,7 +108,7 @@ const CarImageUpload = ({ onImageUploaded, currentImageUrl, userId }: CarImageUp
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-sm text-muted-foreground">Yükleniyor...</p>
+              <p className="text-sm text-muted-foreground">{t("components.carImageUpload.uploading")}</p>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
@@ -119,12 +116,12 @@ const CarImageUpload = ({ onImageUploaded, currentImageUrl, userId }: CarImageUp
                 <Image className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <p className="font-medium">Araç Fotoğrafı Yükle</p>
-                <p className="text-sm text-muted-foreground">PNG, JPG veya WEBP (max. 5MB)</p>
+                <p className="font-medium">{t("components.carImageUpload.uploadTitle")}</p>
+                <p className="text-sm text-muted-foreground">{t("components.carImageUpload.uploadHint")}</p>
               </div>
               <Button type="button" variant="outline" size="sm" className="mt-2">
                 <Upload className="h-4 w-4 mr-2" />
-                Fotoğraf Seç
+                {t("components.carImageUpload.selectPhoto")}
               </Button>
             </div>
           )}

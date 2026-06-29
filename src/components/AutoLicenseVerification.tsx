@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
+import { useTranslation, Trans } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -49,11 +50,11 @@ interface AutoLicenseVerificationProps {
 const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerificationProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const stored = readStoredIdentity(user?.user_metadata as Record<string, unknown> | undefined);
 
-  // MRZ input — dates hidden after first successful scan (stored in profile)
-  const [docNumber, setDocNumber]     = useState(stored.docNumber ?? "");
+  const [docNumber, setDocNumber] = useState(stored.docNumber ?? "");
   const [dateOfBirth, setDateOfBirth] = useState(stored.dobYymmdd ? yymmddToIso(stored.dobYymmdd) : "");
   const [dateOfExpiry, setDateOfExpiry] = useState(stored.expYymmdd ? yymmddToIso(stored.expYymmdd) : "");
 
@@ -66,24 +67,27 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
   const [verificationStep, setVerificationStep] = useState<"idle" | "checking" | "complete">("idle");
   const [result, setResult] = useState<LicenseVerificationResult | null>(null);
 
-  // NFC / eID state
   const [nfcStatus, setNfcStatus] = useState<"idle" | "scanning" | "verified" | "error" | "unsupported">(
     stored.nfcVerified ? "verified" : "idle",
   );
-  const [nfcError, setNfcError]   = useState<string | null>(null);
-  const [cardData, setCardData]   = useState<EidCardData | null>(() => cardDataFromStored(stored));
+  const [nfcError, setNfcError] = useState<string | null>(null);
+  const [cardData, setCardData] = useState<EidCardData | null>(() => cardDataFromStored(stored));
   const nfcActiveRef = useRef(false);
 
-  // Liveness state
   const [livenessStatus, setLivenessStatus] = useState<"idle" | "checking" | "verified" | "error" | "unsupported">(
     stored.livenessVerified ? "verified" : "idle",
   );
-  const [livenessError, setLivenessError]   = useState<string | null>(null);
+  const [livenessError, setLivenessError] = useState<string | null>(null);
   const [livenessDialogOpen, setLivenessDialogOpen] = useState(false);
   const livenessDoneRef = useRef(stored.livenessVerified);
   const licenseSectionRef = useRef<HTMLDivElement | null>(null);
 
   const [flowStep, setFlowStep] = useState<FlowStep>(() => resolveInitialStep(stored));
+
+  const isUnsupportedMessage = (message: string) => {
+    const lower = message.toLowerCase();
+    return lower.includes("desteklenmiyor") || lower.includes("unsupported") || lower.includes("not supported");
+  };
 
   useEffect(() => {
     return () => {
@@ -128,8 +132,6 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
     }
   };
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
-
   const handleIdCardScan = async () => {
     const meta = readStoredIdentity(user?.user_metadata as Record<string, unknown> | undefined);
     const docClean = docNumber.trim().toUpperCase().replace(/[\s\-\.]/g, "");
@@ -138,8 +140,8 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
 
     if (!docClean) {
       toast({
-        title: "Seri Numarası Gerekli",
-        description: "Kimlik kartı seri numarasını girin.",
+        title: t("verification.autoLicense.toast.docNumberRequired"),
+        description: t("verification.autoLicense.toast.docNumberRequiredDesc"),
         variant: "destructive",
       });
       return;
@@ -147,8 +149,8 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
 
     if (!hasStoredDates && (!dobForBac || !expForBac)) {
       toast({
-        title: "İlk Doğrulama — Tarihler Gerekli",
-        description: "İlk kez okutuyorsanız doğum ve son geçerlilik tarihini de girin (bir kez kaydedilir).",
+        title: t("verification.autoLicense.toast.datesRequired"),
+        description: t("verification.autoLicense.toast.datesRequiredDesc"),
         variant: "destructive",
       });
       return;
@@ -165,48 +167,47 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
     nfcActiveRef.current = true;
 
     try {
-      const result = await readIdCard({
+      const scanResult = await readIdCard({
         docNumber: docClean,
         dateOfBirth: dobForBac,
         dateOfExpiry: expForBac,
       });
 
-      if (!result.ok) {
-        if (result.reason === "unsupported") {
+      if (!scanResult.ok) {
+        if (scanResult.reason === "unsupported") {
           setNfcStatus("unsupported");
-          toast({ title: "Desteklenmiyor", description: result.errorMessage, variant: "destructive" });
+          toast({ title: t("verification.autoLicense.toast.unsupported"), description: scanResult.errorMessage, variant: "destructive" });
           return;
         }
-        if (result.reason === "cancelled") {
+        if (scanResult.reason === "cancelled") {
           setNfcStatus("idle");
           return;
         }
         setNfcStatus("error");
-        setNfcError(result.errorMessage);
-        toast({ title: "Kimlik Okuma Hatası", description: result.errorMessage, variant: "destructive" });
+        setNfcError(scanResult.errorMessage);
+        toast({ title: t("verification.autoLicense.toast.idReadError"), description: scanResult.errorMessage, variant: "destructive" });
         return;
       }
 
-      setCardData(result.data);
+      setCardData(scanResult.data);
       setNfcStatus("verified");
 
-      const saveResult = await saveNfcVerification(userId, result.data, {
+      const saveResult = await saveNfcVerification(userId, scanResult.data, {
         docNumber: docClean,
         dateOfBirth: dobForBac,
         dateOfExpiry: expForBac,
       });
       if (saveResult.error) {
-        toast({ title: "Kayıt uyarısı", description: saveResult.error, variant: "destructive" });
+        toast({ title: t("verification.autoLicense.toast.saveWarning"), description: saveResult.error, variant: "destructive" });
       }
 
-      // Auto-proceed to liveness
       if (!livenessDoneRef.current && !stored.livenessVerified) {
         setFlowStep("liveness");
         setLivenessError(null);
         const camOk = await requestCameraPermission();
         if (!camOk) {
           setLivenessStatus("error");
-          setLivenessError("Kamera izni gerekli. Ayarlardan izin verin.");
+          setLivenessError(t("verification.autoLicense.toast.cameraPermissionRequired"));
           return;
         }
         livenessDoneRef.current = false;
@@ -216,10 +217,10 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
         goToLicenseStep();
       }
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : "Kimlik okuma başlatılamadı.";
+      const msg = error instanceof Error ? error.message : t("verification.autoLicense.toast.idReadStartFailed");
       setNfcStatus("error");
       setNfcError(msg);
-      toast({ title: "Kimlik Okuma Hatası", description: msg, variant: "destructive" });
+      toast({ title: t("verification.autoLicense.toast.idReadError"), description: msg, variant: "destructive" });
     } finally {
       nfcActiveRef.current = false;
     }
@@ -228,8 +229,8 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
   const handleLivenessCheck = async () => {
     if (nfcStatus !== "verified") {
       toast({
-        title: "Kimlik Doğrulaması Gerekli",
-        description: "Canlılık adımına geçmek için önce kimlik kartını okutun.",
+        title: t("verification.autoLicense.toast.identityRequired"),
+        description: t("verification.autoLicense.toast.identityRequiredForLiveness"),
         variant: "destructive",
       });
       return;
@@ -237,8 +238,12 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
     const camOk = await requestCameraPermission();
     if (!camOk) {
       setLivenessStatus("error");
-      setLivenessError("Kamera izni gerekli. Ayarlardan izin verin.");
-      toast({ title: "Kamera İzni", description: "Canlılık kontrolü için kamera izni verin.", variant: "destructive" });
+      setLivenessError(t("verification.autoLicense.toast.cameraPermissionRequired"));
+      toast({
+        title: t("verification.autoLicense.toast.cameraPermissionTitle"),
+        description: t("verification.autoLicense.toast.cameraPermissionDesc"),
+        variant: "destructive",
+      });
       return;
     }
     setLivenessError(null);
@@ -252,19 +257,35 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
     e.preventDefault();
 
     if (nfcStatus !== "verified") {
-      toast({ title: "Kimlik Doğrulaması Gerekli", description: "Önce kimlik kartını okutun.", variant: "destructive" });
+      toast({
+        title: t("verification.autoLicense.toast.identityRequired"),
+        description: t("verification.autoLicense.toast.identityRequiredShort"),
+        variant: "destructive",
+      });
       return;
     }
     if (livenessStatus !== "verified") {
-      toast({ title: "Canlılık Kontrolü Gerekli", description: "Canlılık adımını tamamlayın.", variant: "destructive" });
+      toast({
+        title: t("verification.autoLicense.toast.livenessRequired"),
+        description: t("verification.autoLicense.toast.livenessRequiredDesc"),
+        variant: "destructive",
+      });
       return;
     }
     if (!licenseNumber.trim()) {
-      toast({ title: "Ehliyet Numarası Gerekli", description: "Lütfen ehliyet numaranızı girin.", variant: "destructive" });
+      toast({
+        title: t("verification.autoLicense.toast.licenseRequired"),
+        description: t("verification.autoLicense.toast.licenseRequiredDesc"),
+        variant: "destructive",
+      });
       return;
     }
     if (!userId) {
-      toast({ title: "Giriş Gerekli", description: "Ehliyet doğrulaması için giriş yapmalısınız.", variant: "destructive" });
+      toast({
+        title: t("verification.autoLicense.toast.signInRequired"),
+        description: t("verification.autoLicense.toast.signInRequiredDesc"),
+        variant: "destructive",
+      });
       return;
     }
 
@@ -283,7 +304,7 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Oturum bulunamadı");
+        throw new Error(t("verification.autoLicense.toast.sessionNotFound"));
       }
 
       const { data: verifyData, error: verifyError } = await invokeVerifyLicense(
@@ -302,7 +323,7 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
 
       if (!verifyData?.success || verifyData?.canRent === false) {
         const failure = buildLicenseFailureResult(
-          (verifyData?.error as string) || (verifyData?.message as string) || "Ehliyet doğrulanamadı",
+          (verifyData?.error as string) || (verifyData?.message as string) || t("verification.autoLicense.toast.licenseVerifyFailed"),
           (verifyData?.reason as string) || "verification_failed",
         );
         setResult(failure);
@@ -322,75 +343,73 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
       onVerified(true, "low", cardData?.nationalId);
     } catch (error: unknown) {
       setVerificationStep("idle");
-      let errorMessage = "Ehliyet doğrulama sırasında bir hata oluştu";
+      let errorMessage = t("verification.autoLicense.toast.verifyErrorGeneric");
       if (error instanceof Error && error.message) {
         try { errorMessage = JSON.parse(error.message).error || errorMessage; } catch { errorMessage = error.message; }
       }
-      toast({ title: "Doğrulama Hatası", description: errorMessage, variant: "destructive" });
+      toast({ title: t("verification.autoLicense.toast.verifyError"), description: errorMessage, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
-
-  // ── Render helpers ───────────────────────────────────────────────────────────
 
   const getScoreColor = (score: number) =>
     score >= 80 ? "text-green-500" : score >= 60 ? "text-yellow-500" : "text-red-500";
 
   const displayScore = DEFAULT_DRIVER_SCORE;
 
-  // ── UI ───────────────────────────────────────────────────────────────────────
-
   return (
     <Card className="border-border">
       <CardHeader>
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-primary" />
-          <CardTitle>Otomatik Ehliyet Doğrulama</CardTitle>
+          <CardTitle>{t("verification.autoLicense.title")}</CardTitle>
         </div>
         <CardDescription>
-          Sırayla: kimlik kartı NFC → canlılık → ehliyet numarası.
+          {t("verification.autoLicense.description")}
         </CardDescription>
       </CardHeader>
 
       <CardContent>
-        {/* Tamamlanan adımlar özeti */}
         {(flowStep === "liveness" || flowStep === "license") && nfcStatus === "verified" && cardData && (
           <div className="mb-4 rounded-lg border border-green-500/30 bg-green-500/5 p-3 text-sm flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
             <span>
-              Kimlik okundu: {cardData.surname} {cardData.givenNames} · TC: {cardData.nationalId}
+              {t("verification.autoLicense.identityReadSummary", {
+                surname: cardData.surname,
+                givenNames: cardData.givenNames,
+                nationalId: cardData.nationalId,
+              })}
             </span>
           </div>
         )}
         {flowStep === "license" && livenessStatus === "verified" && (
           <div className="mb-4 rounded-lg border border-green-500/30 bg-green-500/5 p-3 text-sm flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-            <span>Canlılık kontrolü tamamlandı</span>
+            <span>{t("verification.autoLicense.livenessCompleteSummary")}</span>
           </div>
         )}
 
         <form onSubmit={handleVerify} className="space-y-5">
 
-          {/* ── Adım 1–2: NFC (sadece nfc adımında) ─────────────────────── */}
           {flowStep === "nfc" && (
             <>
           <div className="space-y-3">
             <Label className="text-base font-medium flex items-center gap-2">
-              <CreditCard className="w-4 h-4" /> Adım 1 — Kimlik Kartı Bilgileri
+              <CreditCard className="w-4 h-4" /> {t("verification.autoLicense.step1Title")}
             </Label>
             <p className="text-xs text-muted-foreground">
               {hasStoredDates
-                ? "Daha önce kaydedilen tarihler kullanılacak — sadece seri numarasını kontrol edip kartı okutun."
-                : "İlk doğrulamada MRZ tarihleri de gerekir; bir kez kaydedilir, sonraki girişlerde sorulmaz."}
+                ? t("verification.autoLicense.storedDatesHint")
+                : t("verification.autoLicense.firstTimeDatesHint")}
             </p>
 
             <div className="grid grid-cols-1 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="docNumber" className="text-sm">Kimlik Seri Numarası</Label>
+                <Label htmlFor="docNumber" className="text-sm">{t("verification.autoLicense.docNumberLabel")}</Label>
                 <Input
                   id="docNumber"
-                  placeholder="Örn: A01B23456"
+                  placeholder={t("verification.autoLicense.docNumberPlaceholder")}
                   value={docNumber}
                   onChange={(e) => setDocNumber(e.target.value)}
                   onBlur={(e) => setDocNumber(e.target.value.trim().toUpperCase())}
@@ -402,14 +421,17 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
                   spellCheck={false}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Kartın <strong>ön yüzündeki seri numarası</strong> — boşluksuz, büyük harf.
+                  <Trans
+                    i18nKey="verification.autoLicense.docNumberHelp"
+                    components={{ strong: <strong /> }}
+                  />
                 </p>
               </div>
 
               {!hasStoredDates && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="dob" className="text-sm">Doğum Tarihi</Label>
+                    <Label htmlFor="dob" className="text-sm">{t("verification.autoLicense.dateOfBirth")}</Label>
                     <Input
                       id="dob"
                       type="date"
@@ -420,7 +442,7 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="expiry" className="text-sm">Son Geçerlilik</Label>
+                    <Label htmlFor="expiry" className="text-sm">{t("verification.autoLicense.dateOfExpiry")}</Label>
                     <Input
                       id="expiry"
                       type="date"
@@ -435,50 +457,52 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
             </div>
           </div>
 
-          {/* ── BAC özet (debug) ──────────────────────────────────────────── */}
           {!hasStoredDates && docNumber && dateOfBirth && dateOfExpiry && (
             <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 p-3 text-xs text-muted-foreground space-y-1">
-              <p className="font-medium">NFC için kullanılacak değerler:</p>
-              <p>Seri: <span className="font-mono font-bold text-foreground">{docNumber.trim().toUpperCase().replace(/[\s\-\.]/g, "")}</span></p>
-              <p>Doğum (YYAAGG): <span className="font-mono font-bold text-foreground">{isoToYymmdd(dateOfBirth)}</span></p>
-              <p>Geçerlilik (YYAAGG): <span className="font-mono font-bold text-foreground">{isoToYymmdd(dateOfExpiry)}</span></p>
+              <p className="font-medium">{t("verification.autoLicense.bacPreviewTitle")}</p>
+              <p>{t("verification.autoLicense.bacSerial")} <span className="font-mono font-bold text-foreground">{docNumber.trim().toUpperCase().replace(/[\s\-\.]/g, "")}</span></p>
+              <p>{t("verification.autoLicense.bacDob")} <span className="font-mono font-bold text-foreground">{isoToYymmdd(dateOfBirth)}</span></p>
+              <p>{t("verification.autoLicense.bacExpiry")} <span className="font-mono font-bold text-foreground">{isoToYymmdd(dateOfExpiry)}</span></p>
             </div>
           )}
 
-          {/* ── Step 2: NFC / eID scan ────────────────────────────────────── */}
           <div className="space-y-2">
-            <Label className="text-base font-medium">Adım 2 — Kimlik Kartı NFC Okuma</Label>
+            <Label className="text-base font-medium">{t("verification.autoLicense.step2Title")}</Label>
             <div className="rounded-lg border border-border bg-background/50 p-3 space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 {nfcStatus === "verified" && cardData ? (
                   <>
                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-green-600">Kimlik kartı okundu</p>
+                      <p className="font-medium text-green-600">{t("verification.autoLicense.nfcCardRead")}</p>
                       <p className="text-xs text-muted-foreground">
-                        {cardData.surname} {cardData.givenNames} · TC: {cardData.nationalId}
+                        {t("verification.autoLicense.nfcCardReadDetail", {
+                          surname: cardData.surname,
+                          givenNames: cardData.givenNames,
+                          nationalId: cardData.nationalId,
+                        })}
                       </p>
                     </div>
                   </>
                 ) : nfcStatus === "scanning" ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin text-primary flex-shrink-0" />
-                    <span>Kimlik kartını telefonunuza yaklaştırın…</span>
+                    <span>{t("verification.autoLicense.nfcScanning")}</span>
                   </>
                 ) : nfcStatus === "unsupported" ? (
                   <>
                     <AlertTriangle className="w-4 h-4 text-destructive" />
-                    <span>NFC bu cihazda desteklenmiyor.</span>
+                    <span>{t("verification.autoLicense.nfcUnsupported")}</span>
                   </>
                 ) : nfcStatus === "error" ? (
                   <>
                     <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />
-                    <span className="text-sm">{nfcError ?? "Kart okuma başarısız."}</span>
+                    <span className="text-sm">{nfcError ?? t("verification.autoLicense.nfcErrorFallback")}</span>
                   </>
                 ) : (
                   <>
                     <Info className="w-4 h-4 text-muted-foreground" />
-                    <span>Bilgileri girdikten sonra kimlik kartını okutun.</span>
+                    <span>{t("verification.autoLicense.nfcIdleHint")}</span>
                   </>
                 )}
               </div>
@@ -490,28 +514,27 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
                 onClick={handleIdCardScan}
                 disabled={loading || nfcStatus === "scanning" || nfcStatus === "verified"}
               >
-                {nfcStatus === "verified" ? "Kimlik Doğrulandı ✓" :
-                 nfcStatus === "scanning"  ? "Kart Bekleniyor…"   : "Kimlik Kartını Okut"}
+                {nfcStatus === "verified" ? t("verification.autoLicense.nfcVerifiedButton") :
+                 nfcStatus === "scanning"  ? t("verification.autoLicense.nfcScanningButton")   : t("verification.autoLicense.nfcScanButton")}
               </Button>
             </div>
           </div>
             </>
           )}
 
-          {/* ── Adım 3: Canlılık (nfc bittikten sonra) ───────────────────── */}
           {flowStep === "liveness" && (
           <div className="space-y-2">
-            <Label className="text-base font-medium">Canlılık Kontrolü</Label>
+            <Label className="text-base font-medium">{t("verification.autoLicense.livenessStepTitle")}</Label>
             <div className="rounded-lg border border-border bg-background/50 p-3 space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 {livenessStatus === "verified" ? (
-                  <><CheckCircle className="w-4 h-4 text-green-500" /><span>Canlılık kontrolü tamamlandı</span></>
+                  <><CheckCircle className="w-4 h-4 text-green-500" /><span>{t("verification.autoLicense.livenessVerified")}</span></>
                 ) : livenessStatus === "checking" ? (
-                  <><Loader2 className="w-4 h-4 animate-spin text-primary" /><span>Selfie kontrolü başlatıldı</span></>
+                  <><Loader2 className="w-4 h-4 animate-spin text-primary" /><span>{t("verification.autoLicense.livenessChecking")}</span></>
                 ) : livenessStatus === "error" ? (
-                  <><AlertTriangle className="w-4 h-4 text-destructive" /><span>{livenessError ?? "Canlılık kontrolü başarısız"}</span></>
+                  <><AlertTriangle className="w-4 h-4 text-destructive" /><span>{livenessError ?? t("verification.autoLicense.livenessErrorFallback")}</span></>
                 ) : (
-                  <><Info className="w-4 h-4 text-muted-foreground" /><span>Kimlik okunduktan sonra otomatik başlar.</span></>
+                  <><Info className="w-4 h-4 text-muted-foreground" /><span>{t("verification.autoLicense.livenessIdleHint")}</span></>
                 )}
               </div>
 
@@ -522,24 +545,23 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
                 onClick={handleLivenessCheck}
                 disabled={loading || livenessStatus === "checking" || nfcStatus !== "verified"}
               >
-                {livenessStatus === "verified" ? "Canlılık Doğrulandı ✓" : "Canlılık Kontrolü Yap"}
+                {livenessStatus === "verified" ? t("verification.autoLicense.livenessVerifiedButton") : t("verification.autoLicense.livenessStartButton")}
               </Button>
             </div>
           </div>
           )}
 
-          {/* ── Adım 4: Ehliyet (canlılık bittikten sonra) ───────────────── */}
           {flowStep === "license" && (
           <div ref={licenseSectionRef} className="space-y-4">
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
-              Son adım: ehliyet numaranızı girin ve doğrulamayı gönderin.
+              {t("verification.autoLicense.licenseFinalHint")}
             </div>
           <div className="space-y-2">
-            <Label htmlFor="licenseNumber" className="text-base font-medium">Ehliyet Numarası</Label>
+            <Label htmlFor="licenseNumber" className="text-base font-medium">{t("verification.autoLicense.licenseNumberLabel")}</Label>
             <div className="relative">
               <Input
                 id="licenseNumber"
-                placeholder="Örn: 12345678901"
+                placeholder={t("verification.autoLicense.licenseNumberPlaceholder")}
                 value={licenseNumber}
                 onChange={(e) => setLicenseNumber(e.target.value.toUpperCase())}
                 className="pr-10"
@@ -548,23 +570,22 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
               />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-xs text-muted-foreground">Ehliyetin ön yüzündeki numarayı girin</p>
+            <p className="text-xs text-muted-foreground">{t("verification.autoLicense.licenseNumberHelp")}</p>
           </div>
           {verificationStep === "checking" && (
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-3">
               <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                <span className="font-medium">Ehliyet Doğrulanıyor…</span>
+                <span className="font-medium">{t("verification.autoLicense.licenseChecking")}</span>
               </div>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-green-500" /><span>Format kontrolü yapılıyor</span></div>
-                <div className="flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /><span>Trafik kayıtları sorgulanıyor</span></div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3" /><span className="opacity-50">Risk analizi yapılıyor</span></div>
+                <div className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-green-500" /><span>{t("verification.autoLicense.checkFormat")}</span></div>
+                <div className="flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /><span>{t("verification.autoLicense.checkTrafficRecords")}</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3" /><span className="opacity-50">{t("verification.autoLicense.checkRiskAnalysis")}</span></div>
               </div>
             </div>
           )}
 
-          {/* ── Result ────────────────────────────────────────────────────── */}
           {verificationStep === "complete" && result && (
             <div className={`p-4 rounded-lg border ${result.canRent ? "bg-green-500/5 border-green-500/20" : "bg-destructive/5 border-destructive/20"}`}>
               <div className="flex items-start gap-3">
@@ -573,18 +594,18 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
                   : <XCircle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />}
                 <div className="flex-1 space-y-3">
                   <div>
-                    <p className="font-semibold text-lg">{result.canRent ? "Ehliyet Onaylandı" : "Ehliyet Reddedildi"}</p>
+                    <p className="font-semibold text-lg">{result.canRent ? t("verification.autoLicense.licenseApproved") : t("verification.autoLicense.licenseRejected")}</p>
                     <p className="text-sm text-muted-foreground">{result.message || result.error}</p>
                   </div>
                   {result.canRent && (
                     <div className="bg-background/50 rounded-lg p-3 space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Sürücü Puanı</span>
+                        <span className="text-sm font-medium">{t("verification.autoLicense.driverScoreLabel")}</span>
                         <span className={`text-2xl font-bold ${getScoreColor(displayScore)}`}>{displayScore}</span>
                       </div>
                       <Progress value={displayScore} className="h-2" />
                       <p className="text-xs text-muted-foreground">
-                        Her sürücü 100 puan ile başlar. Puanınız kullanımınıza göre güncellenir.
+                        {t("verification.autoLicense.driverScoreHint")}
                       </p>
                     </div>
                   )}
@@ -600,9 +621,9 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
             disabled={loading || nfcStatus !== "verified" || livenessStatus !== "verified"}
           >
             {loading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Doğrulanıyor…</>
-            ) : verificationStep === "complete" ? "Tekrar Doğrula" : (
-              <><Search className="w-4 h-4 mr-2" />Ehliyeti Doğrula</>
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("verification.autoLicense.verifying")}</>
+            ) : verificationStep === "complete" ? t("verification.autoLicense.reVerifyLicense") : (
+              <><Search className="w-4 h-4 mr-2" />{t("verification.autoLicense.verifyLicense")}</>
             )}
           </Button>
           </div>
@@ -616,7 +637,7 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
               setLivenessDialogOpen(next);
               if (!next && !livenessDoneRef.current) {
                 setLivenessStatus("error");
-                setLivenessError("Canlılık kontrolü tamamlanmadı.");
+                setLivenessError(t("verification.autoLicense.livenessIncomplete"));
               }
             }}
             onSuccess={async () => {
@@ -625,14 +646,14 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
               setLivenessError(null);
               const saveResult = await saveLivenessVerification(userId);
               if (saveResult.error) {
-                toast({ title: "Kayıt uyarısı", description: saveResult.error, variant: "destructive" });
+                toast({ title: t("verification.autoLicense.toast.saveWarning"), description: saveResult.error, variant: "destructive" });
               }
               goToLicenseStep();
             }}
             onFailure={(message) => {
-              setLivenessStatus(message.toLowerCase().includes("desteklenmiyor") ? "unsupported" : "error");
+              setLivenessStatus(isUnsupportedMessage(message) ? "unsupported" : "error");
               setLivenessError(message);
-              toast({ title: "Canlılık Kontrolü Başarısız", description: message, variant: "destructive" });
+              toast({ title: t("verification.autoLicense.toast.livenessFailed"), description: message, variant: "destructive" });
             }}
           />
         </Suspense>

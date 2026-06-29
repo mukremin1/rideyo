@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ type PayoutProfile = {
 
 const OwnerPayoutSetup = () => {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState<PayoutProfile | null>(null);
@@ -75,7 +77,7 @@ const OwnerPayoutSetup = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Oturum bulunamadı");
+        throw new Error(t("ownerPayout.sessionNotFound"));
       }
 
       const { data, error } = await invokeEdgeFunction(
@@ -90,14 +92,14 @@ const OwnerPayoutSetup = () => {
       );
 
       if (error || !data?.success) {
-        throw new Error((data?.error as string) || error?.message || "Kayıt başarısız");
+        throw new Error((data?.error as string) || error?.message || t("ownerPayout.saveFailed"));
       }
 
-      toast.success("Ödeme profiliniz kaydedildi");
+      toast.success(t("ownerPayout.saveSuccess"));
       await loadProfile();
     } catch (err) {
       console.error(err);
-      toast.error(err instanceof Error ? err.message : "Kayıt başarısız");
+      toast.error(err instanceof Error ? err.message : t("ownerPayout.saveFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -116,7 +118,7 @@ const OwnerPayoutSetup = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="container mx-auto px-4 pt-24 pb-12 max-w-lg text-center">
-          <p className="text-muted-foreground">Giriş yapmanız gerekiyor.</p>
+          <p className="text-muted-foreground">{t("ownerPayout.loginRequired")}</p>
         </main>
         <Footer />
       </div>
@@ -132,10 +134,10 @@ const OwnerPayoutSetup = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Wallet className="w-8 h-8 text-primary" />
-            Ödeme & Hakediş Ayarları
+            {t("ownerPayout.title")}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Kiralama gelirlerinizin banka hesabınıza aktarılması için bilgilerinizi tamamlayın.
+            {t("ownerPayout.subtitle")}
           </p>
         </div>
 
@@ -144,11 +146,11 @@ const OwnerPayoutSetup = () => {
             <CardContent className="pt-6 flex items-start gap-3">
               <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
               <div>
-                <p className="font-semibold">Ödeme profiliniz aktif</p>
+                <p className="font-semibold">{t("ownerPayout.profileActive")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  IBAN: {profile.iban.replace(/(.{4})/g, "$1 ").trim()}
+                  {t("ownerPayout.ibanLabel")}: {profile.iban.replace(/(.{4})/g, "$1 ").trim()}
                 </p>
-                <Badge className="mt-2" variant="secondary">iyzico Marketplace</Badge>
+                <Badge className="mt-2" variant="secondary">{t("ownerPayout.marketplaceBadge")}</Badge>
               </div>
             </CardContent>
           </Card>
@@ -159,8 +161,7 @@ const OwnerPayoutSetup = () => {
             <CardContent className="pt-6 flex items-start gap-3">
               <AlertCircle className="w-6 h-6 text-amber-600 shrink-0" />
               <p className="text-sm text-muted-foreground">
-                Profilinizi tamamlamadan araç kiralama gelirleri hesabınıza aktarılamaz.
-                Platform komisyonu kesildikten sonra kalan tutar IBAN&apos;ınıza yatırılır.
+                {t("ownerPayout.inactiveWarning")}
               </p>
             </CardContent>
           </Card>
@@ -168,16 +169,16 @@ const OwnerPayoutSetup = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{isActive ? "Bilgileri Güncelle" : "Hakediş Bilgileri"}</CardTitle>
+            <CardTitle>{isActive ? t("ownerPayout.updateInfo") : t("ownerPayout.payoutInfo")}</CardTitle>
             <CardDescription>
-              Gerçek ad, TC kimlik ve IBAN bilgileriniz iyzico alt üye işyeri kaydı için kullanılır.
+              {t("ownerPayout.formDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contactName">Ad</Label>
+                  <Label htmlFor="contactName">{t("ownerPayout.firstName")}</Label>
                   <Input
                     id="contactName"
                     value={form.contactName}
@@ -186,7 +187,7 @@ const OwnerPayoutSetup = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contactSurname">Soyad</Label>
+                  <Label htmlFor="contactSurname">{t("ownerPayout.lastName")}</Label>
                   <Input
                     id="contactSurname"
                     value={form.contactSurname}
@@ -197,7 +198,7 @@ const OwnerPayoutSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">E-posta</Label>
+                <Label htmlFor="email">{t("ownerPayout.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -208,10 +209,10 @@ const OwnerPayoutSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="gsmNumber">Telefon</Label>
+                <Label htmlFor="gsmNumber">{t("ownerPayout.phone")}</Label>
                 <Input
                   id="gsmNumber"
-                  placeholder="5XX XXX XX XX"
+                  placeholder={t("ownerPayout.phonePlaceholder")}
                   value={form.gsmNumber}
                   onChange={(e) => setForm({ ...form, gsmNumber: e.target.value })}
                   required
@@ -219,7 +220,7 @@ const OwnerPayoutSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="identityNumber">TC Kimlik No</Label>
+                <Label htmlFor="identityNumber">{t("ownerPayout.identityNumber")}</Label>
                 <Input
                   id="identityNumber"
                   maxLength={11}
@@ -230,10 +231,10 @@ const OwnerPayoutSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="iban">IBAN</Label>
+                <Label htmlFor="iban">{t("ownerPayout.iban")}</Label>
                 <Input
                   id="iban"
-                  placeholder="TR..."
+                  placeholder={t("ownerPayout.ibanPlaceholder")}
                   value={form.iban}
                   onChange={(e) => setForm({ ...form, iban: e.target.value.toUpperCase() })}
                   required
@@ -241,7 +242,7 @@ const OwnerPayoutSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Adres</Label>
+                <Label htmlFor="address">{t("ownerPayout.address")}</Label>
                 <Input
                   id="address"
                   value={form.address}
@@ -252,7 +253,7 @@ const OwnerPayoutSetup = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="taxOffice">Vergi Dairesi (opsiyonel)</Label>
+                  <Label htmlFor="taxOffice">{t("ownerPayout.taxOffice")}</Label>
                   <Input
                     id="taxOffice"
                     value={form.taxOffice}
@@ -260,7 +261,7 @@ const OwnerPayoutSetup = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="legalCompanyTitle">Unvan (opsiyonel)</Label>
+                  <Label htmlFor="legalCompanyTitle">{t("ownerPayout.companyTitle")}</Label>
                   <Input
                     id="legalCompanyTitle"
                     value={form.legalCompanyTitle}
@@ -273,10 +274,10 @@ const OwnerPayoutSetup = () => {
                 {submitting ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Kaydediliyor...
+                    {t("ownerPayout.saving")}
                   </span>
                 ) : (
-                  isActive ? "Güncelle" : "Kaydet ve Aktifleştir"
+                  isActive ? t("ownerPayout.update") : t("ownerPayout.saveAndActivate")
                 )}
               </Button>
             </form>

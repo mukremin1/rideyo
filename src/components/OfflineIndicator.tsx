@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { WifiOff, Wifi } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 
 const OfflineIndicator = () => {
+  const { t } = useTranslation();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showAlert, setShowAlert] = useState(false);
 
@@ -18,12 +20,12 @@ const OfflineIndicator = () => {
       setShowAlert(true);
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -39,7 +41,7 @@ const OfflineIndicator = () => {
             <WifiOff className="w-5 h-5 text-destructive" />
           )}
           <AlertDescription className={isOnline ? "text-primary" : "text-destructive"}>
-            {isOnline ? "Tekrar çevrimiçisiniz!" : "İnternet bağlantısı yok - Offline moddasınız"}
+            {isOnline ? t("components.offlineIndicator.online") : t("components.offlineIndicator.offline")}
           </AlertDescription>
         </div>
       </Alert>

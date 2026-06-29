@@ -1,0 +1,168 @@
+{
+  "components": {
+    "features": {
+      "badge": "Benefits",
+      "title": "Why RideYo?",
+      "subtitle": "All the services you need for a modern mobile rental experience in one platform.",
+      "items": {
+        "fastBooking": {
+          "title": "Fast Booking",
+          "description": "Create a reservation in a few steps, complete payment, and hit the road."
+        },
+        "flexiblePricing": {
+          "title": "Flexible Pricing",
+          "description": "Choose from minute, hourly, and daily rentals with kilometer packages."
+        },
+        "fuelSupport": {
+          "title": "Fuel Support",
+          "description": "Fuel costs are covered by us on selected rental plans."
+        },
+        "secureExperience": {
+          "title": "Secure Experience",
+          "description": "Drive safely with identity verification, insurance options, and a well-maintained fleet."
+        },
+        "access247": {
+          "title": "24/7 Access",
+          "description": "Book anytime and reach our support team whenever you need."
+        },
+        "mobileFirst": {
+          "title": "Mobile First",
+          "description": "Manage everything from your phone — map, payment, and rental in one app."
+        }
+      }
+    },
+    "about": {
+      "title": "About RideYo",
+      "description": "RideYo is a mobile platform digitizing the car rental experience across Turkey. We are with you with a reliable fleet, transparent pricing, and user-focused service.",
+      "stats": {
+        "users": "Registered Users",
+        "secure": "Secure Transactions",
+        "support": "Customer Support",
+        "experience": "Industry Experience"
+      },
+      "advantagesTitle": "Platform Advantages",
+      "advantages": [
+        "Options for different needs with a wide vehicle fleet",
+        "Transparent pricing with no hidden fees",
+        "Comprehensive insurance and additional driver options",
+        "Fast booking, digital verification, and easy handover"
+      ],
+      "quote": "We combine technology and service so every journey is safe, easy, and predictable.",
+      "quoteAuthor": "— RideYo Team"
+    },
+    "howItWorks": {
+      "badge": "Process",
+      "title": "Rent in 4 Steps",
+      "subtitle": "A simple, fast, and fully digital rental experience.",
+      "steps": {
+        "createAccount": {
+          "title": "Create Your Account",
+          "description": "Sign up and complete your identity and driver's license verification."
+        },
+        "chooseCar": {
+          "title": "Choose Your Car",
+          "description": "Find the best car for you on the map or list."
+        },
+        "startBooking": {
+          "title": "Start Your Booking",
+          "description": "Complete payment and access the car with a digital key."
+        },
+        "driveSafely": {
+          "title": "Drive Safely",
+          "description": "Use the car during your rental period and return it when done."
+        }
+      }
+    },
+    "reservationSteps": {
+      "title": "Reservation Process",
+      "subtitle": "Create your reservation in a few steps. The entire process is managed through the mobile app.",
+      "steps": {
+        "carSelection": {
+          "title": "Car Selection",
+          "description": "Filter by price, location, and car type to find the right vehicle."
+        },
+        "duration": {
+          "title": "Set Duration",
+          "description": "Plan minute, hourly, or daily rental based on your needs."
+        },
+        "pickup": {
+          "title": "Pickup Point",
+          "description": "Choose pickup and drop-off locations to finalize your route."
+        },
+        "insurance": {
+          "title": "Insurance & Extras",
+          "description": "Configure insurance packages and optional additional driver options."
+        },
+        "payment": {
+          "title": "Secure Payment",
+          "description": "Complete the transaction through secure payment infrastructure with your card."
+        },
+        "confirmation": {
+          "title": "Booking Confirmation",
+          "description": "After approval, your reservation details appear in your account."
+        }
+      },
+      "viewFleet": "View Vehicle Fleet",
+      "identityVerification": "Identity Verification"
+    },
+    "nearby": {
+      "title": "Nearby Vehicles",
+      "grantPermission": "Grant Location Permission",
+      "noCarsNearby": "No available cars nearby. View all vehicles.",
+      "allCars": "All Cars",
+      "viewAll": "View All →",
+      "perHour": "/hour"
+    },
+    "carsMap": {
+      "loading": "Loading map...",
+      "yourLocation": "Your Location",
+      "rent": "Rent",
+      "perHour": "/hour"
+    },
+    "chatbot": {
+      "title": "RideYo Assistant",
+      "welcome": "Hello! Welcome to RideYo. How can I help you?",
+      "placeholder": "Type your message...",
+      "tooManyRequests": "Too many requests. Please wait a moment.",
+      "serviceUnavailable": "Service is currently unavailable. Please try again later.",
+      "streamError": "Could not start stream",
+      "genericError": "An error occurred. Please try again."
+    },
+    "offlineIndicator": {
+      "online": "You're back online!",
+      "offline": "No internet connection — you're in offline mode"
+    },
+    "brandLogo": {
+      "homeAriaLabel": "RideYo home"
+    },
+    "carImageUpload": {
+      "invalidFile": "Please select an image file",
+      "fileTooLarge": "File size must be less than 5MB",
+      "uploadError": "Error uploading photo",
+      "uploadSuccess": "Photo uploaded successfully",
+      "altText": "Car photo",
+      "uploading": "Uploading...",
+      "uploadTitle": "Upload Car Photo",
+      "uploadHint": "PNG, JPG or WEBP (max. 5MB)",
+      "selectPhoto": "Select Photo"
+    },
+    "locationPickerMap": {
+      "clickToSelect": "Click on the map to select a location",
+      "locating": "Getting location...",
+      "currentLocation": "Current Location",
+      "selectedLocation": "Selected Location",
+      "coordinates": "Coordinates:"
+    },
+    "gpsTracker": {
+      "waitingForData": "Waiting for GPS data...",
+      "online": "Online",
+      "offline": "Offline",
+      "location": "Location",
+      "speed": "Speed",
+      "battery": "Battery",
+      "lastUpdate": "Last Update",
+      "viewOnMap": "View on Map →",
+      "speedUnit": "km/h"
+    }
+  }
+}

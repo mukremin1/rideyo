@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 const markSrc = `${import.meta.env.BASE_URL}logo-mark.png`;
@@ -31,6 +32,7 @@ export const BrandLogo = ({
   linkTo = "/",
   showWordmark = true,
 }: BrandLogoProps) => {
+  const { t } = useTranslation();
   const sizes = sizeMap[size];
 
   const content = (
@@ -57,7 +59,7 @@ export const BrandLogo = ({
       <Link
         to={linkTo}
         className="inline-flex transition-opacity hover:opacity-90 active:scale-[0.99]"
-        aria-label="RideYo ana sayfa"
+        aria-label={t("components.brandLogo.homeAriaLabel")}
       >
         {content}
       </Link>

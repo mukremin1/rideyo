@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation, Trans } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -9,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_DRIVER_SCORE } from "@/lib/driverScore";
 
-const PENALTY_THRESHOLD = 70; // DB ile uyumlu tutun
+const PENALTY_THRESHOLD = 70;
 
 interface DriverHistoryFormProps {
   userId: string;
@@ -19,6 +20,7 @@ type DbMutationResult = { data: unknown; error: { message?: string; details?: st
 
 const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [driverData, setDriverData] = useState({
     licenseNumber: "",
@@ -38,12 +40,22 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
     return "low";
   };
 
+  const riskLevelLabel = (level: string) => {
+    if (level === "low") return t("verification.driverHistory.riskLow");
+    if (level === "medium") return t("verification.driverHistory.riskMedium");
+    return t("verification.driverHistory.riskHigh");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     if (!userId) {
-      toast({ title: "Giriş Gerekli", description: "Sürücü bilgilerini kaydetmek için giriş yapmalısınız.", variant: "destructive" });
+      toast({
+        title: t("verification.driverHistory.toast.signInRequired"),
+        description: t("verification.driverHistory.toast.signInRequiredDesc"),
+        variant: "destructive",
+      });
       setLoading(false);
       return;
     }
@@ -69,17 +81,19 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
 
       console.debug("DriverHistory payload:", payload);
 
-      // 1) Mevcut kaydı kontrol et
       const { data: existing, error: selectError } = await supabase
         .from("driver_history")
         .select("id, user_id")
         .eq("user_id", userId)
-        .maybeSingle(); // maybeSingle toleranslıdır: olmayan için hata fırlatmaz
+        .maybeSingle();
 
       if (selectError) {
         console.error("Select error:", selectError);
-        // Eğer permission/authorization hatası ise ayrıntılı bilgi ver
-        toast({ title: "Veritabanı hatası", description: selectError.message ?? "Kayıt kontrol edilemedi", variant: "destructive" });
+        toast({
+          title: t("verification.driverHistory.toast.dbError"),
+          description: selectError.message ?? t("verification.driverHistory.toast.recordCheckFailed"),
+          variant: "destructive",
+        });
         setLoading(false);
         return;
       }
@@ -90,7 +104,6 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
       let op: "insert" | "update";
 
       if (existing && existing.id) {
-        // Güncelle
         op = "update";
         const { data, error } = await supabase
           .from("driver_history")
@@ -101,7 +114,6 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
 
         result = { data, error };
       } else {
-        // Ekle
         op = "insert";
         const { data, error } = await supabase
           .from("driver_history")
@@ -117,42 +129,70 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
       if (result.error) {
         console.error(`${op} error:`, result.error);
 
-        // Eğer hâlâ duplicate key hatası geliyorsa, race condition ya da constraint farklı isimde olabilir
         if ((result.error.message || "").toLowerCase().includes("duplicate")) {
-          toast({ title: "Kayıt Çakışması", description: "Aynı kullanıcı için zaten bir kayıt mevcut. Lütfen sayfayı yenileyip tekrar deneyin.", variant: "destructive" });
+          toast({
+            title: t("verification.driverHistory.toast.duplicate"),
+            description: t("verification.driverHistory.toast.duplicateDesc"),
+            variant: "destructive",
+          });
           setLoading(false);
           return;
         }
 
         if ((result.error.message || "").toLowerCase().includes("permission") || (result.error.details || "").toLowerCase().includes("policy")) {
-          toast({ title: "İzin Hatası", description: "Veritabanı izinleri (RLS) nedeniyle işlem başarısız oldu. Supabase politika ayarlarını kontrol edin.", variant: "destructive" });
+          toast({
+            title: t("verification.driverHistory.toast.permissionError"),
+            description: t("verification.driverHistory.toast.permissionErrorDesc"),
+            variant: "destructive",
+          });
           setLoading(false);
           return;
         }
 
-        toast({ title: "Kayıt Hatası", description: result.error.message ?? "Sürücü bilgileri kaydedilemedi", variant: "destructive" });
+        toast({
+          title: t("verification.driverHistory.toast.saveError"),
+          description: result.error.message ?? t("verification.driverHistory.toast.saveFailed"),
+          variant: "destructive",
+        });
         setLoading(false);
         return;
       }
 
-      // Başarılıysa sonucu işle
       const riskLevel = calculateRiskLevel(driverData.penaltyPoints, driverData.totalAccidents, driverData.trafficViolations);
       let message = "";
       if (!isApproved) {
-        if (driverData.penaltyPoints > PENALTY_THRESHOLD) message = `Ehliyet ceza puanınız (${driverData.penaltyPoints}) izin verilen maksimum değeri (${PENALTY_THRESHOLD}) aşıyor.`;
-        else if (driverData.totalAccidents >= 3) message = "Kaza geçmişiniz nedeniyle kiralama yapılamıyor.";
-        else if (driverScore < 60) message = `Sürücü puanınız (${driverScore}) kiralama için yeterli değil (minimum 60).`;
-        else message = "Sürücü doğrulaması tamamlanamadı.";
-      } else message = "Sürücü doğrulaması başarılı!";
+        if (driverData.penaltyPoints > PENALTY_THRESHOLD) {
+          message = t("verification.driverHistory.messages.penaltyExceeded", {
+            points: driverData.penaltyPoints,
+            max: PENALTY_THRESHOLD,
+          });
+        } else if (driverData.totalAccidents >= 3) {
+          message = t("verification.driverHistory.messages.accidentsBlocked");
+        } else if (driverScore < 60) {
+          message = t("verification.driverHistory.messages.scoreTooLow", { score: driverScore });
+        } else {
+          message = t("verification.driverHistory.messages.incomplete");
+        }
+      } else {
+        message = t("verification.driverHistory.messages.success");
+      }
 
       setVerificationResult({ isApproved, riskLevel, message });
       onVerified(isApproved, riskLevel);
 
-      toast({ title: isApproved ? "Doğrulama Başarılı" : "Doğrulama Başarısız", description: message, variant: isApproved ? "default" : "destructive" });
+      toast({
+        title: isApproved ? t("verification.driverHistory.verifySuccess") : t("verification.driverHistory.verifyFailed"),
+        description: message,
+        variant: isApproved ? "default" : "destructive",
+      });
     } catch (err: unknown) {
       console.error("Unhandled hata:", err);
       const message = err instanceof Error ? err.message : String(err);
-      toast({ title: "Beklenmeyen hata", description: message, variant: "destructive" });
+      toast({
+        title: t("verification.driverHistory.toast.unexpectedError"),
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -163,55 +203,108 @@ const DriverHistoryForm = ({ userId, onVerified }: DriverHistoryFormProps) => {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-primary" />
-          <CardTitle>Sürücü Geçmişi Kontrolü</CardTitle>
+          <CardTitle>{t("verification.driverHistory.title")}</CardTitle>
         </div>
-        <CardDescription>Güvenli kiralama için sürücü bilgilerinizi doğrulamamız gerekiyor</CardDescription>
+        <CardDescription>{t("verification.driverHistory.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="licenseNumber">Ehliyet Numarası</Label>
-            <Input id="licenseNumber" placeholder="Ehliyet numaranızı girin" value={driverData.licenseNumber} onChange={(e) => setDriverData({ ...driverData, licenseNumber: e.target.value })} required />
+            <Label htmlFor="licenseNumber">{t("verification.driverHistory.licenseNumber")}</Label>
+            <Input
+              id="licenseNumber"
+              placeholder={t("verification.driverHistory.licenseNumberPlaceholder")}
+              value={driverData.licenseNumber}
+              onChange={(e) => setDriverData({ ...driverData, licenseNumber: e.target.value })}
+              required
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="penaltyPoints">Ehliyet Ceza Puanı (Maksimum: {PENALTY_THRESHOLD})</Label>
-            <Input id="penaltyPoints" type="number" min="0" placeholder="Toplam ceza puanınız" value={driverData.penaltyPoints ?? ""} onChange={(e) => setDriverData({ ...driverData, penaltyPoints: Number.isNaN(parseInt(e.target.value, 10)) ? 0 : parseInt(e.target.value, 10) })} required />
-            {driverData.penaltyPoints > PENALTY_THRESHOLD && (<p className="text-sm text-destructive flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Ceza puanınız izin verilen maksimum değeri aşıyor</p>)}
+            <Label htmlFor="penaltyPoints">
+              {t("verification.driverHistory.penaltyPoints", { max: PENALTY_THRESHOLD })}
+            </Label>
+            <Input
+              id="penaltyPoints"
+              type="number"
+              min="0"
+              placeholder={t("verification.driverHistory.penaltyPointsPlaceholder")}
+              value={driverData.penaltyPoints ?? ""}
+              onChange={(e) => setDriverData({ ...driverData, penaltyPoints: Number.isNaN(parseInt(e.target.value, 10)) ? 0 : parseInt(e.target.value, 10) })}
+              required
+            />
+            {driverData.penaltyPoints > PENALTY_THRESHOLD && (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <AlertTriangle className="w-4 h-4" />
+                {t("verification.driverHistory.penaltyExceeded")}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="totalAccidents">Toplam Kaza Sayısı</Label>
-              <Input id="totalAccidents" type="number" min="0" placeholder="0" value={driverData.totalAccidents ?? ""} onChange={(e) => setDriverData({ ...driverData, totalAccidents: Number.isNaN(parseInt(e.target.value, 10)) ? 0 : parseInt(e.target.value, 10) })} required />
+              <Label htmlFor="totalAccidents">{t("verification.driverHistory.totalAccidents")}</Label>
+              <Input
+                id="totalAccidents"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={driverData.totalAccidents ?? ""}
+                onChange={(e) => setDriverData({ ...driverData, totalAccidents: Number.isNaN(parseInt(e.target.value, 10)) ? 0 : parseInt(e.target.value, 10) })}
+                required
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trafficViolations">Trafik İhlali Sayısı</Label>
-              <Input id="trafficViolations" type="number" min="0" placeholder="0" value={driverData.trafficViolations ?? ""} onChange={(e) => setDriverData({ ...driverData, trafficViolations: Number.isNaN(parseInt(e.target.value, 10)) ? 0 : parseInt(e.target.value, 10) })} required />
+              <Label htmlFor="trafficViolations">{t("verification.driverHistory.trafficViolations")}</Label>
+              <Input
+                id="trafficViolations"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={driverData.trafficViolations ?? ""}
+                onChange={(e) => setDriverData({ ...driverData, trafficViolations: Number.isNaN(parseInt(e.target.value, 10)) ? 0 : parseInt(e.target.value, 10) })}
+                required
+              />
             </div>
           </div>
 
           {verificationResult && (
             <div className={`p-4 rounded-lg border ${verificationResult.isApproved ? "bg-primary/5 border-primary/20" : "bg-destructive/5 border-destructive/20"}`}>
               <div className="flex items-start gap-3">
-                {verificationResult.isApproved ? (<CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />) : (<AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />)}
+                {verificationResult.isApproved ? (
+                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                ) : (
+                  <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                )}
                 <div className="flex-1">
-                  <p className="font-semibold mb-1">{verificationResult.isApproved ? "Doğrulama Başarılı" : "Doğrulama Başarısız"}</p>
+                  <p className="font-semibold mb-1">
+                    {verificationResult.isApproved
+                      ? t("verification.driverHistory.verifySuccess")
+                      : t("verification.driverHistory.verifyFailed")}
+                  </p>
                   <p className="text-sm text-muted-foreground mb-2">{verificationResult.message}</p>
                   <Badge variant={verificationResult.riskLevel === "low" ? "default" : verificationResult.riskLevel === "medium" ? "secondary" : "destructive"}>
-                    Risk Seviyesi: {verificationResult.riskLevel === "low" ? "Düşük" : verificationResult.riskLevel === "medium" ? "Orta" : "Yüksek"}
+                    {t("verification.driverHistory.riskLevel", { level: riskLevelLabel(verificationResult.riskLevel) })}
                   </Badge>
                 </div>
               </div>
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>{loading ? "Doğrulanıyor..." : "Sürücü Bilgilerini Doğrula"}</Button>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? t("verification.driverHistory.submitting") : t("verification.driverHistory.submit")}
+          </Button>
         </form>
 
         <div className="mt-4 p-3 bg-muted rounded-lg">
-          <p className="text-xs text-muted-foreground"><strong>Not:</strong> Güvenli kiralama için ehliyet ceza puanınız {PENALTY_THRESHOLD} puanın altında veya eşit olmalıdır. Sürücü puanı en az 60 olmalıdır.</p>
+          <p className="text-xs text-muted-foreground">
+            <Trans
+              i18nKey="verification.driverHistory.note"
+              values={{ max: PENALTY_THRESHOLD }}
+              components={{ strong: <strong /> }}
+            />
+          </p>
         </div>
       </CardContent>
     </Card>

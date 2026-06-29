@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { isBookingPaid } from "@/lib/paymentStatus";
 import { createSupabaseInvoker, invokeVehicleControl } from "@/lib/serverApi";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useTranslation } from "react-i18next";
 import VehiclePhotoCapture from "@/components/VehiclePhotoCapture";
 import CarLocationMap from "@/components/CarLocationMap";
 
@@ -48,9 +49,17 @@ const supabaseInvoke = createSupabaseInvoker((name, options) =>
 const StartRental = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { sendRentalNotification, permission: notifPermission, requestPermission: requestNotifPermission } = usePushNotifications();
-  const state = location.state as RentalState | null;
+  const { t } = useTranslation();
+  const locationState = location.state as RentalState | null;
+  const bookingIdParam = searchParams.get("bookingId");
+  const activeBookingId = locationState?.bookingId ?? bookingIdParam ?? null;
+
+  const [rentalInfo, setRentalInfo] = useState<RentalState | null>(
+    locationState?.bookingId && locationState?.carId ? locationState : null,
+  );
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -81,7 +90,7 @@ const StartRental = () => {
   const callVehicleControl = async (body: Record<string, unknown>): Promise<VehicleControlResponse> => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
-      throw new Error("Oturum bulunamadı");
+      throw new Error(t("rental.sessionNotFound"));
     }
     const { data, error } = await invokeVehicleControl(body, session.access_token, supabaseInvoke);
     if (error) throw error;
@@ -119,13 +128,16 @@ const StartRental = () => {
 
   // Araç GPS verilerini çek ve dinle
   useEffect(() => {
-    if (!state?.carId) return;
+    if (!rentalInfo?.carId) return;
+
+    const carId = rentalInfo.carId;
+    const carName = rentalInfo.carName;
 
     const fetchCarGPS = async () => {
       const { data } = await supabase
         .from("cars")
         .select("latitude, longitude")
-        .eq("id", state.carId)
+        .eq("id", carId)
         .maybeSingle();
 
       if (data?.latitude && data?.longitude) {
@@ -137,14 +149,14 @@ const StartRental = () => {
 
     // Real-time GPS updates
     const channel = supabase
-      .channel(`rental-gps-${state.carId}`)
+      .channel(`rental-gps-${carId}`)
       .on(
         "postgres_changes",
         {
           event: "UPDATE",
           schema: "public",
           table: "cars",
-          filter: `id=eq.${state.carId}`,
+          filter: `id=eq.${carId}`,
         },
         (payload) => {
           const newData = payload.new as { latitude?: number | null; longitude?: number | null };
@@ -152,7 +164,7 @@ const StartRental = () => {
             setCarGPSData({ latitude: newData.latitude, longitude: newData.longitude });
             // Konum güncelleme bildirimi gönder
             if (rentalStarted) {
-              sendRentalNotification("location", state.carName, "Araç konumu güncellendi");
+              sendRentalNotification("location", carName, t("rental.locationUpdated"));
             }
           }
         }
@@ -162,7 +174,7 @@ const StartRental = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [state?.carId, rentalStarted, sendRentalNotification, state?.carName]);
+  }, [rentalInfo?.carId, rentalInfo?.carName, rentalStarted, sendRentalNotification]);
 
   useEffect(() => {
     if (!rentalStarted || !carGPSData) return;
@@ -181,7 +193,7 @@ const StartRental = () => {
   useEffect(() => {
     if (rentalStarted || unlocking) return;
     if (!userLocation || !carGPSData) return;
-    if (step < 2) return;
+    if (step !== 1) return;
 
     const checkAndUnlock = () => {
       const distanceKm = calculateDistanceKm(
@@ -226,8 +238,14 @@ const StartRental = () => {
   }, [rentalStarted, rentalStartTime]);
 
   useEffect(() => {
-    const validateBooking = async () => {
-      if (!state?.bookingId || !user) {
+    const validateAndLoadBooking = async () => {
+      if (!user) {
+        setBookingValidationLoading(false);
+        setBookingValidated(false);
+        return;
+      }
+
+      if (!activeBookingId) {
         setBookingValidationLoading(false);
         setBookingValidated(false);
         return;
@@ -236,13 +254,13 @@ const StartRental = () => {
       setBookingValidationLoading(true);
       const { data, error } = await supabase
         .from("bookings")
-        .select("id, user_id, payment_status")
-        .eq("id", state.bookingId)
+        .select("id, user_id, payment_status, car_id, cars(name)")
+        .eq("id", activeBookingId)
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (error || !data) {
-        toast.error("Kiralama kaydı doğrulanamadı.");
+        toast.error(t("rental.validationFailed"));
         setBookingValidated(false);
         setBookingValidationLoading(false);
         navigate("/cars");
@@ -250,32 +268,41 @@ const StartRental = () => {
       }
 
       if (!isBookingPaid(data.payment_status)) {
-        toast.error("Kiralama başlatmak için ödeme tamamlanmalı.");
+        toast.error(t("rental.paymentRequired"));
         setBookingValidated(false);
         setBookingValidationLoading(false);
-        navigate("/payment", { state });
+        navigate("/payment", {
+          state: {
+            bookingId: data.id,
+            carId: data.car_id,
+            carName: data.cars?.name ?? t("rental.defaultCarName"),
+          },
+        });
         return;
       }
 
+      setRentalInfo({
+        bookingId: data.id,
+        carId: locationState?.carId ?? data.car_id,
+        carName: locationState?.carName ?? data.cars?.name ?? t("rental.defaultCarName"),
+      });
       setBookingValidated(true);
       setBookingValidationLoading(false);
     };
 
-    void validateBooking();
-  }, [navigate, state, user]);
+    void validateAndLoadBooking();
+  }, [activeBookingId, locationState?.carId, locationState?.carName, navigate, user]);
 
-  if (!state) {
+  if (!activeBookingId) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="pt-24 pb-12">
           <div className="container mx-auto px-4 max-w-lg text-center">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-4">Kiralama Bilgisi Bulunamadı</h1>
-              <p className="text-muted-foreground mb-6">
-                Kiralama başlatmak için önce ödeme yapmanız gerekmektedir.
-              </p>
-              <Button onClick={() => navigate("/cars")}>Araçlara Git</Button>
+              <h1 className="text-2xl font-bold text-foreground mb-4">{t("rental.noInfo")}</h1>
+              <p className="text-muted-foreground mb-6">{t("rental.noInfoDesc")}</p>
+              <Button onClick={() => navigate("/cars")}>{t("common.goToCars")}</Button>
             </Card>
           </div>
         </main>
@@ -291,9 +318,9 @@ const StartRental = () => {
         <main className="pt-24 pb-12">
           <div className="container mx-auto px-4 max-w-lg text-center">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-4">Giriş Gerekli</h1>
-              <p className="text-muted-foreground mb-6">Kiralama başlatmak için önce giriş yapın.</p>
-              <Button onClick={() => navigate("/auth")}>Giriş Yap</Button>
+              <h1 className="text-2xl font-bold text-foreground mb-4">{t("rental.loginRequired")}</h1>
+              <p className="text-muted-foreground mb-6">{t("rental.loginRequiredDesc")}</p>
+              <Button onClick={() => navigate("/auth")}>{t("common.goToAuth")}</Button>
             </Card>
           </div>
         </main>
@@ -302,21 +329,24 @@ const StartRental = () => {
     );
   }
 
-  if (bookingValidationLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-24 pb-12">
-          <div className="container mx-auto px-4 max-w-lg text-center">
-            <Card className="p-8">
-              <h1 className="text-xl font-semibold text-foreground mb-4">Kiralama Kontrol Ediliyor</h1>
-              <p className="text-muted-foreground">Rezervasyon ve ödeme bilgileri doğrulanıyor...</p>
-            </Card>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+  if (bookingValidationLoading || !bookingValidated || !rentalInfo) {
+    if (bookingValidationLoading) {
+      return (
+        <div className="min-h-screen bg-background">
+          <Navbar />
+          <main className="pt-24 pb-12">
+            <div className="container mx-auto px-4 max-w-lg text-center">
+              <Card className="p-8">
+                <h1 className="text-xl font-semibold text-foreground mb-4">{t("rental.checking")}</h1>
+                <p className="text-muted-foreground">{t("rental.checkingDesc")}</p>
+              </Card>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      );
+    }
+    return null;
   }
 
   const handleUnlockCar = async () => {
@@ -326,8 +356,8 @@ const StartRental = () => {
     try {
       const data = await callVehicleControl({
         action: "unlock",
-        carId: state.carId,
-        bookingId: state.bookingId,
+        carId: rentalInfo.carId,
+        bookingId: rentalInfo.bookingId,
         userId: user.id,
         latitude: userLocation?.lat,
         longitude: userLocation?.lng,
@@ -340,7 +370,7 @@ const StartRental = () => {
         throw new Error(data.error);
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Araç açılamadı";
+      const message = error instanceof Error ? error.message : t("rental.unlockFailed");
       toast.error(message);
     } finally {
       setUnlocking(false);
@@ -354,8 +384,8 @@ const StartRental = () => {
     try {
       const data = await callVehicleControl({
         action: "lock",
-        carId: state.carId,
-        bookingId: state.bookingId,
+        carId: rentalInfo.carId,
+        bookingId: rentalInfo.bookingId,
         userId: user.id,
         latitude: userLocation?.lat,
         longitude: userLocation?.lng,
@@ -363,12 +393,12 @@ const StartRental = () => {
 
       const response = data;
       if (response.success) {
-        toast.success(response.message ?? "Araç kilitlendi.");
+        toast.success(response.message ?? t("rental.lockSuccess"));
       } else {
-        throw new Error(response.error ?? "Araç kilitlenemedi");
+        throw new Error(response.error ?? t("rental.lockFailed"));
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Araç kilitlenemedi";
+      const message = error instanceof Error ? error.message : t("rental.lockFailed");
       toast.error(message);
     } finally {
       setLocking(false);
@@ -377,17 +407,17 @@ const StartRental = () => {
 
   const handleStartRental = async () => {
     if (!bookingValidated) {
-      toast.error("Rezervasyon doğrulanamadı. Tekrar deneyin.");
+      toast.error(t("rental.validationRetry"));
       return;
     }
 
     if (!carUnlocked) {
-      toast.error("Kiralamayı başlatmadan önce aracın kilidini açın.");
+      toast.error(t("rental.unlockBeforeStart"));
       return;
     }
 
     if (!user || beforePhotos.length === 0) {
-      toast.error("Lütfen önce araç fotoğrafı çekin");
+      toast.error(t("rental.takePhotosFirst"));
       return;
     }
 
@@ -397,8 +427,8 @@ const StartRental = () => {
       // Fotoğrafları kaydet
       for (const photo of beforePhotos) {
         await supabase.from('vehicle_photos').insert({
-          booking_id: state.bookingId,
-          car_id: state.carId,
+          booking_id: rentalInfo.bookingId,
+          car_id: rentalInfo.carId,
           user_id: user.id,
           photo_type: 'before_rental',
           photo_url: photo,
@@ -409,8 +439,8 @@ const StartRental = () => {
       // Kiralamayı başlat
       const data = await callVehicleControl({
         action: "start_rental",
-        carId: state.carId,
-        bookingId: state.bookingId,
+        carId: rentalInfo.carId,
+        bookingId: rentalInfo.bookingId,
         userId: user.id,
         latitude: userLocation?.lat,
         longitude: userLocation?.lng,
@@ -419,8 +449,8 @@ const StartRental = () => {
 
       const response = data;
       if (response.success) {
-        toast.success("Kiralama başarıyla başlatıldı!");
-        sendRentalNotification("start", state.carName);
+        toast.success(t("rental.startSuccess"));
+        sendRentalNotification("start", rentalInfo.carName);
         setRentalStarted(true);
         const startTime = new Date();
         setRentalStartTime(startTime);
@@ -429,10 +459,10 @@ const StartRental = () => {
         }
         setStep(4);
       } else {
-        throw new Error(response.error ?? "Kiralama başlatılamadı");
+        throw new Error(response.error ?? t("rental.startFailed"));
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Kiralama başlatılamadı";
+      const message = error instanceof Error ? error.message : t("rental.startFailed");
       toast.error(message);
     } finally {
       setLoading(false);
@@ -441,7 +471,7 @@ const StartRental = () => {
 
   const handleEndRental = async () => {
     if (!user || afterPhotos.length === 0) {
-      toast.error("Lütfen önce araç fotoğrafı çekin");
+      toast.error(t("rental.takePhotosFirst"));
       return;
     }
 
@@ -451,8 +481,8 @@ const StartRental = () => {
       // Fotoğrafları kaydet
       for (const photo of afterPhotos) {
         await supabase.from('vehicle_photos').insert({
-          booking_id: state.bookingId,
-          car_id: state.carId,
+          booking_id: rentalInfo.bookingId,
+          car_id: rentalInfo.carId,
           user_id: user.id,
           photo_type: 'after_rental',
           photo_url: photo,
@@ -463,8 +493,8 @@ const StartRental = () => {
       // Kiralamayı bitir
       const data = await callVehicleControl({
         action: "end_rental",
-        carId: state.carId,
-        bookingId: state.bookingId,
+        carId: rentalInfo.carId,
+        bookingId: rentalInfo.bookingId,
         userId: user.id,
         latitude: userLocation?.lat,
         longitude: userLocation?.lng,
@@ -473,97 +503,45 @@ const StartRental = () => {
 
       const response = data;
       if (response.success) {
-        toast.success("Kiralama başarıyla bitirildi! Kapılar kilitlendi.");
+        toast.success(t("rental.endSuccess"));
         setRentalEnded(true);
       } else {
-        throw new Error(response.error ?? "Kiralama bitirilemedi");
+        throw new Error(response.error ?? t("rental.endFailed"));
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Kiralama bitirilemedi";
+      const message = error instanceof Error ? error.message : t("rental.endFailed");
       toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const renderStep1 = () => (
-    <Card className="p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Camera className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold">Adım 1: Araç Fotoğrafları</h2>
-          <p className="text-sm text-muted-foreground">Kiralama öncesi aracın durumunu belgeleyin</p>
-        </div>
-      </div>
-
-      <VehiclePhotoCapture
-        onPhotosChange={setBeforePhotos}
-        photos={beforePhotos}
-        maxPhotos={4}
-      />
-
-      <div className="mt-6 space-y-4">
-        <div>
-          <Label htmlFor="damageNotes">Hasar Notları (varsa)</Label>
-          <Textarea
-            id="damageNotes"
-            placeholder="Araçta gördüğünüz hasarları buraya yazın..."
-            value={damageNotes}
-            onChange={(e) => setDamageNotes(e.target.value)}
-            className="mt-2"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="carLocation">Aracın Konumu</Label>
-          <div className="flex gap-2 mt-2">
-            <div className="flex-1 relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                id="carLocation"
-                type="text"
-                placeholder="Örn: AVM B2 katı, 45 numaralı park yeri"
-                value={carLocation}
-                onChange={(e) => setCarLocation(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg bg-background"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Button 
-        className="w-full mt-6" 
-        onClick={() => setStep(2)}
-        disabled={beforePhotos.length === 0}
-      >
-        Devam Et <ArrowRight className="w-4 h-4 ml-2" />
-      </Button>
-    </Card>
-  );
-
-  const renderStep2 = () => (
+  const renderUnlockStep = () => (
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
           <Unlock className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">Adım 2: Aracı Açın</h2>
-          <p className="text-sm text-muted-foreground">Uzaktan kapı açma</p>
+          <h2 className="text-lg font-semibold">{t("rental.step1Title")}</h2>
+          <p className="text-sm text-muted-foreground">{t("rental.step1Desc")}</p>
         </div>
       </div>
 
-      <div className="text-center py-8">
+      {carGPSData && (
+        <div className="mb-6">
+          <CarLocationMap latitude={carGPSData.latitude} longitude={carGPSData.longitude} carName={rentalInfo.carName} />
+        </div>
+      )}
+
+      <div className="text-center py-4">
         <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
           <Car className="w-12 h-12 text-primary" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">{state.carName}</h3>
-        <p className="text-muted-foreground mb-6">Aracın yanında olduğunuzdan emin olun</p>
+        <h3 className="text-xl font-semibold mb-2">{rentalInfo.carName}</h3>
+        <p className="text-muted-foreground mb-6">{t("rental.nearCar")}</p>
         <p className="text-xs text-muted-foreground mb-4">
-          Otomatik acma aktif: Araca {AUTO_UNLOCK_DISTANCE_METERS}m yaklastiginizda kilit acma denemesi yapilir.
+          {t("rental.autoUnlock", { meters: AUTO_UNLOCK_DISTANCE_METERS })}
         </p>
 
         <Button 
@@ -575,12 +553,17 @@ const StartRental = () => {
           {unlocking ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Açılıyor...
+              {t("rental.unlocking")}
+            </>
+          ) : carUnlocked ? (
+            <>
+              <CheckCircle className="w-5 h-5" />
+              {t("rental.doorsOpen")}
             </>
           ) : (
             <>
               <Unlock className="w-5 h-5" />
-              Kapıları Aç
+              {t("rental.unlockDoors")}
             </>
           )}
         </Button>
@@ -588,32 +571,106 @@ const StartRental = () => {
 
       <Button 
         className="w-full mt-4" 
-        onClick={() => setStep(3)}
+        onClick={() => setStep(2)}
         disabled={!carUnlocked}
       >
-        {carUnlocked ? "Devam Et" : "Önce Aracı Aç"} <ArrowRight className="w-4 h-4 ml-2" />
+        {carUnlocked ? t("common.continue") : t("rental.unlockFirst")} <ArrowRight className="w-4 h-4 ml-2" />
       </Button>
     </Card>
   );
 
-  const renderStep3 = () => (
+  const renderPhotoStep = () => (
+    <Card className="p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <Camera className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold">{t("rental.step2Title")}</h2>
+          <p className="text-sm text-muted-foreground">{t("rental.step2Desc")}</p>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-3 p-4 bg-green-500/10 rounded-lg mb-6">
+        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+        <div>
+          <p className="font-medium text-green-700 dark:text-green-400">{t("rental.unlockedBanner")}</p>
+          <p className="text-sm text-muted-foreground">{t("rental.unlockedBannerDesc")}</p>
+        </div>
+      </div>
+
+      <VehiclePhotoCapture
+        onPhotosChange={setBeforePhotos}
+        photos={beforePhotos}
+        maxPhotos={4}
+      />
+
+      <div className="mt-6 space-y-4">
+        <div>
+          <Label htmlFor="damageNotes">{t("rental.damageNotes")}</Label>
+          <Textarea
+            id="damageNotes"
+            placeholder={t("rental.damagePlaceholder")}
+            value={damageNotes}
+            onChange={(e) => setDamageNotes(e.target.value)}
+            className="mt-2"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="carLocation">{t("rental.carLocation")}</Label>
+          <div className="flex gap-2 mt-2">
+            <div className="flex-1 relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                id="carLocation"
+                type="text"
+                placeholder={t("rental.carLocationPlaceholder")}
+                value={carLocation}
+                onChange={(e) => setCarLocation(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border rounded-lg bg-background"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Button 
+        className="w-full mt-6" 
+        onClick={() => setStep(3)}
+        disabled={beforePhotos.length === 0}
+      >
+        {t("common.continue")} <ArrowRight className="w-4 h-4 ml-2" />
+      </Button>
+    </Card>
+  );
+
+  const renderStartStep = () => (
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
           <Key className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">Adım 3: Kiralamayı Başlatın</h2>
-          <p className="text-sm text-muted-foreground">Son kontrolleri yapın</p>
+          <h2 className="text-lg font-semibold">{t("rental.step3Title")}</h2>
+          <p className="text-sm text-muted-foreground">{t("rental.step3Desc")}</p>
         </div>
       </div>
 
       <div className="space-y-4 mb-6">
         <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
+          <Unlock className="w-5 h-5 text-green-500 mt-0.5" />
+          <div>
+            <p className="font-medium">{t("rental.doorsUnlockedCheck")}</p>
+            <p className="text-sm text-muted-foreground">{t("rental.doorsUnlockedCheckDesc")}</p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
           <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
           <div>
-            <p className="font-medium">Fotoğraflar çekildi</p>
-            <p className="text-sm text-muted-foreground">{beforePhotos.length} fotoğraf yüklendi</p>
+            <p className="font-medium">{t("rental.photosTaken")}</p>
+            <p className="text-sm text-muted-foreground">{t("rental.photosCount", { count: beforePhotos.length })}</p>
           </div>
         </div>
 
@@ -621,7 +678,7 @@ const StartRental = () => {
           <div className="flex items-start gap-3 p-4 bg-amber-500/10 rounded-lg">
             <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5" />
             <div>
-              <p className="font-medium">Hasar notu eklendi</p>
+              <p className="font-medium">{t("rental.damageNoteAdded")}</p>
               <p className="text-sm text-muted-foreground">{damageNotes}</p>
             </div>
           </div>
@@ -631,7 +688,7 @@ const StartRental = () => {
           <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
             <MapPin className="w-5 h-5 text-primary mt-0.5" />
             <div>
-              <p className="font-medium">Konum kaydedildi</p>
+              <p className="font-medium">{t("rental.locationSaved")}</p>
               <p className="text-sm text-muted-foreground">{carLocation}</p>
             </div>
           </div>
@@ -647,12 +704,12 @@ const StartRental = () => {
         {loading ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            Başlatılıyor...
+            {t("rental.starting")}
           </>
         ) : (
           <>
             <Car className="w-5 h-5" />
-            Kiralamayı Başlat
+            {t("rental.startRental")}
           </>
         )}
       </Button>
@@ -667,8 +724,8 @@ const StartRental = () => {
             <Car className="w-5 h-5 text-green-500" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-green-700 dark:text-green-400">Kiralama Aktif</h2>
-            <p className="text-sm text-muted-foreground">{state.carName}</p>
+            <h2 className="text-lg font-semibold text-green-700 dark:text-green-400">{t("rental.activeRental")}</h2>
+            <p className="text-sm text-muted-foreground">{rentalInfo.carName}</p>
           </div>
         </div>
 
@@ -680,7 +737,7 @@ const StartRental = () => {
             disabled={unlocking}
           >
             {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4" />}
-            Kapıları Aç
+            {t("rental.unlockDoorsActive")}
           </Button>
           <Button
             variant="outline"
@@ -689,17 +746,17 @@ const StartRental = () => {
             disabled={locking}
           >
             {locking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-            Kapıları Kilitle
+            {t("rental.lockDoors")}
           </Button>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div className="p-3 bg-background rounded-lg border border-border">
-            <p className="text-muted-foreground">Geçen Süre</p>
-            <p className="text-lg font-semibold">{elapsedMinutes} dk</p>
+            <p className="text-muted-foreground">{t("rental.elapsedTime")}</p>
+            <p className="text-lg font-semibold">{elapsedMinutes} {t("rental.minutes")}</p>
           </div>
           <div className="p-3 bg-background rounded-lg border border-border">
-            <p className="text-muted-foreground">Toplam Mesafe</p>
-            <p className="text-lg font-semibold">{distanceKm.toFixed(2)} km</p>
+            <p className="text-muted-foreground">{t("rental.totalDistance")}</p>
+            <p className="text-lg font-semibold">{distanceKm.toFixed(2)} {t("rental.km")}</p>
           </div>
         </div>
       </Card>
@@ -708,19 +765,19 @@ const StartRental = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Navigation className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold">Canlı Araç Konumu</h3>
+            <h3 className="font-semibold">{t("rental.liveLocation")}</h3>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Bell className="w-4 h-4" />
-            <span>Güncellendikçe yenilenir</span>
+            <span>{t("rental.locationUpdates")}</span>
           </div>
         </div>
 
         {carGPSData ? (
-          <CarLocationMap latitude={carGPSData.latitude} longitude={carGPSData.longitude} carName={state.carName} />
+          <CarLocationMap latitude={carGPSData.latitude} longitude={carGPSData.longitude} carName={rentalInfo.carName} />
         ) : (
           <div className="flex items-center justify-center h-64 bg-muted rounded-lg">
-            <div className="text-muted-foreground">GPS verisi bekleniyor...</div>
+            <div className="text-muted-foreground">{t("rental.gpsWaiting")}</div>
           </div>
         )}
 
@@ -737,8 +794,8 @@ const StartRental = () => {
             <Camera className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Kiralamayı Bitir</h2>
-            <p className="text-sm text-muted-foreground">Araç teslim fotoğrafları çekin</p>
+            <h2 className="text-lg font-semibold">{t("rental.endRental")}</h2>
+            <p className="text-sm text-muted-foreground">{t("rental.endPhotosDesc")}</p>
           </div>
         </div>
 
@@ -746,10 +803,10 @@ const StartRental = () => {
 
         <div className="mt-6 space-y-4">
           <div>
-            <Label htmlFor="endDamageNotes">Hasar Notları (varsa)</Label>
+            <Label htmlFor="endDamageNotes">{t("rental.damageNotes")}</Label>
             <Textarea
               id="endDamageNotes"
-              placeholder="Araçta yeni bir hasar varsa buraya yazın..."
+              placeholder={t("rental.endDamagePlaceholder")}
               value={damageNotes}
               onChange={(e) => setDamageNotes(e.target.value)}
               className="mt-2"
@@ -760,9 +817,9 @@ const StartRental = () => {
             <div className="flex items-start gap-3">
               <Key className="w-5 h-5 text-amber-600 mt-0.5" />
               <div>
-                <p className="font-medium text-amber-700 dark:text-amber-400">Anahtarı Torpidoya Bırakın</p>
+                <p className="font-medium text-amber-700 dark:text-amber-400">{t("rental.keyInGlovebox")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Kiralamayı bitirmeden önce anahtar torpido gözüne bırakıldığından emin olun.
+                  {t("rental.keyInGloveboxDesc")}
                 </p>
               </div>
             </div>
@@ -779,12 +836,12 @@ const StartRental = () => {
           {loading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Bitirilyor...
+              {t("rental.ending")}
             </>
           ) : (
             <>
               <Lock className="w-5 h-5" />
-              Kiralamayı Bitir ve Kapıları Kilitle
+              {t("rental.endAndLock")}
             </>
           )}
         </Button>
@@ -797,12 +854,12 @@ const StartRental = () => {
       <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
         <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
       </div>
-      <h1 className="text-2xl font-bold text-foreground mb-2">Kiralama Tamamlandı!</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-2">{t("rental.completedTitle")}</h1>
       <p className="text-muted-foreground mb-6">
-        {state.carName} için kiralama başarıyla bitirildi. Araç kapıları kilitlendi.
+        {t("rental.completedDesc", { carName: rentalInfo.carName })}
       </p>
       <Button onClick={() => navigate("/my-bookings")}>
-        Rezervasyonlarıma Git
+        {t("rental.goToBookings")}
       </Button>
     </Card>
   );
@@ -814,9 +871,15 @@ const StartRental = () => {
       <main className="pt-24 pb-12">
         <div className="container mx-auto px-4 max-w-lg">
           <h1 className="text-2xl font-bold text-foreground mb-2">
-            {rentalEnded ? "Kiralama Tamamlandı" : rentalStarted ? "Aktif Kiralama" : "Kiralamayı Başlat"}
+            {rentalEnded
+              ? t("rental.titleCompleted")
+              : rentalStarted
+                ? t("rental.titleActive")
+                : step === 1
+                  ? t("rental.titleUnlock")
+                  : t("rental.titleStart")}
           </h1>
-          <p className="text-muted-foreground mb-8">{state.carName}</p>
+          <p className="text-muted-foreground mb-8">{rentalInfo.carName}</p>
 
           {/* Progress Steps */}
           {!rentalStarted && !rentalEnded && (
@@ -838,9 +901,9 @@ const StartRental = () => {
 
           {rentalEnded ? renderCompleted() : rentalStarted ? renderActiveRental() : (
             <>
-              {step === 1 && renderStep1()}
-              {step === 2 && renderStep2()}
-              {step === 3 && renderStep3()}
+              {step === 1 && renderUnlockStep()}
+              {step === 2 && renderPhotoStep()}
+              {step === 3 && renderStartStep()}
             </>
           )}
         </div>

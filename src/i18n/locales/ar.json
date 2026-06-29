@@ -1,0 +1,105 @@
+{
+  "language": { "label": "اللغة", "select": "اختر اللغة", "changed": "تم تحديث اللغة" },
+  "nav": {
+    "home": "الرئيسية", "fleet": "أسطول السيارات", "howItWorks": "كيف يعمل", "owners": "مالكو السيارات",
+    "support": "الدعم", "myBookings": "حجوزاتي", "favorites": "المفضلة",
+    "subscriptionPlans": "خطط الاشتراك", "account": "الحساب", "profileInfo": "الملف الشخصي",
+    "identityVerified": "تم التحقق من الهوية", "identityVerify": "التحقق من الهوية",
+    "driverScore": "تقييم السائق", "ownerPanel": "لوحة المالك", "myCars": "سياراتي",
+    "addCar": "إضافة سيارة", "notifications": "الإشعارات", "vehicleAlerts": "تنبيهات السيارة",
+    "supportCenter": "مركز الدعم", "adminPanel": "لوحة الإدارة", "signOut": "تسجيل الخروج",
+    "signIn": "تسجيل الدخول", "signUp": "إنشاء حساب", "explore": "استكشف", "rental": "الإيجار",
+    "owner": "المالك", "menu": "القائمة", "cars": "السيارات", "bookings": "الحجوزات"
+  },
+  "common": {
+    "continue": "متابعة", "back": "رجوع", "loading": "جاري التحميل...", "save": "حفظ",
+    "cancel": "إلغاء", "confirm": "تأكيد", "error": "حدث خطأ", "success": "نجاح",
+    "goToCars": "تصفح السيارات", "goToAuth": "تسجيل الدخول", "required": "مطلوب", "optional": "اختياري",
+    "notFound": "الصفحة غير موجودة", "notFoundDesc": "الصفحة المطلوبة غير موجودة أو تم نقلها.",
+    "backHome": "العودة للرئيسية"
+  },
+  "home": {
+    "promoBanner": "وفّر حتى 25٪ مع خطط الاشتراك",
+    "enableNotifications": "تفعيل الإشعارات", "viewPlans": "عرض الخطط",
+    "mapTitle": "استكشف على الخريطة", "mapDesc": "اعرض السيارات المتاحة بالقرب منك.",
+    "enableLocation": "تفعيل الموقع", "hideMap": "إخفاء الخريطة", "showMap": "إظهار الخريطة",
+    "heroBadge": "تأجير سيارات آمن وشفاف ومرن",
+    "heroTitle1": "استأجر السيارة التي تحتاجها", "heroTitle2": "في دقائق",
+    "heroDesc": "إيجار بالدقيقة أو الساعة أو اليوم. تحقق رقمي من الهوية وأسعار شفافة ودعم على مدار الساعة.",
+    "rentCar": "استأجر سيارة", "browseFleet": "تصفح الأسطول", "listYourCar": "أضف سيارتك",
+    "stat247": "متاح 24/7", "statCities": "نشط في مدن متعددة", "statSecure": "دفع آمن"
+  },
+  "auth": {
+    "title": "مرحباً", "signInTab": "دخول", "signUpTab": "تسجيل",
+    "email": "البريد الإلكتروني", "password": "كلمة المرور", "confirmPassword": "تأكيد كلمة المرور",
+    "fullName": "الاسم الكامل", "phone": "الهاتف", "renter": "مستأجر", "carOwner": "مالك سيارة",
+    "termsRequired": "يجب قبول الشروط وسياسة الخصوصية للتسجيل.",
+    "signInSuccess": "تم تسجيل الدخول بنجاح!", "signUpSuccess": "تم التسجيل! يرجى تأكيد بريدك.",
+    "invalidEmail": "أدخل بريداً إلكترونياً صالحاً", "passwordMin": "كلمة المرور 6 أحرف على الأقل",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين", "nameMin": "الاسم حرفان على الأقل",
+    "phoneInvalid": "أدخل رقم هاتف صالحاً"
+  },
+  "payment": {
+    "title": "الدفع", "subtitle": "دفع آمن لـ", "checking": "جاري التحقق من الدفع",
+    "checkingDesc": "جاري التحقق من الحجز...", "noInfo": "معلومات الدفع غير موجودة",
+    "noInfoDesc": "اختر سيارة وأنشئ حجزاً قبل الدفع.", "loginRequired": "تسجيل الدخول مطلوب",
+    "loginRequiredDesc": "سجّل الدخول للمتابعة بالدفع.", "alreadyPaid": "تم دفع هذا الحجز مسبقاً.",
+    "validationFailed": "تعذر التحقق من الدفع.", "success": "تم الدفع بنجاح!",
+    "failed": "فشل الدفع", "redirect3ds": "جاري التوجيه للتحقق البنكي...", "summary": "ملخص الحجز",
+    "car": "السيارة", "rentalType": "نوع الإيجار", "start": "البداية", "end": "النهاية",
+    "rentalAmount": "مبلغ الإيجار", "kmPackage": "باقة الكيلومتر", "provisionFee": "التأمين",
+    "insuranceFee": "رسوم التأمين", "additionalDriver": "سائق إضافي", "total": "الإجمالي",
+    "payNow": "إتمام الدفع", "processing": "جاري المعالجة...", "savedCards": "البطاقات المحفوظة",
+    "newCard": "بطاقة جديدة", "saveCard": "حفظ بطاقتي", "typeHour": "بالساعة",
+    "typeDay": "يومي", "typeMinute": "بالدقيقة", "callbackVerifying": "جاري التحقق من الدفع",
+    "callbackWait": "يرجى الانتظار...", "callbackSuccess": "تم الدفع بنجاح",
+    "callbackRedirect": "جاري التوجيه لبدء الإيجار...", "callbackFailed": "فشل الدفع",
+    "callbackRetry": "إعادة المحاولة", "callbackMyBookings": "حجوزاتي"
+  },
+  "rental": {
+    "titleStart": "بدء الإيجار", "titleUnlock": "فتح قفل السيارة",
+    "titleActive": "إيجار نشط", "titleCompleted": "اكتمل الإيجار",
+    "noInfo": "معلومات الإيجار غير موجودة", "noInfoDesc": "أكمل الدفع قبل بدء الإيجار.",
+    "loginRequired": "تسجيل الدخول مطلوب", "loginRequiredDesc": "سجّل الدخول لبدء الإيجار.",
+    "checking": "جاري التحقق", "checkingDesc": "جاري التحقق من الحجز والدفع...",
+    "validationFailed": "تعذر التحقق من الإيجار.", "paymentRequired": "يجب إتمام الدفع أولاً.",
+    "step1Title": "الخطوة 1: فتح القفل", "step1Desc": "تم الدفع — اذهب إلى السيارة",
+    "step2Title": "الخطوة 2: صور السيارة", "step2Desc": "وثّق حالة السيارة",
+    "step3Title": "الخطوة 3: بدء الإيجار", "step3Desc": "الفحوصات الأخيرة",
+    "nearCar": "تأكد من وجودك بجانب السيارة",
+    "autoUnlock": "فتح تلقائي عند {{meters}} م.",
+    "unlockDoors": "فتح الأبواب", "unlocking": "جاري الفتح...", "doorsOpen": "الأبواب مفتوحة",
+    "unlockFirst": "افتح القفل أولاً", "unlockedBanner": "تم فتح قفل السيارة",
+    "unlockedBannerDesc": "التقط الصور وابدأ الإيجار", "damageNotes": "ملاحظات الأضرار",
+    "damagePlaceholder": "صف أي أضرار موجودة...", "carLocation": "موقع السيارة",
+    "carLocationPlaceholder": "مثال: موقف B2، مكان 45", "photosTaken": "تم التقاط الصور",
+    "photosCount": "{{count}} صورة", "locationSaved": "تم حفظ الموقع",
+    "doorsUnlockedCheck": "تم فتح القفل", "doorsUnlockedCheckDesc": "الأبواب مفتوحة",
+    "startRental": "بدء الإيجار", "starting": "جاري البدء...",
+    "unlockBeforeStart": "افتح قفل السيارة قبل البدء.", "takePhotosFirst": "التقط صور السيارة أولاً",
+    "startSuccess": "بدأ الإيجار بنجاح!", "activeRental": "إيجار نشط", "lockDoors": "قفل الأبواب",
+    "elapsedTime": "الوقت المنقضي", "totalDistance": "المسافة الإجمالية", "liveLocation": "موقع مباشر",
+    "locationUpdates": "يتحدث تلقائياً", "gpsWaiting": "في انتظار GPS...",
+    "endRental": "إنهاء الإيجار", "endPhotosDesc": "صور الإرجاع",
+    "endDamagePlaceholder": "أضرار جديدة...", "keyInGlovebox": "ضع المفتاح في الدرج",
+    "keyInGloveboxDesc": "تأكد من وضع المفتاح قبل الإنهاء.", "endAndLock": "إنهاء وقفل",
+    "ending": "جاري الإنهاء...", "completedTitle": "اكتمل الإيجار!",
+    "completedDesc": "انتهى إيجار {{carName}}. تم قفل الأبواب.",
+    "goToBookings": "حجوزاتي", "minutes": "د", "km": "كم"
+  },
+  "bookings": {
+    "title": "حجوزاتي", "pay": "ادفع", "startRental": "بدء الإيجار", "cancel": "إلغاء",
+    "noBookings": "لا توجد حجوزات", "browseCars": "تصفح السيارات"
+  },
+  "profile": {
+    "title": "الملف الشخصي", "languageSettings": "اللغة",
+    "languageDesc": "اختر لغة التطبيق للاستخدام الدولي.",
+    "subscription": "الاشتراك", "driverVerification": "التحقق من السائق",
+    "verified": "تم التحقق", "pending": "قيد الانتظار", "signOut": "تسجيل الخروج"
+  },
+  "paymentStatus": {
+    "pending": "في انتظار الدفع", "authorized": "تم حجز التأمين", "completed": "مدفوع",
+    "in_progress": "إيجار نشط", "failed": "فشل الدفع", "refunded": "مسترد",
+    "cancelled": "ملغى", "unknown": "غير معروف"
+  }
+}

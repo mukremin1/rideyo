@@ -1,4 +1,5 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useNavigate, Link } from "react-router-dom";
 
@@ -52,45 +53,44 @@ const turkeyCities = [
 
 // Function to extract city from location text
 
-const extractCityFromLocation = (location: string): string => {
-
+const extractCityFromLocation = (location: string, otherLabel: string): string => {
   const lowerLocation = location.toLocaleLowerCase("tr");
-
   const match = turkeyCities.find((city) =>
-
     lowerLocation.includes(city.toLocaleLowerCase("tr"))
-
   );
-
-  return match || "Diğer";
-
+  return match || otherLabel;
 };
 
-
-
-const carSchema = z.object({
-  name: z.string().min(2, "Araç adı en az 2 karakter olmalıdır").max(100),
-  type: z.enum(["compact", "sedan", "suv"]),
-  pricePerMinute: z.number().min(0.1, "Fiyat 0'dan büyük olmalıdır"),
-  pricePerHour: z.number().min(1, "Fiyat 0'dan büyük olmalıdır"),
-  pricePerDay: z.number().min(10, "Fiyat 10'dan büyük olmalıdır"),
-  pricePerKm: z.number().min(0, "KM başı fiyat 0'dan büyük veya eşit olmalıdır"),
-  fuelType: z.enum(["Benzin", "Dizel", "Elektrik", "Hibrit"]),
-  transmission: z.enum(["Manuel", "Otomatik"]),
-  seats: z.number().min(2).max(9),
-  city: z.string().min(2, "Lütfen geçerli bir il seçin"),
-  location: z.string().min(3, "Lokasyon en az 3 karakter olmalıdır"),
-  plateNumber: z.string().optional(),
-  year: z.number().min(2010, "2010 ve üzeri model yılı araçlar kabul edilmektedir").max(new Date().getFullYear() + 1),
-  description: z.string().max(500, "Açıklama en fazla 500 karakter olabilir").optional(),
-  imageUrl: z.string().optional(),
-});
-
-
-
 const AddCar = () => {
-
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
+
+  const carSchema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(2, t("owner.addCar.validation.nameMin")).max(100),
+        type: z.enum(["compact", "sedan", "suv"]),
+        pricePerMinute: z.number().min(0.1, t("owner.addCar.validation.pricePositive")),
+        pricePerHour: z.number().min(1, t("owner.addCar.validation.pricePositive")),
+        pricePerDay: z.number().min(10, t("owner.addCar.validation.priceDayMin")),
+        pricePerKm: z.number().min(0, t("owner.addCar.validation.priceKmMin")),
+        fuelType: z.enum(["Benzin", "Dizel", "Elektrik", "Hibrit"]),
+        transmission: z.enum(["Manuel", "Otomatik"]),
+        seats: z.number().min(2).max(9),
+        city: z.string().min(2, t("owner.addCar.validation.cityRequired")),
+        location: z.string().min(3, t("owner.addCar.validation.locationMin")),
+        plateNumber: z.string().optional(),
+        year: z
+          .number()
+          .min(2010, t("owner.addCar.validation.yearMin"))
+          .max(new Date().getFullYear() + 1),
+        description: z.string().max(500, t("owner.addCar.validation.descriptionMax")).optional(),
+        imageUrl: z.string().optional(),
+      }),
+    [t]
+  );
+
+  const otherCityLabel = t("owner.common.other");
 
   const navigate = useNavigate();
 
@@ -227,27 +227,17 @@ const AddCar = () => {
 
           setIsCarOwner(true);
 
-          toast.success("Zaten araç sahibi rolüne sahipsiniz!");
-
+          toast.success(t("owner.addCar.alreadyOwner"));
         } else {
-
           throw error;
-
         }
-
       } else {
-
         setIsCarOwner(true);
-
-        toast.success("Araç sahibi olarak kaydınız tamamlandı!");
-
+        toast.success(t("owner.addCar.ownerRegistered"));
       }
-
     } catch (error) {
-
       console.error("Rol ekleme hatası:", error);
-
-      toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+      toast.error(t("owner.common.error"));
 
     } finally {
 
@@ -302,12 +292,12 @@ const AddCar = () => {
 
 
       if (formData.latitude === null || formData.longitude === null) {
-        toast.error("Lütfen haritadan konum seçin.");
+        toast.error(t("owner.addCar.toast.selectLocation"));
         return;
       }
 
       if (!ownerDeclarationAccepted || !listingRulesAccepted) {
-        toast.error("Devam etmek için zorunlu onay kutularını işaretleyin.");
+        toast.error(t("owner.addCar.toast.acceptCheckboxes"));
         return;
       }
 
@@ -370,22 +360,14 @@ const AddCar = () => {
         console.error("Araç ekleme hatası:", error);
 
         if (error.code === "42501") {
-
-          toast.error("Araç ekleme yetkiniz bulunmuyor. Lütfen araç sahibi olarak kayıt olun.");
-
+          toast.error(t("owner.addCar.toast.noPermission"));
         } else {
-
-          toast.error("Araç eklenirken bir hata oluştu: " + error.message);
-
+          toast.error(t("owner.addCar.toast.addError", { message: error.message }));
         }
-
         return;
-
       }
 
-
-
-      toast.success("Araç başarıyla eklendi!");
+      toast.success(t("owner.addCar.toast.addSuccess"));
 
       navigate("/my-cars");
 
@@ -399,10 +381,8 @@ const AddCar = () => {
 
         console.error("Hata:", error);
 
-        toast.error("Bir hata oluştu");
-
+        toast.error(t("owner.common.error"));
       }
-
     } finally {
 
       setLoading(false);
@@ -416,23 +396,23 @@ const AddCar = () => {
   const validateCurrentStep = () => {
     if (currentStep === 1) {
       if (!formData.name.trim() || !formData.year || !formData.city || !formData.location) {
-        toast.error("Araç bilgileri adımındaki zorunlu alanları doldurun.");
+        toast.error(t("owner.addCar.toast.fillRequired"));
         return false;
       }
       if (formData.latitude === null || formData.longitude === null) {
-        toast.error("Lütfen haritadan bir konum seçin.");
+        toast.error(t("owner.addCar.toast.selectMapLocation"));
         return false;
       }
     }
 
     if (currentStep === 2 && !formData.imageUrl) {
-      toast.error("Devam etmek için en az bir araç fotoğrafı yükleyin.");
+      toast.error(t("owner.addCar.toast.uploadPhoto"));
       return false;
     }
 
     if (currentStep === 4) {
       if (!formData.pricePerMinute || !formData.pricePerHour || !formData.pricePerDay || !formData.pricePerKm) {
-        toast.error("Fiyatlandırma adımındaki tüm alanları doldurun.");
+        toast.error(t("owner.addCar.toast.fillPricing"));
         return false;
       }
     }
@@ -463,7 +443,7 @@ const AddCar = () => {
 
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
 
-            <p className="text-muted-foreground">Yükleniyor...</p>
+            <p className="text-muted-foreground">{t("owner.common.loading")}</p>
 
           </div>
 
@@ -501,14 +481,14 @@ const AddCar = () => {
 
                 </div>
 
-                <CardTitle className="text-2xl">Giriş Yapmalısınız</CardTitle>
+                <CardTitle className="text-2xl">{t("owner.addCar.signInRequired")}</CardTitle>
                 <CardDescription>
-                  Araç eklemek için önce hesabınıza giriş yapmanız gerekmektedir.
+                  {t("owner.addCar.signInDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button onClick={() => navigate("/auth")} size="lg" className="w-full">
-                  Giriş Yap / Üye Ol
+                  {t("owner.addCar.signInButton")}
                 </Button>
 
               </CardContent>
@@ -551,12 +531,10 @@ const AddCar = () => {
 
                 </div>
 
-                <CardTitle className="text-3xl">Araç Sahibi Olun</CardTitle>
+                <CardTitle className="text-3xl">{t("owner.addCar.becomeOwnerTitle")}</CardTitle>
 
                 <CardDescription className="text-base">
-
-                  RideYo platformunda araç kiralayarak gelir elde etmeye başlayın
-
+                  {t("owner.addCar.becomeOwnerDesc")}
                 </CardDescription>
 
               </CardHeader>
@@ -569,29 +547,27 @@ const AddCar = () => {
 
                     <CreditCard className="w-8 h-8 text-primary mx-auto mb-2" />
 
-                    <h3 className="font-semibold">Kazanç</h3>
+                    <h3 className="font-semibold">{t("owner.addCar.benefitEarnings")}</h3>
 
-                    <p className="text-sm text-muted-foreground">Pasif gelir elde edin</p>
-
+                    <p className="text-sm text-muted-foreground">{t("owner.addCar.benefitEarningsDesc")}</p>
                   </div>
 
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
 
                     <Shield className="w-8 h-8 text-primary mx-auto mb-2" />
 
-                    <h3 className="font-semibold">Güvenlik</h3>
+                    <h3 className="font-semibold">{t("owner.addCar.benefitSecurity")}</h3>
 
-                    <p className="text-sm text-muted-foreground">Sigortalı kiralama</p>
-
+                    <p className="text-sm text-muted-foreground">{t("owner.addCar.benefitSecurityDesc")}</p>
                   </div>
 
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
 
                     <Settings className="w-8 h-8 text-primary mx-auto mb-2" />
 
-                    <h3 className="font-semibold">Kontrol</h3>
+                    <h3 className="font-semibold">{t("owner.addCar.benefitControl")}</h3>
 
-                    <p className="text-sm text-muted-foreground">Fiyat & takvim yönetimi</p>
+                    <p className="text-sm text-muted-foreground">{t("owner.addCar.benefitControlDesc")}</p>
 
                   </div>
 
@@ -602,25 +578,15 @@ const AddCar = () => {
                 <Button onClick={becomeCarOwner} disabled={loading} size="lg" className="w-full">
 
                   {loading ? (
-
                     <>
-
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-
-                      İşleniyor...
-
+                      {t("owner.addCar.processing")}
                     </>
-
                   ) : (
-
                     <>
-
                       <CheckCircle2 className="w-5 h-5 mr-2" />
-
-                      Araç Sahibi Ol
-
+                      {t("owner.addCar.becomeOwnerButton")}
                     </>
-
                   )}
 
                 </Button>
@@ -659,17 +625,16 @@ const AddCar = () => {
 
             <ArrowLeft className="w-5 h-5" />
 
-            Araçlarıma Dön
-
+            {t("owner.addCar.backToMyCars")}
           </Link>
 
 
 
           <div className="text-center mb-8">
 
-            <h1 className="text-3xl font-bold text-foreground mb-2">Yeni Araç Ekle</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t("owner.addCar.title")}</h1>
 
-            <p className="text-muted-foreground">Aracınızı ekleyerek gelir elde etmeye başlayın</p>
+            <p className="text-muted-foreground">{t("owner.addCar.subtitle")}</p>
 
           </div>
 
@@ -682,11 +647,11 @@ const AddCar = () => {
             <div className="flex justify-between items-center mb-4">
 
               {[
-                { num: 1, label: "Araç Bilgileri", icon: Car },
-                { num: 2, label: "Fotoğraf", icon: Image },
-                { num: 3, label: "Teknik Özellikler", icon: Settings },
-                { num: 4, label: "Fiyatlandırma", icon: CreditCard },
-                { num: 5, label: "Ehliyet", icon: Shield },
+                { num: 1, label: t("owner.addCar.steps.info"), icon: Car },
+                { num: 2, label: t("owner.addCar.steps.photo"), icon: Image },
+                { num: 3, label: t("owner.addCar.steps.specs"), icon: Settings },
+                { num: 4, label: t("owner.addCar.steps.pricing"), icon: CreditCard },
+                { num: 5, label: t("owner.addCar.steps.license"), icon: Shield },
               ].map((step, index) => (
 
                 <div key={step.num} className="flex items-center">
@@ -747,7 +712,7 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="name">Araç Adı *</Label>
+                      <Label htmlFor="name">{t("owner.addCar.fields.name")}</Label>
 
                       <Input
 
@@ -757,7 +722,7 @@ const AddCar = () => {
 
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 
-                        placeholder="örn: Renault Clio 2022"
+                        placeholder={t("owner.addCar.fields.namePlaceholder")}
 
                         required
 
@@ -771,7 +736,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="type">Araç Tipi *</Label>
+                        <Label htmlFor="type">{t("owner.addCar.fields.type")}</Label>
 
                         <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
 
@@ -783,11 +748,11 @@ const AddCar = () => {
 
                           <SelectContent>
 
-                            <SelectItem value="compact">Kompakt</SelectItem>
+                            <SelectItem value="compact">{t("owner.common.carTypes.compact")}</SelectItem>
 
-                            <SelectItem value="sedan">Sedan</SelectItem>
+                            <SelectItem value="sedan">{t("owner.common.carTypes.sedan")}</SelectItem>
 
-                            <SelectItem value="suv">SUV</SelectItem>
+                            <SelectItem value="suv">{t("owner.common.carTypes.suv")}</SelectItem>
 
                           </SelectContent>
 
@@ -799,7 +764,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="year">Model Yılı *</Label>
+                        <Label htmlFor="year">{t("owner.addCar.fields.year")}</Label>
 
                         <Input
 
@@ -815,7 +780,7 @@ const AddCar = () => {
 
                           onChange={(e) => setFormData({ ...formData, year: e.target.value })}
 
-                          placeholder="Örn: 2022"
+                          placeholder={t("owner.addCar.fields.yearPlaceholder")}
 
                           required
 
@@ -826,10 +791,10 @@ const AddCar = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="city">İl *</Label>
+                      <Label htmlFor="city">{t("owner.addCar.fields.city")}</Label>
                       <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
                         <SelectTrigger>
-                          <SelectValue placeholder="İl seçin" />
+                          <SelectValue placeholder={t("owner.addCar.fields.cityPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
                           {turkeyCities.map((city) => (
@@ -849,7 +814,7 @@ const AddCar = () => {
 
                         <MapPin className="w-4 h-4" />
 
-                        Lokasyon *
+                        {t("owner.addCar.fields.location")}
 
                       </Label>
 
@@ -863,7 +828,7 @@ const AddCar = () => {
 
                         onLocationSelect={(lat, lng, address) => {
 
-                          const derivedCity = address ? extractCityFromLocation(address) : "";
+                          const derivedCity = address ? extractCityFromLocation(address, otherCityLabel) : "";
 
                           setFormData({
 
@@ -874,7 +839,7 @@ const AddCar = () => {
                             longitude: lng,
 
                             location: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-                            city: derivedCity && derivedCity !== "Diğer" ? derivedCity : formData.city,
+                            city: derivedCity && derivedCity !== otherCityLabel ? derivedCity : formData.city,
 
                           });
 
@@ -886,7 +851,7 @@ const AddCar = () => {
 
                         <p className="text-sm text-muted-foreground mt-2">
 
-                          Seçilen adres: {formData.location}
+                          {t("owner.addCar.fields.selectedAddress")} {formData.location}
 
                         </p>
 
@@ -898,7 +863,7 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="plateNumber">Plaka (Opsiyonel)</Label>
+                      <Label htmlFor="plateNumber">{t("owner.addCar.fields.plate")}</Label>
 
                       <Input
 
@@ -908,7 +873,7 @@ const AddCar = () => {
 
                         onChange={(e) => setFormData({ ...formData, plateNumber: e.target.value })}
 
-                        placeholder="örn: 25 ABC 123"
+                        placeholder={t("owner.addCar.fields.platePlaceholder")}
 
                       />
 
@@ -919,9 +884,7 @@ const AddCar = () => {
                     <div className="flex justify-end">
 
                       <Button type="button" onClick={nextStep}>
-
-                        Devam Et
-
+                        {t("owner.common.continue")}
                       </Button>
 
                     </div>
@@ -944,14 +907,11 @@ const AddCar = () => {
 
                         <Image className="w-4 h-4" />
 
-                        Araç Fotoğrafı
-
+                        {t("owner.addCar.fields.photo")}
                       </Label>
 
                       <p className="text-sm text-muted-foreground mb-4">
-
-                        Aracınızın net ve kaliteli bir fotoğrafını yükleyin. Bu fotoğraf araç listesinde görünecektir.
-
+                        {t("owner.addCar.fields.photoDesc")}
                       </p>
 
                       <CarImageUpload
@@ -972,14 +932,11 @@ const AddCar = () => {
 
                       <Button type="button" variant="outline" onClick={prevStep}>
 
-                        Geri
-
+                        {t("owner.common.back")}
                       </Button>
 
                       <Button type="button" onClick={nextStep}>
-
-                        Devam Et
-
+                        {t("owner.common.continue")}
                       </Button>
 
                     </div>
@@ -1004,8 +961,7 @@ const AddCar = () => {
 
                           <Fuel className="w-4 h-4" />
 
-                          Yakıt Tipi *
-
+                          {t("owner.addCar.fields.fuelType")}
                         </Label>
 
                         <Select value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
@@ -1018,13 +974,13 @@ const AddCar = () => {
 
                           <SelectContent>
 
-                            <SelectItem value="Benzin">Benzin</SelectItem>
+                            <SelectItem value="Benzin">{t("owner.common.fuelTypes.Benzin")}</SelectItem>
 
-                            <SelectItem value="Dizel">Dizel</SelectItem>
+                            <SelectItem value="Dizel">{t("owner.common.fuelTypes.Dizel")}</SelectItem>
 
-                            <SelectItem value="Elektrik">Elektrik</SelectItem>
+                            <SelectItem value="Elektrik">{t("owner.common.fuelTypes.Elektrik")}</SelectItem>
 
-                            <SelectItem value="Hibrit">Hibrit</SelectItem>
+                            <SelectItem value="Hibrit">{t("owner.common.fuelTypes.Hibrit")}</SelectItem>
 
                           </SelectContent>
 
@@ -1036,7 +992,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="transmission">Vites *</Label>
+                        <Label htmlFor="transmission">{t("owner.addCar.fields.transmission")}</Label>
 
                         <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
 
@@ -1048,9 +1004,9 @@ const AddCar = () => {
 
                           <SelectContent>
 
-                            <SelectItem value="Manuel">Manuel</SelectItem>
+                            <SelectItem value="Manuel">{t("owner.common.transmission.Manuel")}</SelectItem>
 
-                            <SelectItem value="Otomatik">Otomatik</SelectItem>
+                            <SelectItem value="Otomatik">{t("owner.common.transmission.Otomatik")}</SelectItem>
 
                           </SelectContent>
 
@@ -1064,7 +1020,7 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="seats">Koltuk Sayısı *</Label>
+                      <Label htmlFor="seats">{t("owner.addCar.fields.seats")}</Label>
 
                       <Select value={formData.seats} onValueChange={(value) => setFormData({ ...formData, seats: value })}>
 
@@ -1080,7 +1036,7 @@ const AddCar = () => {
 
                             <SelectItem key={num} value={num.toString()}>
 
-                              {num} Koltuk
+                              {t("owner.common.seatsLabel", { count: num })}
 
                             </SelectItem>
 
@@ -1096,7 +1052,7 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="description">Açıklama (Opsiyonel)</Label>
+                      <Label htmlFor="description">{t("owner.addCar.fields.description")}</Label>
 
                       <Textarea
 
@@ -1106,7 +1062,7 @@ const AddCar = () => {
 
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
 
-                        placeholder="Araç hakkında ek bilgiler..."
+                        placeholder={t("owner.addCar.fields.descriptionPlaceholder")}
 
                         rows={4}
 
@@ -1124,14 +1080,11 @@ const AddCar = () => {
 
                       <Button type="button" variant="outline" onClick={prevStep}>
 
-                        Geri
-
+                        {t("owner.common.back")}
                       </Button>
 
                       <Button type="button" onClick={nextStep}>
-
-                        Devam Et
-
+                        {t("owner.common.continue")}
                       </Button>
 
                     </div>
@@ -1152,7 +1105,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerMinute">Dakika Fiyatı (₺) *</Label>
+                        <Label htmlFor="pricePerMinute">{t("owner.addCar.fields.pricePerMinute")}</Label>
 
                         <Input
 
@@ -1180,7 +1133,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerHour">Saat Fiyatı (₺) *</Label>
+                        <Label htmlFor="pricePerHour">{t("owner.addCar.fields.pricePerHour")}</Label>
 
                         <Input
 
@@ -1208,7 +1161,7 @@ const AddCar = () => {
 
                       <div className="space-y-2">
 
-                        <Label htmlFor="pricePerDay">Günlük Fiyat (₺) *</Label>
+                        <Label htmlFor="pricePerDay">{t("owner.addCar.fields.pricePerDay")}</Label>
 
                         <Input
 
@@ -1238,7 +1191,7 @@ const AddCar = () => {
 
                     <div className="space-y-2">
 
-                      <Label htmlFor="pricePerKm">KM Başına Fiyat (₺) *</Label>
+                      <Label htmlFor="pricePerKm">{t("owner.addCar.fields.pricePerKm")}</Label>
 
                         <Input
 
@@ -1262,7 +1215,7 @@ const AddCar = () => {
 
                         <p className="text-sm text-muted-foreground">
 
-                          Araç kiralama süresi dışında yapılan her km için ücret
+                          {t("owner.addCar.fields.pricePerKmDesc")}
 
                         </p>
 
@@ -1272,11 +1225,10 @@ const AddCar = () => {
 
                       <div className="bg-muted/50 p-4 rounded-lg space-y-2">
 
-                        <h4 className="font-medium">Tahmini Kazanç</h4>
+                        <h4 className="font-medium">{t("owner.addCar.estimatedEarnings")}</h4>
 
                         <p className="text-sm text-muted-foreground">
-
-                          Günlük {formData.pricePerDay || 0} ₺ fiyatla ayda ortalama 15 gün kiralama yaparsanız:{" "}
+                          {t("owner.addCar.estimatedEarningsDesc", { price: formData.pricePerDay || 0 })}{" "}
 
                           <span className="font-semibold text-primary">
 
@@ -1295,13 +1247,13 @@ const AddCar = () => {
 
                         <Button type="button" variant="outline" onClick={prevStep}>
 
-                          Geri
+                          {t("owner.common.back")}
 
                         </Button>
 
                         <Button type="button" onClick={nextStep}>
 
-                          Devam Et
+                          {t("owner.common.continue")}
 
                         </Button>
 
@@ -1325,14 +1277,11 @@ const AddCar = () => {
 
                           <Shield className="w-4 h-4" />
 
-                          Ehliyet Belgesi *
-
+                          {t("owner.addCar.fields.license")}
                         </Label>
 
                         <p className="text-sm text-muted-foreground mb-4">
-
-                          Araç kiralama işlemlerinde ehliyet belgeniz zorunludur. Geçerli bir ehliyet belgesi yükleyiniz.
-
+                          {t("owner.addCar.fields.licenseDesc")}
                         </p>
 
                         <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
@@ -1340,25 +1289,20 @@ const AddCar = () => {
                           <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
 
                           <p className="text-muted-foreground mb-4">
-
-                            Ehliyet belgenizi buraya yükleyin
-
+                            {t("owner.addCar.fields.licenseUpload")}
                           </p>
 
                           <Button variant="outline" type="button">
 
                             <Image className="w-4 h-4 mr-2" />
 
-                            Ehliyet Yükle
-
+                            {t("owner.addCar.fields.licenseUploadButton")}
                           </Button>
 
                         </div>
 
                         <p className="text-xs text-muted-foreground mt-2">
-
-                          * Ehliyet belgesi olmadan araç ekleyemezsiniz.
-
+                          {t("owner.addCar.fields.licenseRequired")}
                         </p>
                       <div className="rounded-lg border p-4 space-y-4">
                         <div className="flex items-start space-x-3">
@@ -1368,7 +1312,7 @@ const AddCar = () => {
                             onCheckedChange={(checked) => setOwnerDeclarationAccepted(Boolean(checked))}
                           />
                           <label htmlFor="ownerDeclaration" className="text-sm leading-relaxed cursor-pointer">
-                            Aracın yasal kullanım hakkına sahip olduğumu ve paylaştığım bilgilerin doğru olduğunu beyan ederim.
+                            {t("owner.addCar.ownerDeclaration")}
                           </label>
                         </div>
                         <div className="flex items-start space-x-3">
@@ -1378,7 +1322,7 @@ const AddCar = () => {
                             onCheckedChange={(checked) => setListingRulesAccepted(Boolean(checked))}
                           />
                           <label htmlFor="listingRules" className="text-sm leading-relaxed cursor-pointer">
-                            RideYo listeleme ve kiralama kurallarını okudum, kabul ediyorum.
+                            {t("owner.addCar.listingRules")}
                           </label>
                         </div>
                       </div>
@@ -1391,7 +1335,7 @@ const AddCar = () => {
 
                         <Button type="button" variant="outline" onClick={prevStep}>
 
-                          Geri
+                          {t("owner.common.back")}
 
                         </Button>
 
@@ -1403,7 +1347,7 @@ const AddCar = () => {
 
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
 
-                              Ekleniyor...
+                              {t("owner.addCar.adding")}
 
                             </>
 
@@ -1413,7 +1357,7 @@ const AddCar = () => {
 
                               <CheckCircle2 className="w-5 h-5 mr-2" />
 
-                              Araç Ekle
+                              {t("owner.addCar.submit")}
 
                             </>
 

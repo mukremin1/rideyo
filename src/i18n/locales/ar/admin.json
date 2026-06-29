@@ -1,0 +1,40 @@
+{
+  "admin": {
+    "noAccess": "ليس لديك صلاحية الوصول إلى هذه الصفحة",
+    "title": "لوحة الإدارة",
+    "subtitle": "إدارة الحملات والنظام",
+    "newCampaign": "حملة جديدة",
+    "editCampaign": "تعديل الحملة",
+    "createCampaign": "إنشاء حملة جديدة",
+    "campaignName": "اسم الحملة",
+    "description": "الوصف",
+    "discountPercent": "نسبة الخصم (%)",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "carTypesLabel": "أنواع السيارات (اتركها فارغة لجميع السيارات)",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "update": "تحديث",
+    "create": "إنشاء",
+    "cancel": "إلغاء",
+    "discountBadge": "خصم {{percent}}%",
+    "startLabel": "البدء:",
+    "endLabel": "الانتهاء:",
+    "carsLabel": "السيارات:",
+    "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذه الحملة؟",
+    "empty": "لم يتم إنشاء أي حملات بعد",
+    "toast": {
+      "updateError": "تعذّر تحديث الحملة",
+      "updateSuccess": "تم تحديث الحملة",
+      "createError": "تعذّر إنشاء الحملة",
+      "createSuccess": "تم إنشاء الحملة",
+      "deleteError": "تعذّر حذف الحملة",
+      "deleteSuccess": "تم حذف الحملة"
+    },
+    "carTypes": {
+      "compact": "مدمجة",
+      "sedan": "سيدان",
+      "suv": "SUV"
+    }
+  }
+}

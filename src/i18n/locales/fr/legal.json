@@ -1,0 +1,951 @@
+{
+  "legal": {
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "lastUpdated": "Dernière mise à jour : 23 octobre 2024",
+      "sections": [
+        {
+          "title": "1. Dispositions générales",
+          "paragraphs": [
+            "Les présentes Conditions d'utilisation constituent un accord juridique régissant votre utilisation de la plateforme RideYo. En utilisant la plateforme, vous êtes réputé avoir accepté ces conditions. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser la plateforme."
+          ]
+        },
+        {
+          "title": "2. Description du service",
+          "paragraphs": [
+            "RideYo est une plateforme numérique qui met en relation les propriétaires de véhicules et les locataires. La plateforme facilite le partage de véhicules mais n'en est pas propriétaire. Tous les véhicules sont fournis par des propriétaires indépendants."
+          ]
+        },
+        {
+          "title": "3. Comptes utilisateurs",
+          "subsections": [
+            {
+              "title": "3.1 Inscription",
+              "list": [
+                "Vous devez avoir 18 ans ou plus pour utiliser la plateforme",
+                "Vous devez être titulaire d'un permis de conduire valide",
+                "Vous devez fournir des informations exactes et à jour",
+                "Vous êtes responsable de la sécurité de votre compte"
+              ]
+            },
+            {
+              "title": "3.2 Types de comptes",
+              "list": [
+                "Compte utilisateur : vous pouvez louer des véhicules",
+                "Compte propriétaire de véhicule : vous pouvez mettre votre véhicule en location et également louer des véhicules"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. Conditions de location",
+          "subsections": [
+            {
+              "title": "4.1 Réservation",
+              "list": [
+                "Les réservations sont contraignantes une fois confirmées",
+                "Une caution est prélevée pour les locations à la minute",
+                "Le paiement intégral est requis pour les locations horaires et journalières",
+                "Les tarifs sont fixés par le propriétaire du véhicule"
+              ]
+            },
+            {
+              "title": "4.2 Remise du véhicule",
+              "list": [
+                "La prise en charge et la restitution du véhicule doivent avoir lieu aux horaires prévus",
+                "L'état du véhicule doit être vérifié lors de la remise",
+                "Le niveau de carburant doit être restitué au même niveau qu'à la prise en charge"
+              ]
+            },
+            {
+              "title": "4.3 Utilisation",
+              "list": [
+                "Seul vous pouvez conduire le véhicule (en tant que conducteur titulaire du permis)",
+                "Vous devez respecter le code de la route",
+                "Vous ne pouvez pas utiliser le véhicule à des fins commerciales (sauf indication contraire)",
+                "Vous ne pouvez pas conduire sous l'influence de l'alcool ou de drogues"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Paiement et facturation",
+          "list": [
+            "Tous les paiements doivent être effectués via la plateforme",
+            "Location à la minute : facturation au temps utilisé",
+            "Location horaire : facturation au tarif horaire indiqué",
+            "Location journalière : facturation par périodes de 24 heures",
+            "Un retour tardif entraîne des frais supplémentaires",
+            "Les frais de service de la plateforme sont de 15 %"
+          ]
+        },
+        {
+          "title": "6. Politique d'annulation",
+          "list": [
+            "Annulation gratuite jusqu'à 24 heures avant le début de la location",
+            "Annulation dans les 24 heures : remboursement à 50 %",
+            "Annulation après le début de la location : aucun remboursement",
+            "Annulation par le propriétaire : remboursement intégral + indemnisation de 20 %"
+          ]
+        },
+        {
+          "title": "7. Assurance et responsabilité",
+          "subsections": [
+            {
+              "title": "7.1 Couverture",
+              "list": [
+                "Tous les véhicules sont couverts par une assurance tous risques",
+                "L'assurance responsabilité civile obligatoire est incluse",
+                "Franchise pour dommages mineurs : 500 TL",
+                "Franchise pour dommages majeurs : 2 000 TL"
+              ]
+            },
+            {
+              "title": "7.2 Responsabilités",
+              "list": [
+                "Les amendes de circulation sont à la charge du locataire",
+                "Les accidents doivent être signalés immédiatement",
+                "Les dommages intentionnels sont entièrement à la charge du locataire"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "8. Règles pour les propriétaires de véhicules",
+          "list": [
+            "L'immatriculation, l'assurance et le contrôle technique de votre véhicule doivent être à jour",
+            "Le véhicule doit être remis propre et en bon état de fonctionnement",
+            "Les tarifs doivent être équitables et conformes au marché",
+            "Vous êtes tenu d'honorer les réservations",
+            "Les caractéristiques du véhicule doivent être indiquées avec exactitude et exhaustivité"
+          ]
+        },
+        {
+          "title": "9. Comportements interdits",
+          "list": [
+            "Paiement ou communication en dehors de la plateforme",
+            "Fourniture de fausses informations ou documents",
+            "Harcèlement ou menaces envers d'autres utilisateurs",
+            "Tentative de manipulation des systèmes",
+            "Utilisation des véhicules pour des activités illégales"
+          ]
+        },
+        {
+          "title": "10. Suspension et résiliation du compte",
+          "paragraphs": [
+            "RideYo se réserve le droit de suspendre ou de résilier votre compte en cas de violation des présentes conditions. Des poursuites judiciaires peuvent être engagées en cas de violations graves."
+          ]
+        },
+        {
+          "title": "11. Clause de non-responsabilité",
+          "paragraphs": [
+            "RideYo est une plateforme intermédiaire entre propriétaires de véhicules et locataires. Nous ne garantissons pas la qualité, la sécurité ou l'adéquation des véhicules. Nous ne sommes pas partie aux litiges entre utilisateurs."
+          ]
+        },
+        {
+          "title": "12. Droit applicable",
+          "paragraphs": [
+            "Les présentes Conditions d'utilisation sont régies par les lois de la République de Turquie. Les litiges seront tranchés par les tribunaux de Trabzon."
+          ]
+        },
+        {
+          "title": "13. Modifications",
+          "paragraphs": [
+            "RideYo se réserve le droit de modifier les présentes Conditions d'utilisation à tout moment. Les modifications importantes seront communiquées aux utilisateurs. L'utilisation continue de la plateforme après les modifications vaut acceptation des nouvelles conditions."
+          ]
+        },
+        {
+          "title": "14. Contact",
+          "paragraphs": [
+            "Pour toute question concernant les présentes Conditions d'utilisation :",
+            "E-mail : destek@ride-yo.com",
+            "Téléphone : +90 (462) 123 45 67",
+            "Adresse : Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "lastUpdated": "Dernière mise à jour : 23 octobre 2024",
+      "sections": [
+        {
+          "title": "1. Introduction",
+          "paragraphs": [
+            "Chez RideYo, nous nous engageons à protéger la vie privée de nos utilisateurs. La présente Politique de confidentialité explique comment nous collectons, utilisons, stockons et protégeons vos données personnelles."
+          ]
+        },
+        {
+          "title": "2. Informations collectées",
+          "subsections": [
+            {
+              "title": "2.1 Informations personnelles",
+              "list": [
+                "Prénom et nom",
+                "Adresse e-mail",
+                "Numéro de téléphone",
+                "Informations de carte bancaire (chiffrées)",
+                "Informations du permis de conduire",
+                "Informations d'adresse"
+              ]
+            },
+            {
+              "title": "2.2 Informations collectées automatiquement",
+              "list": [
+                "Adresse IP",
+                "Type et version du navigateur",
+                "Informations sur l'appareil",
+                "Informations de localisation (avec votre consentement)",
+                "Données d'utilisation de la plateforme"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Utilisation des informations",
+          "paragraphs": ["Nous utilisons les informations collectées aux fins suivantes :"],
+          "list": [
+            "Fourniture de services de location de véhicules",
+            "Traitement des paiements",
+            "Assistance client",
+            "Développement et amélioration de la plateforme",
+            "Sécurité et prévention de la fraude",
+            "Respect des obligations légales",
+            "Envoi d'offres et notifications personnalisées (avec votre consentement)"
+          ]
+        },
+        {
+          "title": "4. Partage des informations",
+          "paragraphs": ["Nous pouvons partager vos informations personnelles avec des tiers dans les cas suivants :"],
+          "list": [
+            "Avec les propriétaires de véhicules pour faciliter les transactions de location",
+            "Avec les prestataires de paiement pour l'infrastructure de paiement sécurisée",
+            "Avec les autorités officielles conformément à la loi",
+            "Avec les prestataires de services pour le fonctionnement de la plateforme"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "Vos informations ne sont jamais vendues ou louées à des tiers à des fins marketing."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Sécurité des données",
+          "paragraphs": [
+            "Nous utilisons des mesures de sécurité conformes aux standards du secteur pour protéger vos données personnelles :"
+          ],
+          "list": [
+            "Chiffrement SSL/TLS",
+            "Stockage sécurisé des données",
+            "Audits de sécurité réguliers",
+            "Contrôles d'accès limités",
+            "Protocoles de chiffrement robustes"
+          ]
+        },
+        {
+          "title": "6. Cookies",
+          "paragraphs": [
+            "Notre site web utilise des cookies pour améliorer l'expérience utilisateur. Les cookies sont de petits fichiers texte stockés par votre navigateur. Vous pouvez gérer vos préférences de cookies dans les paramètres de votre navigateur."
+          ]
+        },
+        {
+          "title": "7. Vos droits",
+          "paragraphs": ["Conformément à la KVKK (loi turque sur la protection des données personnelles), vous disposez des droits suivants :"],
+          "list": [
+            "Savoir si vos données personnelles font l'objet d'un traitement",
+            "Demander des informations si elles ont été traitées",
+            "Connaître la finalité du traitement et vérifier qu'il est utilisé de manière appropriée",
+            "Connaître les tiers auxquels les données sont transférées en Turquie ou à l'étranger",
+            "Demander la rectification si les données sont incomplètes ou inexactes",
+            "Demander la suppression ou la destruction",
+            "Vous opposer aux résultats issus uniquement d'une analyse automatisée de vos données à votre détriment"
+          ]
+        },
+        {
+          "title": "8. Confidentialité des mineurs",
+          "paragraphs": [
+            "Nos services ne sont pas destinés aux personnes de moins de 18 ans. Nous ne collectons pas sciemment d'informations personnelles auprès de personnes de moins de 18 ans."
+          ]
+        },
+        {
+          "title": "9. Modifications",
+          "paragraphs": [
+            "La présente Politique de confidentialité peut être mise à jour de temps à autre. En cas de modifications importantes, nous vous en informerons par e-mail ou via la plateforme."
+          ]
+        },
+        {
+          "title": "10. Contact",
+          "paragraphs": [
+            "Pour toute question concernant notre Politique de confidentialité :",
+            "E-mail : gizlilik@ride-yo.com",
+            "Téléphone : +90 (462) 123 45 67",
+            "Adresse : Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "kvkk": {
+      "title": "Notice d'information KVKK",
+      "lastUpdated": "Informations en vertu de la loi sur la protection des données personnelles",
+      "sections": [
+        {
+          "title": "1. Responsable du traitement",
+          "paragraphs": [
+            "Conformément à la loi n° 6698 sur la protection des données personnelles (« KVKK »), vos données personnelles peuvent être traitées par RideYo en qualité de responsable du traitement dans le cadre décrit ci-dessous.",
+            "Raison sociale : RideYo Teknoloji A.Ş.",
+            "Adresse : Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon",
+            "E-mail : kvkk@ride-yo.com"
+          ]
+        },
+        {
+          "title": "2. Données personnelles traitées",
+          "subsections": [
+            {
+              "title": "2.1 Informations d'identité",
+              "list": ["Prénom et nom", "Numéro d'identité turc", "Date de naissance", "Numéro et détails du permis de conduire"]
+            },
+            {
+              "title": "2.2 Informations de contact",
+              "list": ["Adresse e-mail", "Numéro de téléphone", "Informations d'adresse"]
+            },
+            {
+              "title": "2.3 Informations financières",
+              "list": [
+                "Informations de carte bancaire (chiffrées)",
+                "Informations de compte bancaire (pour les propriétaires de véhicules)",
+                "Historique des transactions"
+              ]
+            },
+            {
+              "title": "2.4 Informations sur le véhicule et la location",
+              "list": [
+                "Informations sur le véhicule loué",
+                "Dates et durées de location",
+                "Photos et descriptions du véhicule",
+                "Informations de localisation"
+              ]
+            },
+            {
+              "title": "2.5 Informations de sécurité des transactions",
+              "list": ["Adresse IP", "Enregistrements de cookies", "Informations sur l'appareil", "Journaux (logs)"]
+            }
+          ]
+        },
+        {
+          "title": "3. Finalités du traitement des données personnelles",
+          "paragraphs": ["Vos données personnelles sont traitées aux fins suivantes :"],
+          "list": [
+            "Fourniture de services de location de véhicules",
+            "Création et gestion des comptes utilisateurs",
+            "Traitement des paiements",
+            "Gestion de la relation client et services d'assistance",
+            "Sécurité et prévention de la fraude",
+            "Respect des obligations légales",
+            "Développement et amélioration de la plateforme",
+            "Analyses statistiques et reporting",
+            "Activités marketing et promotionnelles (avec votre consentement explicite)"
+          ]
+        },
+        {
+          "title": "4. Transfert des données personnelles",
+          "paragraphs": ["Vos données personnelles peuvent être transférées aux fins mentionnées ci-dessus à :"],
+          "list": [
+            "Propriétaires de véhicules (pour les transactions de location)",
+            "Institutions de paiement (pour le traitement des paiements)",
+            "Cabinets d'avocats (pour les procédures judiciaires)",
+            "Institutions publiques autorisées (pour les exigences légales)",
+            "Partenaires commerciaux et prestataires de services (pour le fonctionnement de la plateforme)"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "Les transferts sont effectués conformément aux articles 8 et 9 de la KVKK."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Méthode de collecte des données personnelles",
+          "paragraphs": ["Vos données personnelles sont collectées :"],
+          "list": [
+            "Via le site web et l'application mobile",
+            "Par le biais des formulaires d'inscription et d'adhésion",
+            "Lors des transactions de location",
+            "Par e-mail, téléphone et autres canaux de communication",
+            "Par le biais de systèmes automatisés (cookies, journaux)"
+          ],
+          "subsections": [
+            {
+              "paragraphs": ["comme décrit ci-dessus."]
+            }
+          ]
+        },
+        {
+          "title": "6. Droits de la personne concernée",
+          "paragraphs": [
+            "Conformément à l'article 11 de la KVKK, en tant que personnes concernées, vous disposez des droits suivants :"
+          ],
+          "list": [
+            "Savoir si vos données personnelles font l'objet d'un traitement",
+            "Demander des informations si vos données personnelles ont été traitées",
+            "Connaître la finalité du traitement et vérifier qu'il est utilisé de manière appropriée",
+            "Connaître les tiers auxquels vos données personnelles sont transférées en Turquie ou à l'étranger",
+            "Demander la rectification si vos données personnelles sont incomplètes ou inexactes",
+            "Demander la suppression ou la destruction de vos données personnelles dans les conditions prévues à l'article 7 de la KVKK",
+            "Demander la notification de la rectification, suppression ou destruction aux tiers auxquels les données personnelles ont été transférées",
+            "Vous opposer aux résultats issus uniquement d'une analyse automatisée des données traitées à votre détriment",
+            "Réclamer une indemnisation pour les dommages résultant d'un traitement illicite de vos données personnelles"
+          ]
+        },
+        {
+          "title": "7. Exercice de vos droits",
+          "paragraphs": [
+            "Pour exercer les droits énumérés ci-dessus, vous pouvez soumettre votre demande contenant les informations nécessaires pour vous identifier et les explications concernant le droit que vous souhaitez exercer en vertu de l'article 11 de la KVKK par les moyens suivants :"
+          ],
+          "list": [
+            "Par écrit : en envoyant une lettre de demande signée manuscritement en personne ou par l'intermédiaire d'un notaire à Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon",
+            "Par e-mail : en envoyant une demande signée avec un courrier électronique enregistré (KEP), une signature électronique sécurisée ou une signature mobile à kvkk@ride-yo.com"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "Vos demandes seront traitées gratuitement dans un délai maximum de 30 jours, selon la nature de la demande. Si le traitement entraîne un coût supplémentaire, les frais déterminés par le Conseil de protection des données personnelles peuvent être facturés."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "8. Sécurité des données",
+          "paragraphs": [
+            "En tant que RideYo, nous prenons des mesures techniques et administratives pour garantir la sécurité de vos données personnelles. Vos données sont protégées contre tout accès non autorisé, perte et utilisation abusive."
+          ]
+        },
+        {
+          "title": "9. Modifications",
+          "paragraphs": [
+            "La présente notice d'information peut être modifiée en fonction des évolutions de la réglementation légale ou des mises à jour des politiques de l'entreprise. Les modifications importantes vous seront communiquées."
+          ]
+        },
+        {
+          "title": "10. Contact",
+          "paragraphs": [
+            "Pour toute question concernant la KVKK et le traitement de vos données personnelles :",
+            "E-mail : kvkk@ride-yo.com",
+            "Téléphone : +90 (462) 123 45 67",
+            "Adresse : Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Politique de cookies",
+      "lastUpdated": "Dernière mise à jour : 23 octobre 2024",
+      "sections": [
+        {
+          "title": "1. Que sont les cookies ?",
+          "paragraphs": [
+            "Les cookies sont de petits fichiers texte stockés sur votre appareil ou serveur réseau par les navigateurs lorsque vous visitez des sites web. Chez RideYo, nous utilisons divers cookies sur notre site web et notre application mobile."
+          ]
+        },
+        {
+          "title": "2. Types de cookies",
+          "subsections": [
+            {
+              "title": "2.1. Cookies essentiels",
+              "paragraphs": [
+                "Ces cookies sont nécessaires au bon fonctionnement du site web. Ils assurent des fonctions de base telles que la sécurité, la gestion du réseau et l'accessibilité."
+              ]
+            },
+            {
+              "title": "2.2. Cookies de fonctionnalité",
+              "paragraphs": [
+                "Ces cookies mémorisent les préférences de l'utilisateur pour offrir une expérience plus personnalisée. Ils stockent des informations telles que la sélection de la langue et les préférences de thème."
+              ]
+            },
+            {
+              "title": "2.3. Cookies de performance et d'analyse",
+              "paragraphs": [
+                "Ces cookies sont utilisés pour mesurer et améliorer les performances du site web. Ils collectent des données anonymes telles que les pages visitées et la durée de visite des utilisateurs."
+              ]
+            },
+            {
+              "title": "2.4. Cookies de ciblage et publicitaires",
+              "paragraphs": [
+                "Ces cookies sont utilisés pour afficher des publicités personnalisées en fonction des centres d'intérêt des utilisateurs."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Cookies que nous utilisons",
+          "list": [
+            "Cookies de session : authentification des utilisateurs connectés",
+            "Cookies de préférences : langue, thème et préférences d'affichage",
+            "Cookies de sécurité : détection de fraude et sécurité",
+            "Cookies d'analyse : statistiques d'utilisation et mesure des performances",
+            "Cookies GPS : pour les services basés sur la localisation"
+          ]
+        },
+        {
+          "title": "4. Gestion des cookies",
+          "paragraphs": [
+            "Vous pouvez contrôler, supprimer ou bloquer les cookies via les paramètres de votre navigateur. Cependant, la désactivation de certains cookies peut empêcher certaines fonctionnalités du site web de fonctionner correctement."
+          ],
+          "subsections": [
+            {
+              "title": "Gestion des cookies dans les navigateurs populaires :",
+              "list": [
+                "Google Chrome : Paramètres → Confidentialité et sécurité → Cookies et autres données de sites",
+                "Mozilla Firefox : Paramètres → Vie privée et sécurité → Cookies et données de sites",
+                "Safari : Préférences → Confidentialité → Gérer les cookies et les données de sites web",
+                "Microsoft Edge : Paramètres → Confidentialité, recherche et services → Cookies"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Cookies tiers",
+          "paragraphs": [
+            "Certains prestataires de services tiers sur notre site web (systèmes de paiement, services cartographiques, outils d'analyse) peuvent utiliser leurs propres cookies. Ces cookies sont soumis aux politiques de confidentialité des entreprises concernées."
+          ]
+        },
+        {
+          "title": "6. Mises à jour de la politique de cookies",
+          "paragraphs": [
+            "La présente politique de cookies peut être mise à jour de temps à autre. Nous vous informerons des modifications importantes. Les modifications de la politique entrent en vigueur à la date de publication."
+          ]
+        },
+        {
+          "title": "7. Contact",
+          "paragraphs": [
+            "Pour toute question concernant notre politique de cookies, vous pouvez nous contacter :",
+            "E-mail : info@ride-yo.com",
+            "Téléphone : +90 (462) 123 45 67",
+            "Adresse : Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "cancellation": {
+      "title": "Politique d'annulation et de remboursement",
+      "lastUpdated": "Dernière mise à jour : 23 octobre 2024",
+      "sections": [
+        {
+          "title": "Informations générales",
+          "paragraphs": [
+            "Les conditions d'annulation et de remboursement pour les réservations effectuées via la plateforme RideYo sont définies ci-dessous. Veuillez lire attentivement ces conditions avant de faire une réservation."
+          ]
+        },
+        {
+          "title": "Conditions d'annulation par le locataire",
+          "subsections": [
+            {
+              "title": "Plus de 24 heures avant — Remboursement intégral",
+              "paragraphs": [
+                "Pour les annulations effectuées 24 heures ou plus avant le début de la location, 100 % du montant payé sera remboursé."
+              ]
+            },
+            {
+              "title": "12 à 24 heures avant — Remboursement partiel",
+              "paragraphs": [
+                "Pour les annulations effectuées entre 12 et 24 heures avant le début de la location, 50 % du montant payé sera remboursé."
+              ]
+            },
+            {
+              "title": "Moins de 12 heures — Aucun remboursement",
+              "paragraphs": [
+                "Pour les annulations effectuées moins de 12 heures avant le début de la location, aucun remboursement ne sera effectué."
+              ]
+            },
+            {
+              "title": "Absence — Aucun remboursement",
+              "paragraphs": [
+                "Si vous ne vous présentez pas à l'heure de la réservation sans préavis, aucun remboursement ne sera effectué."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Conditions d'annulation par le propriétaire de véhicule",
+          "paragraphs": ["En cas d'annulation de dernière minute par le propriétaire du véhicule :"],
+          "list": [
+            "Le propriétaire est tenu de proposer un véhicule alternatif au locataire",
+            "Si aucun véhicule alternatif n'est disponible, les frais de réservation seront remboursés au locataire à hauteur de 120 %",
+            "Des annulations répétées peuvent entraîner la suspension du compte du propriétaire",
+            "RideYo aide à trouver un véhicule alternatif adapté pour le locataire"
+          ]
+        },
+        {
+          "title": "Processus de remboursement",
+          "subsections": [
+            {
+              "title": "Remboursements de paiement",
+              "list": [
+                "Les demandes de remboursement peuvent être effectuées via l'application ou le service client",
+                "Les remboursements sont effectués sur le même moyen de paiement utilisé (carte de crédit, carte de débit)",
+                "Les remboursements sur carte de crédit apparaissent sur le compte sous 5 à 10 jours ouvrables",
+                "Les remboursements sur carte de débit apparaissent sur le compte sous 3 à 5 jours ouvrables",
+                "Le statut du remboursement est notifié par SMS et e-mail"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Circonstances particulières",
+          "subsections": [
+            {
+              "title": "Force majeure",
+              "paragraphs": [
+                "Des remboursements intégraux sont effectués en cas de force majeure telle que catastrophes naturelles, épidémies ou guerre. La détermination de telles circonstances est faite par la direction de RideYo."
+              ]
+            },
+            {
+              "title": "Panne du véhicule",
+              "paragraphs": [
+                "Si le véhicule devient inutilisable en raison d'une panne technique pendant la période de location, un remboursement intégral est effectué pour la période non utilisée ou un véhicule alternatif est fourni."
+              ]
+            },
+            {
+              "title": "Retour anticipé",
+              "paragraphs": [
+                "Si le véhicule est restitué avant la fin de la période de location, aucun remboursement n'est effectué pour le temps non utilisé. Pour les locations journalières, le retour anticipé est calculé au tarif horaire."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Contact",
+          "paragraphs": [
+            "Pour toute demande d'annulation ou de remboursement, vous pouvez contacter notre service client 24h/24 :",
+            "Téléphone : 0539 526 32 93",
+            "E-mail : destek@ride-yo.com",
+            "WhatsApp : +90 539 526 32 93"
+          ]
+        }
+      ]
+    },
+    "rentalAgreement": {
+      "title": "Contrat de vente à distance",
+      "lastUpdated": "Dernière mise à jour : 23 octobre 2024",
+      "sections": [
+        {
+          "title": "Introduction",
+          "paragraphs": [
+            "Le présent Contrat de vente à distance (« Contrat ») est conclu entre le locataire (« Locataire/Consommateur ») et le propriétaire du véhicule (« Bailleur/Vendeur ») louant un véhicule via la plateforme RideYo, conformément aux dispositions de la loi n° 6502 sur la protection des consommateurs et du règlement sur les contrats à distance."
+          ]
+        },
+        {
+          "title": "Article 1 : Parties",
+          "subsections": [
+            {
+              "title": "1.1. Informations du vendeur/prestataire de services",
+              "list": [
+                "Raison sociale : RideYo Vehicle Rental Services",
+                "Adresse : Müftü Solakzade Mah. Elmadağ Sk. No:2 Kat:2 Palandöken/Erzurum",
+                "Téléphone : 0539 526 32 93",
+                "E-mail : info@ride-yo.com",
+                "Site web : www.ride-yo.com"
+              ]
+            },
+            {
+              "title": "1.2. Acheteur/consommateur",
+              "paragraphs": [
+                "Personne physique louant un véhicule via la plateforme RideYo, titulaire d'un permis de conduire valide et acceptant les conditions de la plateforme. Les informations de l'acheteur sont enregistrées lors de la réservation."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Article 2 : Objet du contrat",
+          "paragraphs": [
+            "L'objet du présent contrat est de déterminer les droits et obligations des parties concernant la vente et la fourniture du service de location de véhicule commandé électroniquement par l'Acheteur via la plateforme e-commerce RideYo appartenant au Vendeur, conformément à la loi n° 6502 sur la protection des consommateurs et au règlement sur les contrats à distance."
+          ]
+        },
+        {
+          "title": "Article 3 : Informations sur le service et tarifs",
+          "subsections": [
+            {
+              "title": "3.1. Caractéristiques du service",
+              "list": [
+                "Le type, la marque, le modèle, la couleur et toutes les caractéristiques du service sont précisés sur la plateforme",
+                "La durée de location peut être à la minute, à l'heure ou à la journée",
+                "Des forfaits kilométriques peuvent être précisés séparément",
+                "Le prix total taxes comprises est affiché avant la réservation"
+              ]
+            },
+            {
+              "title": "3.2. Tarification",
+              "list": [
+                "Tous les prix sont indiqués en livre turque (TL) TVA comprise",
+                "La commission de la plateforme est de 15 % des frais de location",
+                "Le tarif horaire s'applique en cas de retour tardif",
+                "Des frais supplémentaires peuvent s'appliquer en cas de dommage"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Article 4 : Mode et conditions de paiement",
+          "list": [
+            "Le paiement peut être effectué par carte de crédit ou carte de débit",
+            "Les frais de location sont prélevés lors de la confirmation de la réservation",
+            "Tous les paiements sont traités via une infrastructure de paiement sécurisée",
+            "Les informations de carte sont chiffrées avec un certificat SSL 256 bits",
+            "Les informations de carte peuvent être enregistrées (optionnel)",
+            "Le montant de la caution varie entre 500 et 2 000 TL selon le type de véhicule"
+          ]
+        },
+        {
+          "title": "Article 5 : Exécution et fourniture du service",
+          "subsections": [
+            {
+              "title": "5.1. Conditions de livraison",
+              "list": [
+                "Le véhicule est remis à l'emplacement indiqué à la date et l'heure spécifiées",
+                "Un formulaire d'inspection du véhicule est complété avant la livraison",
+                "Les dommages existants sont photographiés et enregistrés",
+                "Le niveau de carburant et les informations kilométriques sont consignés"
+              ]
+            },
+            {
+              "title": "5.2. Conditions de restitution",
+              "list": [
+                "Le véhicule est restitué propre à la fin de la période de location",
+                "Le niveau de carburant est rétabli au niveau initial",
+                "Une inspection des dommages est effectuée et consignée"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Article 6 : Droit de rétractation",
+          "paragraphs": [
+            "Conformément à l'article 50 de la loi n° 6502 et à l'article 15 du règlement sur les contrats à distance, les consommateurs n'ont pas le droit de rétractation dans les contrats relatifs à l'hébergement, au transport de marchandises, à la location de voitures, à la fourniture de nourriture et boissons, et aux activités de loisirs devant être exécutées à une date ou période déterminée.",
+            "Cependant, en tant que RideYo, la politique d'annulation suivante s'applique pour la satisfaction client :"
+          ],
+          "list": [
+            "Annulation jusqu'à 24 heures avant : remboursement à 100 %",
+            "Annulation entre 12 et 24 heures avant : remboursement à 50 %",
+            "Annulation moins de 12 heures avant : aucun remboursement",
+            "Absence : aucun remboursement"
+          ]
+        },
+        {
+          "title": "Article 7 : Garantie et responsabilité",
+          "subsections": [
+            {
+              "title": "7.1. Couverture d'assurance",
+              "list": [
+                "Assurance responsabilité civile obligatoire (MTPL)",
+                "Assurance tous risques mini (fournie par RideYo)",
+                "Assurance accident corporel passager",
+                "Assistance routière 24h/24"
+              ]
+            },
+            {
+              "title": "7.2. Limitations de responsabilité",
+              "list": [
+                "L'utilisation sous l'influence de l'alcool ou de drogues n'est pas couverte par l'assurance",
+                "L'utilisation sans permis ou avec un permis expiré est interdite",
+                "Les dommages intentionnels sont à la charge du consommateur"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Article 8 : Protection des données personnelles",
+          "paragraphs": [
+            "Les données personnelles du consommateur sont traitées et protégées conformément à la loi n° 6698 sur la protection des données personnelles. Pour des informations détaillées, veuillez consulter la Politique de confidentialité et la Notice d'information KVKK."
+          ]
+        },
+        {
+          "title": "Article 9 : Règlement des litiges",
+          "list": [
+            "Les comités d'arbitrage des consommateurs et les tribunaux des consommateurs sont compétents pour les litiges découlant du présent contrat",
+            "Les limites monétaires sont déterminées chaque année par le ministère du Commerce",
+            "Les tribunaux et offices d'exécution d'Erzurum sont compétents",
+            "Les lois de la République de Turquie s'appliquent"
+          ]
+        },
+        {
+          "title": "Article 10 : Entrée en vigueur",
+          "paragraphs": [
+            "Le présent contrat entre en vigueur dès l'approbation électronique par le Consommateur. En commandant le service objet du présent contrat, le Consommateur est réputé avoir accepté l'ensemble des articles du présent contrat."
+          ]
+        },
+        {
+          "title": "Coordonnées du vendeur/prestataire de services",
+          "paragraphs": [
+            "RideYo Vehicle Rental Services",
+            "Adresse : Müftü Solakzade Mah. Elmadağ Sk. No:2 Kat:2 Palandöken/Erzurum",
+            "Téléphone : 0539 526 32 93",
+            "E-mail : info@ride-yo.com",
+            "Web : www.ride-yo.com"
+          ]
+        }
+      ]
+    },
+    "safety": {
+      "title": "Consignes de sécurité",
+      "lastUpdated": "Dernière mise à jour : 23 octobre 2024",
+      "sections": [
+        {
+          "title": "Avis de sécurité important",
+          "paragraphs": [
+            "Votre sécurité est notre priorité chez RideYo. En lisant attentivement les règles ci-dessous, vous contribuez à garantir la sécurité de vous-même et des autres utilisateurs."
+          ]
+        },
+        {
+          "title": "Avant de louer un véhicule",
+          "subsections": [
+            {
+              "title": "Vérification du permis",
+              "list": [
+                "Vous devez être titulaire d'un permis de conduire valide",
+                "Le permis doit être détenu depuis au minimum 2 ans",
+                "L'âge doit être compris entre 21 et 70 ans",
+                "Votre score conducteur doit être d'au moins 60"
+              ]
+            },
+            {
+              "title": "Inspection du véhicule",
+              "list": [
+                "Inspectez l'extérieur avant de prendre possession du véhicule",
+                "Photographiez les dommages et rayures existants",
+                "Vérifiez le niveau de carburant",
+                "Inspectez l'état des pneus",
+                "Vérifiez la propreté de l'intérieur",
+                "Assurez-vous que tous les documents sont dans le véhicule"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sécurité à la conduite",
+          "subsections": [
+            {
+              "title": "Respect du code de la route",
+              "list": [
+                "Ne dépassez pas les limites de vitesse",
+                "Ne conduisez pas sous l'influence de l'alcool ou de drogues",
+                "Portez toujours votre ceinture de sécurité",
+                "N'utilisez pas votre téléphone mobile (sauf en mains libres)",
+                "Ne conduisez pas en cas de fatigue",
+                "Respectez la signalisation routière"
+              ]
+            },
+            {
+              "title": "Interdictions",
+              "list": [
+                "Il est interdit de céder le véhicule à une autre personne",
+                "Il est interdit de sortir le véhicule du pays",
+                "Il est interdit de fumer dans le véhicule",
+                "Il est interdit de transporter des animaux (sans autorisation spéciale)",
+                "Il est interdit d'utiliser le véhicule pour des courses ou démonstrations",
+                "Il est interdit d'utiliser le véhicule pour des activités illégales"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Urgences",
+          "subsections": [
+            {
+              "title": "En cas d'accident",
+              "list": [
+                "1. Assurez d'abord votre sécurité personnelle",
+                "2. Appelez le 112 si nécessaire",
+                "3. Informez la police et les autorités routières",
+                "4. Appelez la ligne d'assistance RideYo (24h/24)",
+                "5. Obtenez un rapport d'accident",
+                "6. Photographiez la scène et les dommages",
+                "7. Recueillez les informations de l'autre partie"
+              ]
+            },
+            {
+              "title": "En cas de panne",
+              "list": [
+                "1. Déplacez le véhicule en lieu sûr",
+                "2. Placez les triangles de signalisation",
+                "3. Appelez la ligne d'assistance RideYo",
+                "4. Attendez l'arrivée de l'assistance routière",
+                "5. N'essayez pas de réparer vous-même"
+              ]
+            },
+            {
+              "title": "Lignes d'assistance 24h/24",
+              "paragraphs": [
+                "Assistance d'urgence : +90 5395263293",
+                "Assistance routière : +90 5395263293",
+                "WhatsApp : +90 5395263293"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sécurité pour les propriétaires de véhicules",
+          "subsections": [
+            {
+              "title": "Recommandations pour les propriétaires de véhicules",
+              "list": [
+                "Entretenez régulièrement votre véhicule",
+                "Maintenez les documents d'assurance et de contrôle technique à jour",
+                "Inspectez le véhicule avant et après chaque location",
+                "Gardez le système de suivi GPS actif",
+                "Vérifiez l'équipement d'urgence (trousse de secours, extincteur)",
+                "Ne concluez pas d'arrangements financiers directs avec les locataires",
+                "Effectuez toutes les transactions via la plateforme RideYo"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Remise du véhicule",
+          "subsections": [
+            {
+              "title": "Prise en charge",
+              "list": [
+                "Ayez les détails de votre réservation à portée de main",
+                "Apportez votre pièce d'identité et votre permis de conduire",
+                "Complétez ensemble le formulaire d'inspection du véhicule",
+                "Consignez tous les dommages et manquements",
+                "Notez le niveau de carburant"
+              ]
+            },
+            {
+              "title": "Restitution",
+              "list": [
+                "Restituez le véhicule propre",
+                "Rétablissez le niveau de carburant au niveau initial",
+                "Ne laissez pas d'effets personnels dans le véhicule",
+                "Restituez tous les documents",
+                "Faites effectuer une inspection des dommages",
+                "Signez le formulaire de restitution"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sanctions",
+          "paragraphs": ["Si vous ne respectez pas les règles de sécurité :"],
+          "list": [
+            "Votre compte peut être suspendu temporairement ou définitivement",
+            "Des pénalités peuvent être appliquées",
+            "Vous pouvez être exclu de la couverture d'assurance",
+            "Des poursuites judiciaires peuvent être engagées",
+            "Votre caution peut ne pas être remboursée"
+          ]
+        },
+        {
+          "title": "Rappel",
+          "paragraphs": [
+            "Les présentes consignes de sécurité ont été préparées pour la sécurité de vous et de tous les utilisateurs RideYo. En respectant les règles, vous pouvez profiter d'une expérience de partage de véhicule sûre et agréable.",
+            "Bon voyage en toute sécurité !"
+          ]
+        }
+      ]
+    }
+  }
+}

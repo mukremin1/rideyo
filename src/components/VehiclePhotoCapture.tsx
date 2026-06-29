@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Camera, X, Plus, Flashlight, FlashlightOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ type TorchCapableTrack = MediaStreamTrack & {
 
 const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehiclePhotoCaptureProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isCapturing, setIsCapturing] = useState(false);
   const [isFlashEnabled, setIsFlashEnabled] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -38,8 +40,8 @@ const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehicleP
     } catch (error) {
       console.error("Kamera erişim hatası:", error);
       toast({
-        title: "Kamera Hatası",
-        description: "Kameraya erişilemedi. Lütfen izin verin.",
+        title: t("vehiclePhoto.cameraError"),
+        description: t("vehiclePhoto.cameraPermission"),
         variant: "destructive",
       });
     }
@@ -75,8 +77,8 @@ const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehicleP
     }
 
     toast({
-      title: "Fotoğraf Çekildi!",
-      description: `${newPhotos.length}/${maxPhotos} fotoğraf`,
+      title: t("vehiclePhoto.photoTaken"),
+      description: t("vehiclePhoto.photoCount", { current: newPhotos.length, max: maxPhotos }),
     });
   };
 
@@ -102,8 +104,8 @@ const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehicleP
       }
     } else {
       toast({
-        title: "Flaş Desteklenmiyor",
-        description: "Bu cihazda flaş kontrolü desteklenmiyor",
+        title: t("vehiclePhoto.flashNotSupported"),
+        description: t("vehiclePhoto.flashNotSupportedDesc"),
         variant: "destructive",
       });
     }
@@ -111,11 +113,10 @@ const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehicleP
 
   return (
     <div className="space-y-4">
-      {/* Photo Grid */}
       <div className="grid grid-cols-2 gap-3">
         {photos.map((photo, index) => (
           <div key={index} className="relative aspect-video rounded-lg overflow-hidden border">
-            <img src={photo} alt={`Araç fotoğrafı ${index + 1}`} className="w-full h-full object-cover" />
+            <img src={photo} alt={t("vehiclePhoto.photoAlt", { index: index + 1 })} className="w-full h-full object-cover" />
             <button
               onClick={() => removePhoto(index)}
               className="absolute top-2 right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center"
@@ -131,12 +132,11 @@ const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehicleP
             className="aspect-video rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/5 transition-colors"
           >
             <Plus className="w-8 h-8 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Fotoğraf Ekle</span>
+            <span className="text-xs text-muted-foreground">{t("vehiclePhoto.addPhoto")}</span>
           </button>
         )}
       </div>
 
-      {/* Camera View */}
       {isCapturing && (
         <div className="relative rounded-lg overflow-hidden bg-black">
           <video
@@ -150,7 +150,7 @@ const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehicleP
           {isFlashEnabled && (
             <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
               <Flashlight className="w-3 h-3" />
-              Flaş Aktif
+              {t("vehiclePhoto.flashActive")}
             </div>
           )}
 
@@ -185,7 +185,7 @@ const VehiclePhotoCapture = ({ onPhotosChange, photos, maxPhotos = 4 }: VehicleP
       )}
 
       <p className="text-sm text-muted-foreground text-center">
-        {photos.length}/{maxPhotos} fotoğraf eklendi. Aracın ön, arka, sol ve sağ taraflarını çekin.
+        {t("vehiclePhoto.photoHint", { current: photos.length, max: maxPhotos })}
       </p>
     </div>
   );

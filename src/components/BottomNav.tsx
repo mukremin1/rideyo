@@ -1,26 +1,28 @@
 import { Home, Car, Calendar, Heart, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 const BottomNav = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
 
   const guestItems = [
-    { to: "/", label: "Ana Sayfa", icon: Home },
-    { to: "/cars", label: "Araçlar", icon: Car },
-    { to: "/auth", label: "Giriş", icon: User },
+    { to: "/", label: t("nav.home"), icon: Home },
+    { to: "/cars", label: t("nav.cars"), icon: Car },
+    { to: "/auth", label: t("nav.signIn"), icon: User },
   ];
 
   const userItems = [
-    { to: "/", label: "Ana Sayfa", icon: Home },
-    { to: "/cars", label: "Araçlar", icon: Car },
-    { to: "/my-bookings", label: "Rezervasyon", icon: Calendar },
-    { to: "/favorites", label: "Favoriler", icon: Heart },
-    { to: "/profile", label: "Hesap", icon: User },
+    { to: "/", label: t("nav.home"), icon: Home },
+    { to: "/cars", label: t("nav.cars"), icon: Car },
+    { to: "/my-bookings", label: t("nav.bookings"), icon: Calendar },
+    { to: "/favorites", label: t("nav.favorites"), icon: Heart },
+    { to: "/profile", label: t("nav.account"), icon: User },
   ];
 
   const items = user ? userItems : guestItems;

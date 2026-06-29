@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { MapPin, Navigation, Zap, Clock } from "lucide-react";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { useDateLocale } from "@/hooks/useDateLocale";
 
 interface GPSTrackerProps {
   carId: string;
@@ -29,11 +30,12 @@ interface CarRealtimePayload {
 }
 
 const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const [gpsData, setGpsData] = useState<GPSData | null>(null);
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
-    // Fetch initial GPS data
     const fetchGPSData = async () => {
       const { data } = await supabase
         .from("cars")
@@ -43,8 +45,7 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
 
       if (data && data.latitude && data.longitude) {
         setGpsData(data as GPSData);
-        
-        // Check if car is online (updated within last 5 minutes)
+
         const lastUpdate = new Date(data.last_gps_update || 0);
         const now = new Date();
         const diffMinutes = (now.getTime() - lastUpdate.getTime()) / (1000 * 60);
@@ -54,7 +55,6 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
 
     fetchGPSData();
 
-    // Subscribe to real-time GPS updates
     const channel = supabase
       .channel(`gps-${carId}`)
       .on(
@@ -92,7 +92,7 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
       <Card className="p-6">
         <div className="flex items-center gap-2 text-muted-foreground">
           <MapPin className="w-5 h-5" />
-          <span>GPS verisi bekleniyor...</span>
+          <span>{t("components.gpsTracker.waitingForData")}</span>
         </div>
       </Card>
     );
@@ -104,7 +104,7 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">{carName}</h3>
           <Badge variant={isOnline ? "default" : "secondary"}>
-            {isOnline ? "Çevrimiçi" : "Çevrimdışı"}
+            {isOnline ? t("components.gpsTracker.online") : t("components.gpsTracker.offline")}
           </Badge>
         </div>
 
@@ -112,7 +112,7 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="w-4 h-4" />
-              <span>Konum</span>
+              <span>{t("components.gpsTracker.location")}</span>
             </div>
             <p className="text-sm font-medium">
               {gpsData.latitude.toFixed(6)}, {gpsData.longitude.toFixed(6)}
@@ -122,15 +122,17 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Navigation className="w-4 h-4" />
-              <span>Hız</span>
+              <span>{t("components.gpsTracker.speed")}</span>
             </div>
-            <p className="text-sm font-medium">{gpsData.speed.toFixed(0)} km/s</p>
+            <p className="text-sm font-medium">
+              {gpsData.speed.toFixed(0)} {t("components.gpsTracker.speedUnit")}
+            </p>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Zap className="w-4 h-4" />
-              <span>Batarya</span>
+              <span>{t("components.gpsTracker.battery")}</span>
             </div>
             <p className="text-sm font-medium">%{gpsData.battery_level}</p>
           </div>
@@ -138,10 +140,10 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              <span>Son Güncelleme</span>
+              <span>{t("components.gpsTracker.lastUpdate")}</span>
             </div>
             <p className="text-sm font-medium">
-              {format(new Date(gpsData.last_gps_update), "HH:mm:ss", { locale: tr })}
+              {format(new Date(gpsData.last_gps_update), "HH:mm:ss", { locale: dateLocale })}
             </p>
           </div>
         </div>
@@ -153,7 +155,7 @@ const GPSTracker = ({ carId, carName }: GPSTrackerProps) => {
             rel="noopener noreferrer"
             className="text-sm text-primary hover:underline"
           >
-            Haritada Görüntüle →
+            {t("components.gpsTracker.viewOnMap")}
           </a>
         </div>
       </div>

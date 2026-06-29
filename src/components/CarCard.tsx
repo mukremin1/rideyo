@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge";
 import { MapPin, Users, Fuel, Settings, Clock, Heart, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ interface Campaign {
 
 const CarCard = ({ car }: CarCardProps) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(false);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
 
@@ -61,7 +63,7 @@ const CarCard = ({ car }: CarCardProps) => {
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!user) {
-      toast.error("Favori eklemek için giriş yapmalısınız");
+      toast.error(t("carCard.loginForFavorite"));
       return;
     }
 
@@ -72,13 +74,13 @@ const CarCard = ({ car }: CarCardProps) => {
         .eq("user_id", user.id)
         .eq("car_id", car.id);
       setIsFavorite(false);
-      toast.success("Favorilerden çıkarıldı");
+      toast.success(t("carCard.removedFromFavorites"));
     } else {
       await supabase
         .from("favorites")
         .insert({ user_id: user.id, car_id: car.id });
       setIsFavorite(true);
-      toast.success("Favorilere eklendi");
+      toast.success(t("carCard.addedToFavorites"));
     }
   };
 
@@ -110,11 +112,11 @@ const CarCard = ({ car }: CarCardProps) => {
         )}
         {car.available ? (
           <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
-            Müsait
+            {t("carCard.available")}
           </Badge>
         ) : (
           <Badge variant="destructive" className="absolute top-4 right-4">
-            Kullanımda
+            {t("carCard.inUse")}
           </Badge>
         )}
       </div>
@@ -134,7 +136,7 @@ const CarCard = ({ car }: CarCardProps) => {
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="w-4 h-4" />
-            <span>{car.seats} Kişi</span>
+            <span>{t("carCard.seats", { count: car.seats })}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Fuel className="w-4 h-4" />
@@ -146,7 +148,7 @@ const CarCard = ({ car }: CarCardProps) => {
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
-            <span>{car.pricePerHour}₺/saat</span>
+            <span>{car.pricePerHour}₺{t("carCard.perHour")}</span>
           </div>
         </div>
 
@@ -157,17 +159,17 @@ const CarCard = ({ car }: CarCardProps) => {
                 <>
                   <span className="text-2xl font-bold text-foreground">{discountedPrice.toFixed(2)}₺</span>
                   <span className="text-sm text-muted-foreground line-through ml-2">{car.pricePerMinute}₺</span>
-                  <span className="text-sm text-muted-foreground ml-1">/dakika</span>
+                  <span className="text-sm text-muted-foreground ml-1">{t("carCard.perMinute")}</span>
                 </>
               ) : (
                 <>
                   <span className="text-3xl font-bold text-foreground">{car.pricePerMinute}₺</span>
-                  <span className="text-sm text-muted-foreground ml-1">/dakika</span>
+                  <span className="text-sm text-muted-foreground ml-1">{t("carCard.perMinute")}</span>
                 </>
               )}
             </div>
             <div className="text-right">
-              <div className="text-sm text-muted-foreground">{car.pricePerDay}₺/gün</div>
+              <div className="text-sm text-muted-foreground">{car.pricePerDay}{t("carCard.perDay")}</div>
             </div>
           </div>
 
@@ -176,7 +178,7 @@ const CarCard = ({ car }: CarCardProps) => {
               className="w-full" 
               disabled={!car.available}
             >
-              {car.available ? "Detayları Gör" : "Müsait Değil"}
+              {car.available ? t("carCard.viewDetails") : t("carCard.notAvailable")}
             </Button>
           </Link>
         </div>

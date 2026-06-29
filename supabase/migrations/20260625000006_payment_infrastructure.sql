@@ -100,6 +100,29 @@ CREATE TRIGGER update_owner_payout_profiles_updated_at
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS iyzico_card_user_key text;
 
+-- Saved cards table (if missing from earlier migrations)
+CREATE TABLE IF NOT EXISTS public.saved_cards (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  card_holder_name text NOT NULL,
+  card_type text NOT NULL,
+  expiry_month integer NOT NULL,
+  expiry_year integer NOT NULL,
+  last_four_digits text NOT NULL,
+  encrypted_card_token text NOT NULL,
+  is_default boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.saved_cards ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage own saved cards" ON public.saved_cards;
+CREATE POLICY "Users can manage own saved cards"
+  ON public.saved_cards FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 -- Saved cards: token-only storage (PCI safe)
 ALTER TABLE public.saved_cards
   ADD COLUMN IF NOT EXISTS iyzico_card_token text,

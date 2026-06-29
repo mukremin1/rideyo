@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
@@ -10,6 +11,7 @@ import { Car as CarType } from "@/types/car";
 import carCompact from "@/assets/car-compact.jpg";
 import carSedan from "@/assets/car-sedan.jpg";
 import carSuv from "@/assets/car-suv.jpg";
+
 interface FavoriteRow {
   car_id: string;
   cars: {
@@ -33,6 +35,7 @@ interface FavoriteRow {
 const Favorites = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [cars, setCars] = useState<CarType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -84,7 +87,7 @@ const Favorites = () => {
       setCars(convertedCars);
     } catch (error) {
       console.error("Favoriler yüklenemedi:", error);
-      toast.error("Favoriler yüklenemedi");
+      toast.error(t("favorites.loadError"));
     } finally {
       setLoading(false);
     }
@@ -97,17 +100,17 @@ const Favorites = () => {
       <main className="pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">Favorilerim</h1>
-            <p className="text-muted-foreground">Beğendiğiniz araçlar</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">{t("favorites.title")}</h1>
+            <p className="text-muted-foreground">{t("favorites.subtitle")}</p>
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-xl text-muted-foreground">Yükleniyor...</p>
+              <p className="text-xl text-muted-foreground">{t("common.loading")}</p>
             </div>
           ) : cars.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-xl text-muted-foreground">Henüz favori araç eklemediniz</p>
+              <p className="text-xl text-muted-foreground">{t("favorites.empty")}</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

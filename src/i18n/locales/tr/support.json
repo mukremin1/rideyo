@@ -1,0 +1,132 @@
+{
+  "support": {
+    "page": {
+      "title": "Müşteri Hizmetleri",
+      "subtitle": "Önce yapay zeka asistanımız size yardımcı olacak, ardından canlı destek ile görüşebilirsiniz",
+      "aiBadge": "AI Öncelikli",
+      "whatsappContact": "WhatsApp ile İletişim",
+      "phone": "Telefon",
+      "whatsappMessage": "Merhaba, RideYo hakkında bilgi almak istiyorum.",
+      "welcome": "Merhaba! RideYo müşteri hizmetlerine hoş geldiniz. Öncelikle yapay zeka asistanım size yardımcı olacak. İsterseniz daha sonra canlı destek ile görüşebilirsiniz. Size nasıl yardımcı olabilirim?",
+      "placeholder": "Mesajınızı yazın...",
+      "sendFailed": "Mesaj gönderilemedi",
+      "streamError": "Stream başlatılamadı"
+    },
+    "contact": {
+      "title": "İletişim",
+      "reachUs": "Bize Ulaşın",
+      "addressLabel": "Adres",
+      "address": "Atatürk Alanı, Devlet Sahil Yolu Cd.\nTrabzon, Türkiye",
+      "phoneLabel": "Telefon",
+      "phone": "+90 (462) 123 45 67",
+      "emailLabel": "E-posta",
+      "email": "destek@ride-yo.com",
+      "hoursTitle": "Çalışma Saatleri",
+      "hoursWeekday": "Pazartesi - Cuma: 09:00 - 18:00",
+      "hoursSaturday": "Cumartesi: 10:00 - 16:00",
+      "hoursSunday": "Pazar: Kapalı",
+      "sendMessage": "Mesaj Gönderin",
+      "namePlaceholder": "Adınız Soyadınız",
+      "emailPlaceholder": "E-posta Adresiniz",
+      "phonePlaceholder": "Telefon Numaranız",
+      "subjectPlaceholder": "Konu",
+      "messagePlaceholder": "Mesajınız",
+      "submit": "Gönder",
+      "toastTitle": "Mesajınız alındı",
+      "toastDesc": "En kısa sürede size dönüş yapacağız."
+    },
+    "about": {
+      "title": "Hakkımızda",
+      "intro": "RideYo, Türkiye'nin en yenilikçi araç paylaşım platformudur. 2024 yılında kurulan şirketimiz, insanların araçlarını daha verimli kullanmalarını ve araç sahiplerinin araçlarından gelir elde etmelerini sağlamak misyonuyla yola çıktı.",
+      "visionTitle": "Vizyonumuz",
+      "vision": "Şehir içi ulaşımı daha sürdürülebilir, ekonomik ve esnek hale getirerek, herkesin ihtiyacı olduğunda güvenilir bir araca erişebileceği bir ekosistem yaratmak.",
+      "missionTitle": "Misyonumuz",
+      "mission": "Teknoloji ve güven odaklı yaklaşımımızla, araç sahipleri ve kiralayıcılar arasında güvenli bir köprü kurmak. Kullanıcılarımıza dakikalık, saatlik ve günlük esnek kiralama seçenekleri sunarak, herkesin bütçesine uygun çözümler sunmak.",
+      "valuesTitle": "Değerlerimiz",
+      "values": {
+        "trust": "Güven: Platform üzerindeki tüm kullanıcılarımızın güvenliği önceliğimizdir.",
+        "transparency": "Şeffaflık: Net fiyatlandırma ve açık iletişim politikamız vardır.",
+        "sustainability": "Sürdürülebilirlik: Araç paylaşımını teşvik ederek karbon ayak izini azaltıyoruz.",
+        "innovation": "İnovasyon: Sürekli gelişen teknolojimizle en iyi deneyimi sunuyoruz."
+      },
+      "howTitle": "Nasıl Çalışıyoruz?",
+      "how": "RideYo, araç sahiplerinin kullanmadıkları araçlarını platform üzerinden kiraya vermesini sağlıyor. Kiralayıcılar ise dakika, saat veya gün bazında ihtiyaçlarına uygun araçları kolayca kiralayabiliyor. Tüm işlemler dijital ortamda, güvenli ödeme altyapımızla gerçekleşiyor.",
+      "closing": "Trabzon'da başlayan hikayemiz, yakında tüm Türkiye'ye yayılacak. Siz de bu yolculuğun bir parçası olun!"
+    },
+    "faq": {
+      "title": "Sık Sorulan Sorular",
+      "subtitle": "RideYo hakkında merak ettiğiniz her şey",
+      "generalTitle": "Genel Sorular",
+      "renterTitle": "Kiracılar İçin",
+      "ownerTitle": "Araç Sahipleri İçin",
+      "notFoundTitle": "Sorunuz burada yok mu?",
+      "notFoundDesc": "Bizimle iletişime geçmekten çekinmeyin",
+      "contactLink": "İletişim sayfasına git →",
+      "general": [
+        { "q": "RideYo nasıl çalışır?", "a": "RideYo, araç sahiplerinin kullanmadıkları araçlarını kiraya vermesini sağlayan bir platformdur. Kullanıcılar dakika, saat veya gün bazında araç kiralayabilir. Tüm işlemler uygulama üzerinden güvenli bir şekilde gerçekleşir." },
+        { "q": "Hangi şehirlerde hizmet veriyorsunuz?", "a": "Şu anda Trabzon'da hizmet vermekteyiz. Yakında İstanbul, Ankara, İzmir ve diğer büyük şehirlere de açılmayı planlıyoruz." },
+        { "q": "Ödeme güvenli mi?", "a": "Evet, tüm ödemeler güvenli ödeme altyapımız üzerinden gerçekleşir. Kredi kartı bilgileriniz şifrelenerek saklanır ve PCI-DSS standartlarına uygun işlem yapılır." },
+        { "q": "Mobil uygulama var mı?", "a": "Evet! RideYo hem iOS hem de Android cihazlarda kullanılabilen bir mobil uygulamaya sahiptir. Ayrıca web tarayıcısından da erişim sağlayabilirsiniz." }
+      ],
+      "renter": [
+        { "q": "Araç kiralamak için ne yapmalıyım?", "a": "Öncelikle bir hesap oluşturup kimlik doğrulaması yapmanız gerekiyor. Ardından uygulama üzerinden uygun bir araç seçip, kiralama süresini belirleyebilir ve ödeme yapabilirsiniz." },
+        { "q": "Kiralama için hangi belgeler gerekli?", "a": "Geçerli bir kimlik belgesi ve en az 2 yıllık sürücü belgesi gerekmektedir. Yaşınız 21-70 arasında olmalı, sürücü puanınız minimum 60 olmalıdır." },
+        { "q": "Fiyatlandırma nasıl yapılıyor?", "a": "Her araç için dakikalık, saatlik ve günlük fiyatlar belirlenmiştir. Kiralama sürenize göre otomatik olarak hesaplama yapılır." },
+        { "q": "Minimum kiralama süresi var mı?", "a": "Dakikalık kiralama için minimum 30 dakika, saatlik kiralama için minimum 1 saat, günlük kiralama için minimum 1 gün süre bulunmaktadır." },
+        { "q": "İptal politikası nedir?", "a": "Kiralama başlangıcından 24 saat öncesine kadar ücretsiz iptal yapabilirsiniz. 12-24 saat arası iptallerde %50 iade, 12 saatten kısa sürede iptal durumunda iade yapılmaz." },
+        { "q": "Araç teslim ve iade nasıl yapılır?", "a": "Araç sahibi ile koordine ederek belirlenen lokasyonda teslim alma ve iade işlemlerini gerçekleştirirsiniz." },
+        { "q": "Kaza durumunda ne olur?", "a": "Tüm araçlar sigorta ile korunmaktadır. Kaza durumunda derhal RideYo destek hattını (7/24) aramanız gerekmektedir." },
+        { "q": "Yakıt maliyeti kime ait?", "a": "Yakıt maliyeti kiracıya aittir. Araç teslim alındığında ki yakıt seviyesi ile aynı seviyede teslim edilmelidir." },
+        { "q": "Trafik cezaları ne olur?", "a": "Kiralama süresi içinde oluşan trafik cezaları kiracıya aittir." },
+        { "q": "Sürücü puanı nedir ve nasıl hesaplanır?", "a": "Sürücü puanı, kiralama geçmişinize, yorumlarınıza, ceza puanınıza ve trafik geçmişinize göre hesaplanan bir değerlendirmedir." }
+      ],
+      "owner": [
+        { "q": "Aracımı nasıl kiraya verebilirim?", "a": "Araç sahibi hesabı oluşturarak başlayabilirsiniz. 'Araç Ekle' sayfasından aracınızın bilgilerini girerek kiraya verebilirsiniz." },
+        { "q": "Hangi belgeler gerekli?", "a": "Araç ruhsatı, trafik sigortası, kasko (isteğe bağlı), kimlik belgesi ve araç fotoğrafları gereklidir." },
+        { "q": "Ne kadar kazanabilirim?", "a": "Kazançlar araç tipine, fiyatlandırmaya ve kiralama sıklığına bağlıdır. RideYo %15 komisyon ücreti alır." },
+        { "q": "Sigorta durumu nasıl?", "a": "Tüm kiralamalar RideYo Mini Kasko ile korunur. Zorunlu Trafik Sigortası (ZTS) her araçta olmalıdır." },
+        { "q": "Ödemeler nasıl ve ne zaman yapılır?", "a": "Kiralama bedeli kiracıdan RideYo tarafından tahsil edilir, %15 komisyon kesintisi yapılır. Kalan tutar 7 iş günü içinde hesabınıza aktarılır." },
+        { "q": "Aracımı nasıl koruyabilirim?", "a": "GPS takip sistemi ile aracınızı anlık izleyebilirsiniz. Kiracılar kimlik ve ehliyet doğrulamasından geçer." },
+        { "q": "Rezervasyonları reddetebilir miyim?", "a": "Evet, gelen rezervasyon isteklerini değerlendirip kabul veya reddedebilirsiniz." },
+        { "q": "Aracımda hasar oluşursa ne olur?", "a": "Hasar durumunda derhal RideYo'yu bilgilendirin. Sigorta kapsamındaki hasarlar sigorta tarafından karşılanır." },
+        { "q": "Vergi durumu nasıl?", "a": "Araç kiralama geliri vergiye tabidir. RideYo size aylık gelir raporu sağlar." },
+        { "q": "Kiracı seçimi nasıl yapmalıyım?", "a": "Kiracının sürücü puanına, yorumlarına, kiralama geçmişine ve kimlik doğrulamasına bakın." }
+      ]
+    },
+    "install": {
+      "title": "RideYo Uygulamasını İndir",
+      "subtitle": "Telefonuna kur, her zaman yanında taşı. İnternet olmadan bile çalışır!",
+      "installedTitle": "Uygulama Kurulu! 🎉",
+      "installedDesc": "RideYo artık cihazınızda kurulu. Ana ekranınızdan açabilirsiniz.",
+      "installButton": "Uygulamayı Kur",
+      "installHint": "Bir tıkla telefonuna kur, uygulama mağazasına gerek yok!",
+      "howToInstall": "Nasıl Kurulur?",
+      "howToInstallDesc": "Tarayıcınızın menüsünden \"Ana Ekrana Ekle\" seçeneğini kullanın",
+      "iphoneTitle": "iPhone (Safari)",
+      "iphoneSteps": ["Paylaş butonuna tıklayın", "\"Ana Ekrana Ekle\" seçeneğini bulun", "\"Ekle\" butonuna basın"],
+      "androidTitle": "Android (Chrome)",
+      "androidSteps": ["Menü (⋮) butonuna tıklayın", "\"Ana ekrana ekle\" seçeneğini bulun", "\"Ekle\" butonuna basın"],
+      "fastAccessTitle": "Hızlı Erişim",
+      "fastAccessDesc": "Ana ekranınızdan doğrudan açın, tarayıcı aramaya gerek yok",
+      "offlineTitle": "Offline Çalışır",
+      "offlineDesc": "İnternet olmadan da kullanın, veriler önbellekte saklanır",
+      "secureTitle": "Güvenli",
+      "secureDesc": "Tüm veriler şifreli, gizliliğiniz korunur"
+    },
+    "notifications": {
+      "title": "Bildirimler",
+      "unreadCount": "{{count}} okunmamış bildirim",
+      "markAllRead": "Tümünü Okundu İşaretle",
+      "empty": "Henüz bildiriminiz yok",
+      "markRead": "Okundu",
+      "loadError": "Bildirimler yüklenemedi",
+      "allMarkedRead": "Tüm bildirimler okundu olarak işaretlendi",
+      "types": {
+        "booking": "Rezervasyon",
+        "campaign": "Kampanya",
+        "system": "Sistem",
+        "review": "Değerlendirme"
+      }
+    }
+  }
+}

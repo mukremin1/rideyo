@@ -1,0 +1,951 @@
+{
+  "legal": {
+    "terms": {
+      "title": "Kullanım Koşulları",
+      "lastUpdated": "Son Güncelleme: 23 Ekim 2024",
+      "sections": [
+        {
+          "title": "1. Genel Hükümler",
+          "paragraphs": [
+            "Bu Kullanım Koşulları, RideYo platformunu kullanımınızı düzenleyen yasal bir sözleşmedir. Platformu kullanarak bu koşulları kabul etmiş sayılırsınız. Eğer bu koşulları kabul etmiyorsanız, lütfen platformu kullanmayınız."
+          ]
+        },
+        {
+          "title": "2. Hizmet Tanımı",
+          "paragraphs": [
+            "RideYo, araç sahipleri ile kiralayıcıları bir araya getiren dijital bir platformdur. Platform, araç paylaşımını kolaylaştırır ancak araçların sahibi değildir. Tüm araçlar, bağımsız araç sahipleri tarafından sağlanır."
+          ]
+        },
+        {
+          "title": "3. Kullanıcı Hesapları",
+          "subsections": [
+            {
+              "title": "3.1 Kayıt",
+              "list": [
+                "Platformu kullanmak için 18 yaşında veya üzerinde olmalısınız",
+                "Geçerli bir ehliyet sahibi olmalısınız",
+                "Doğru ve güncel bilgiler sağlamalısınız",
+                "Hesap güvenliğinden siz sorumlusunuz"
+              ]
+            },
+            {
+              "title": "3.2 Hesap Türleri",
+              "list": [
+                "Kullanıcı Hesabı: Araç kiralama hizmeti alabilirsiniz",
+                "Araç Sahibi Hesabı: Aracınızı kiraya verebilir ve araç kiralayabilirsiniz"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. Kiralama Koşulları",
+          "subsections": [
+            {
+              "title": "4.1 Rezervasyon",
+              "list": [
+                "Rezervasyonlar onaylandıktan sonra bağlayıcıdır",
+                "Dakikalık kiralama için provizyon çekilir",
+                "Saatlik ve günlük kiralamalar için tam ödeme yapılır",
+                "Fiyatlar araç sahibi tarafından belirlenir"
+              ]
+            },
+            {
+              "title": "4.2 Araç Teslimi",
+              "list": [
+                "Araç teslim ve iade saatleri belirlenen zamanda yapılmalıdır",
+                "Teslim sırasında aracın durumu kontrol edilmelidir",
+                "Yakıt seviyesi teslim durumunda iade edilmelidir"
+              ]
+            },
+            {
+              "title": "4.3 Kullanım",
+              "list": [
+                "Aracı sadece siz kullanabilirsiniz (ehliyet sahibi olarak)",
+                "Trafik kurallarına uymanız zorunludur",
+                "Aracı ticari amaçla kullanamazsınız (aksi belirtilmedikçe)",
+                "Alkol veya uyuşturucu etkisi altında araç kullanamazsınız"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Ödeme ve Faturalama",
+          "list": [
+            "Tüm ödemeler platform üzerinden yapılmalıdır",
+            "Dakikalık kiralama: Kullanılan süre kadar ücretlendirilir",
+            "Saatlik kiralama: Belirlenen saat başına ücretlendirilir",
+            "Günlük kiralama: 24 saatlik periyotlar halinde ücretlendirilir",
+            "Geç iade için ek ücret uygulanır",
+            "Platform hizmet bedeli %15 olarak uygulanır"
+          ]
+        },
+        {
+          "title": "6. İptal Politikası",
+          "list": [
+            "Kiralama başlangıcından 24 saat öncesine kadar ücretsiz iptal",
+            "24 saat içinde iptal: %50 iade",
+            "Kiralama başladıktan sonra iptal: İade yok",
+            "Araç sahibi iptali: Tam iade + %20 tazminat"
+          ]
+        },
+        {
+          "title": "7. Sigorta ve Sorumluluk",
+          "subsections": [
+            {
+              "title": "7.1 Kapsam",
+              "list": [
+                "Tüm araçlar kasko sigortası ile korunmaktadır",
+                "Zorunlu trafik sigortası mevcuttur",
+                "Mini hasar muafiyeti: 500 TL",
+                "Büyük hasar muafiyeti: 2.000 TL"
+              ]
+            },
+            {
+              "title": "7.2 Sorumluluklar",
+              "list": [
+                "Trafik cezaları kiralayıcıya aittir",
+                "Kaza durumunda derhal bildirim yapılmalıdır",
+                "Kasıtlı hasar durumunda tam sorumluluk kiralayıcıya aittir"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "8. Araç Sahipleri İçin Kurallar",
+          "list": [
+            "Aracınızın ruhsatı, sigortası ve muayenesi güncel olmalıdır",
+            "Araç temiz ve çalışır durumda teslim edilmelidir",
+            "Fiyatlandırma adil ve piyasa koşullarına uygun olmalıdır",
+            "Rezervasyonları onurlandırma zorunluluğu vardır",
+            "Araç özellikleri doğru ve eksiksiz belirtilmelidir"
+          ]
+        },
+        {
+          "title": "9. Yasaklanan Davranışlar",
+          "list": [
+            "Platform dışı ödeme veya iletişim",
+            "Sahte bilgi veya belge sağlama",
+            "Diğer kullanıcılara taciz veya tehdit",
+            "Sistemleri manipüle etmeye çalışma",
+            "Yasal olmayan faaliyetler için araç kullanımı"
+          ]
+        },
+        {
+          "title": "10. Hesap Askıya Alma ve Sonlandırma",
+          "paragraphs": [
+            "RideYo, bu koşulların ihlali durumunda hesabınızı askıya alma veya sonlandırma hakkını saklı tutar. Ciddi ihlaller durumunda yasal işlem başlatılabilir."
+          ]
+        },
+        {
+          "title": "11. Sorumluluk Reddi",
+          "paragraphs": [
+            "RideYo, araç sahipleri ve kiralayıcılar arasında bir aracı platformdur. Araçların kalitesi, güvenliği ve uygunluğu konusunda garanti vermez. Kullanıcılar arası anlaşmazlıklarda taraf değiliz."
+          ]
+        },
+        {
+          "title": "12. Uygulanacak Hukuk",
+          "paragraphs": [
+            "Bu Kullanım Koşulları, Türkiye Cumhuriyeti kanunlarına tabidir. Uyuşmazlıklar Trabzon mahkemelerinde çözülecektir."
+          ]
+        },
+        {
+          "title": "13. Değişiklikler",
+          "paragraphs": [
+            "RideYo, bu Kullanım Koşullarını dilediği zaman değiştirme hakkını saklı tutar. Önemli değişiklikler kullanıcılara bildirilecektir. Değişikliklerden sonra platformu kullanmaya devam etmeniz, yeni koşulları kabul ettiğiniz anlamına gelir."
+          ]
+        },
+        {
+          "title": "14. İletişim",
+          "paragraphs": [
+            "Kullanım Koşulları hakkında sorularınız için:",
+            "E-posta: destek@ride-yo.com",
+            "Telefon: +90 (462) 123 45 67",
+            "Adres: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Gizlilik Politikası",
+      "lastUpdated": "Son Güncelleme: 23 Ekim 2024",
+      "sections": [
+        {
+          "title": "1. Giriş",
+          "paragraphs": [
+            "RideYo olarak, kullanıcılarımızın gizliliğini korumayı taahhüt ediyoruz. Bu Gizlilik Politikası, kişisel verilerinizi nasıl topladığımızı, kullandığımızı, sakladığımızı ve koruduğumuzu açıklamaktadır."
+          ]
+        },
+        {
+          "title": "2. Toplanan Bilgiler",
+          "subsections": [
+            {
+              "title": "2.1 Kişisel Bilgiler",
+              "list": [
+                "Ad, soyad",
+                "E-posta adresi",
+                "Telefon numarası",
+                "Kredi kartı bilgileri (şifreli olarak)",
+                "Ehliyet bilgileri",
+                "Adres bilgileri"
+              ]
+            },
+            {
+              "title": "2.2 Otomatik Toplanan Bilgiler",
+              "list": [
+                "IP adresi",
+                "Tarayıcı türü ve sürümü",
+                "Cihaz bilgileri",
+                "Konum bilgileri (izniniz dahilinde)",
+                "Platform kullanım verileri"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Bilgilerin Kullanımı",
+          "paragraphs": ["Topladığımız bilgileri şu amaçlarla kullanırız:"],
+          "list": [
+            "Araç kiralama hizmetlerini sağlamak",
+            "Ödeme işlemlerini gerçekleştirmek",
+            "Müşteri desteği sunmak",
+            "Platformu geliştirmek ve iyileştirmek",
+            "Güvenlik ve dolandırıcılık önleme",
+            "Yasal yükümlülükleri yerine getirmek",
+            "Size özel teklifler ve bildirimler göndermek (izniniz dahilinde)"
+          ]
+        },
+        {
+          "title": "4. Bilgi Paylaşımı",
+          "paragraphs": ["Kişisel bilgilerinizi şu durumlarda üçüncü taraflarla paylaşabiliriz:"],
+          "list": [
+            "Araç sahipleri ile kiralama işlemlerinin gerçekleştirilmesi için",
+            "Ödeme işlemcileri ile güvenli ödeme altyapısı için",
+            "Yasal zorunluluklar gereği resmi makamlarla",
+            "Hizmet sağlayıcılar ile platform işletimi için"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "Bilgileriniz hiçbir zaman pazarlama amaçlı üçüncü taraflara satılmaz veya kiralanmaz."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Veri Güvenliği",
+          "paragraphs": [
+            "Kişisel verilerinizi korumak için endüstri standardı güvenlik önlemleri kullanırız:"
+          ],
+          "list": [
+            "SSL/TLS şifreleme",
+            "Güvenli veri depolama",
+            "Düzenli güvenlik denetimleri",
+            "Sınırlı erişim kontrolleri",
+            "Güçlü şifreleme protokolleri"
+          ]
+        },
+        {
+          "title": "6. Çerezler (Cookies)",
+          "paragraphs": [
+            "Web sitemiz, kullanıcı deneyimini iyileştirmek için çerezler kullanır. Çerezler, tarayıcınız tarafından depolanan küçük metin dosyalarıdır. Çerez tercihlerinizi tarayıcı ayarlarınızdan yönetebilirsiniz."
+          ]
+        },
+        {
+          "title": "7. Haklarınız",
+          "paragraphs": ["KVKK kapsamında aşağıdaki haklara sahipsiniz:"],
+          "list": [
+            "Kişisel verilerinizin işlenip işlenmediğini öğrenme",
+            "İşlenmişse buna ilişkin bilgi talep etme",
+            "İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme",
+            "Yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme",
+            "Eksik veya yanlış işlenmişse düzeltilmesini isteme",
+            "Silme veya yok edilmesini isteme",
+            "İşlenen verilerin münhasıran otomatik sistemler ile analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme"
+          ]
+        },
+        {
+          "title": "8. Çocukların Gizliliği",
+          "paragraphs": [
+            "Hizmetlerimiz 18 yaş altı bireyler için tasarlanmamıştır. Bilerek 18 yaş altı bireylerden kişisel bilgi toplamıyoruz."
+          ]
+        },
+        {
+          "title": "9. Değişiklikler",
+          "paragraphs": [
+            "Bu Gizlilik Politikası zaman zaman güncellenebilir. Önemli değişiklikler olduğunda, size e-posta veya platform üzerinden bildirimde bulunacağız."
+          ]
+        },
+        {
+          "title": "10. İletişim",
+          "paragraphs": [
+            "Gizlilik Politikamız hakkında sorularınız için:",
+            "E-posta: gizlilik@ride-yo.com",
+            "Telefon: +90 (462) 123 45 67",
+            "Adres: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "kvkk": {
+      "title": "KVKK Aydınlatma Metni",
+      "lastUpdated": "Kişisel Verilerin Korunması Kanunu Uyarınca Bilgilendirme",
+      "sections": [
+        {
+          "title": "1. Veri Sorumlusu",
+          "paragraphs": [
+            "6698 sayılı Kişisel Verilerin Korunması Kanunu (\"KVKK\") uyarınca, kişisel verileriniz; veri sorumlusu olarak RideYo tarafından aşağıda açıklanan kapsamda işlenebilecektir.",
+            "Şirket Unvanı: RideYo Teknoloji A.Ş.",
+            "Adres: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon",
+            "E-posta: kvkk@ride-yo.com"
+          ]
+        },
+        {
+          "title": "2. İşlenen Kişisel Veriler",
+          "subsections": [
+            {
+              "title": "2.1 Kimlik Bilgileri",
+              "list": ["Ad, soyad", "T.C. kimlik numarası", "Doğum tarihi", "Ehliyet numarası ve bilgileri"]
+            },
+            {
+              "title": "2.2 İletişim Bilgileri",
+              "list": ["E-posta adresi", "Telefon numarası", "Adres bilgileri"]
+            },
+            {
+              "title": "2.3 Finansal Bilgiler",
+              "list": [
+                "Kredi kartı bilgileri (şifreli)",
+                "Banka hesap bilgileri (araç sahipleri için)",
+                "İşlem geçmişi"
+              ]
+            },
+            {
+              "title": "2.4 Araç ve Kiralama Bilgileri",
+              "list": [
+                "Kiralanan araç bilgileri",
+                "Kiralama tarihleri ve süreleri",
+                "Araç resimleri ve açıklamaları",
+                "Konum bilgileri"
+              ]
+            },
+            {
+              "title": "2.5 İşlem Güvenliği Bilgileri",
+              "list": ["IP adresi", "Çerez kayıtları", "Cihaz bilgileri", "Log kayıtları"]
+            }
+          ]
+        },
+        {
+          "title": "3. Kişisel Verilerin İşlenme Amaçları",
+          "paragraphs": ["Kişisel verileriniz aşağıdaki amaçlarla işlenmektedir:"],
+          "list": [
+            "Araç kiralama hizmetlerinin sunulması",
+            "Kullanıcı hesabı oluşturma ve yönetimi",
+            "Ödeme işlemlerinin gerçekleştirilmesi",
+            "Müşteri ilişkileri yönetimi ve destek hizmetleri",
+            "Güvenlik ve dolandırıcılık önleme",
+            "Yasal yükümlülüklerin yerine getirilmesi",
+            "Platform geliştirme ve iyileştirme",
+            "İstatistiksel analiz ve raporlama",
+            "Pazarlama ve tanıtım faaliyetleri (açık rızanız dahilinde)"
+          ]
+        },
+        {
+          "title": "4. Kişisel Verilerin Aktarılması",
+          "paragraphs": ["Kişisel verileriniz, yukarıda belirtilen amaçlar doğrultusunda:"],
+          "list": [
+            "Araç sahipleri ile (kiralama işlemleri için)",
+            "Ödeme kuruluşları ile (ödeme işlemleri için)",
+            "Hukuk firmaları ile (hukuki süreçler için)",
+            "Yetkili kamu kurum ve kuruluşları ile (yasal zorunluluklar için)",
+            "İş ortakları ve hizmet sağlayıcılar ile (platform operasyonları için)"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "aktarılabilecektir. Aktarımlar KVKK'nın 8. ve 9. maddelerine uygun olarak gerçekleştirilmektedir."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Kişisel Veri Toplanma Yöntemi",
+          "paragraphs": ["Kişisel verileriniz:"],
+          "list": [
+            "Web sitesi ve mobil uygulama üzerinden",
+            "Kayıt ve üyelik formları aracılığıyla",
+            "Kiralama işlemleri sırasında",
+            "E-posta, telefon ve diğer iletişim kanalları üzerinden",
+            "Otomatik sistemler (çerezler, loglar) aracılığıyla"
+          ],
+          "subsections": [
+            {
+              "paragraphs": ["toplanmaktadır."]
+            }
+          ]
+        },
+        {
+          "title": "6. Kişisel Veri Sahibinin Hakları",
+          "paragraphs": [
+            "KVKK'nın 11. maddesi uyarınca, kişisel veri sahipleri olarak aşağıdaki haklara sahipsiniz:"
+          ],
+          "list": [
+            "Kişisel verilerinizin işlenip işlenmediğini öğrenme",
+            "Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme",
+            "Kişisel verilerinizin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme",
+            "Yurt içinde veya yurt dışında kişisel verilerinizin aktarıldığı üçüncü kişileri bilme",
+            "Kişisel verilerinizin eksik veya yanlış işlenmiş olması hâlinde bunların düzeltilmesini isteme",
+            "KVKK'nın 7. maddesinde öngörülen şartlar çerçevesinde kişisel verilerinizin silinmesini veya yok edilmesini isteme",
+            "Yapılan düzeltme, silme ve yok etme işlemlerinin, kişisel verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme",
+            "İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme",
+            "Kişisel verilerinizin kanuna aykırı olarak işlenmesi sebebiyle zarara uğramanız hâlinde zararın giderilmesini talep etme"
+          ]
+        },
+        {
+          "title": "7. Haklarınızı Kullanma",
+          "paragraphs": [
+            "Yukarıda belirtilen haklarınızı kullanmak için kimliğinizi tespit edici gerekli bilgiler ile KVKK'nın 11. maddesinde belirtilen haklardan kullanmayı talep ettiğiniz hakkınıza yönelik açıklamalarınızı içeren talebinizi aşağıdaki yöntemlerle iletebilirsiniz:"
+          ],
+          "list": [
+            "Yazılı olarak: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon adresine ıslak imzalı başvuru dilekçenizi şahsen veya noter kanalıyla göndererek",
+            "E-posta ile: kvkk@ride-yo.com adresine kayıtlı elektronik posta (KEP) adresi, güvenli elektronik imza veya mobil imza ile imzalanmış başvuru göndererek"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "Başvurularınız, talebin niteliğine göre en geç 30 gün içinde ücretsiz olarak sonuçlandırılacaktır. İşlemin ayrıca bir maliyeti gerektirmesi hâlinde, tarafımızca Kişisel Verileri Koruma Kurulu tarafından belirlenen tarifedeki ücret alınabilir."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "8. Veri Güvenliği",
+          "paragraphs": [
+            "RideYo olarak, kişisel verilerinizin güvenliğini sağlamak için teknik ve idari tedbirler almaktayız. Verileriniz, yetkisiz erişime, kaybolmaya, kötüye kullanıma karşı korunmaktadır."
+          ]
+        },
+        {
+          "title": "9. Değişiklikler",
+          "paragraphs": [
+            "Bu aydınlatma metni, yasal düzenlemelerdeki değişiklikler veya şirket politikalarındaki güncellemeler doğrultusunda değiştirilebilir. Önemli değişiklikler size bildirilecektir."
+          ]
+        },
+        {
+          "title": "10. İletişim",
+          "paragraphs": [
+            "KVKK ve kişisel verilerinizin işlenmesi hakkında sorularınız için:",
+            "E-posta: kvkk@ride-yo.com",
+            "Telefon: +90 (462) 123 45 67",
+            "Adres: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Çerez Politikası",
+      "lastUpdated": "Son Güncelleme: 23 Ekim 2024",
+      "sections": [
+        {
+          "title": "1. Çerez Nedir?",
+          "paragraphs": [
+            "Çerezler, ziyaret ettiğiniz internet siteleri tarafından tarayıcılar aracılığıyla cihazınıza veya ağ sunucusuna depolanan küçük metin dosyalarıdır. RideYo olarak web sitemizde ve mobil uygulamamızda çeşitli çerezler kullanmaktayız."
+          ]
+        },
+        {
+          "title": "2. Çerez Türleri",
+          "subsections": [
+            {
+              "title": "2.1. Zorunlu Çerezler",
+              "paragraphs": [
+                "Web sitesinin düzgün çalışması için gerekli olan çerezlerdir. Güvenlik, ağ yönetimi ve erişilebilirlik gibi temel işlevleri sağlar."
+              ]
+            },
+            {
+              "title": "2.2. İşlevsellik Çerezleri",
+              "paragraphs": [
+                "Kullanıcı tercihlerini hatırlayarak daha kişiselleştirilmiş bir deneyim sunar. Dil seçimi, tema tercihleri gibi bilgileri saklar."
+              ]
+            },
+            {
+              "title": "2.3. Performans ve Analitik Çerezleri",
+              "paragraphs": [
+                "Web sitesinin performansını ölçmek ve iyileştirmek için kullanılır. Hangi sayfaların ziyaret edildiği, ne kadar süre kalındığı gibi anonim veriler toplar."
+              ]
+            },
+            {
+              "title": "2.4. Hedefleme ve Reklam Çerezleri",
+              "paragraphs": [
+                "Kullanıcıların ilgi alanlarına göre özelleştirilmiş reklamlar göstermek için kullanılır."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Kullandığımız Çerezler",
+          "list": [
+            "Oturum Çerezleri: Giriş yapmış kullanıcıların kimlik doğrulaması",
+            "Tercih Çerezleri: Dil, tema ve görünüm tercihleri",
+            "Güvenlik Çerezleri: Dolandırıcılık tespiti ve güvenlik",
+            "Analitik Çerezleri: Kullanım istatistikleri ve performans ölçümü",
+            "GPS Çerezleri: Konum bazlı hizmetler için"
+          ]
+        },
+        {
+          "title": "4. Çerez Yönetimi",
+          "paragraphs": [
+            "Tarayıcı ayarlarınızdan çerezleri kontrol edebilir, silebilir veya engelleyebilirsiniz. Ancak bazı çerezleri devre dışı bırakmanız durumunda web sitesinin bazı özellikleri düzgün çalışmayabilir."
+          ],
+          "subsections": [
+            {
+              "title": "Popüler Tarayıcılarda Çerez Yönetimi:",
+              "list": [
+                "Google Chrome: Ayarlar → Gizlilik ve güvenlik → Çerezler ve diğer site verileri",
+                "Mozilla Firefox: Ayarlar → Gizlilik ve Güvenlik → Çerezler ve Site Verileri",
+                "Safari: Tercihler → Gizlilik → Çerezleri ve web sitesi verilerini yönet",
+                "Microsoft Edge: Ayarlar → Gizlilik, arama ve hizmetler → Çerezler"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Üçüncü Taraf Çerezleri",
+          "paragraphs": [
+            "Web sitemizde bazı üçüncü taraf hizmet sağlayıcılar (ödeme sistemleri, harita servisleri, analitik araçlar) kendi çerezlerini kullanabilir. Bu çerezler ilgili şirketlerin gizlilik politikalarına tabidir."
+          ]
+        },
+        {
+          "title": "6. Çerez Politikası Güncellemeleri",
+          "paragraphs": [
+            "Bu çerez politikası zaman zaman güncellenebilir. Önemli değişiklikler olduğunda sizi bilgilendireceğiz. Politikadaki değişiklikler yayınlandığı tarihten itibaren geçerli olacaktır."
+          ]
+        },
+        {
+          "title": "7. İletişim",
+          "paragraphs": [
+            "Çerez politikamız hakkında sorularınız için bizimle iletişime geçebilirsiniz:",
+            "E-posta: info@ride-yo.com",
+            "Telefon: +90 (462) 123 45 67",
+            "Adres: Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "cancellation": {
+      "title": "İptal ve İade Koşulları",
+      "lastUpdated": "Son Güncelleme: 23 Ekim 2024",
+      "sections": [
+        {
+          "title": "Genel Bilgi",
+          "paragraphs": [
+            "RideYo platformu üzerinden yapılan rezervasyonların iptal ve iade koşulları aşağıda belirtilmiştir. Lütfen rezervasyon yapmadan önce bu koşulları dikkatlice okuyunuz."
+          ]
+        },
+        {
+          "title": "Kiracı İptal Koşulları",
+          "subsections": [
+            {
+              "title": "24+ Saat Önce — Tam iade",
+              "paragraphs": [
+                "Kiralama başlangıcından 24 saat veya daha önce yapılan iptallerde ödenen tutarın %100'ü iade edilir."
+              ]
+            },
+            {
+              "title": "12-24 Saat Arası — Kısmi iade",
+              "paragraphs": [
+                "Kiralama başlangıcından 12-24 saat arası yapılan iptallerde ödenen tutarın %50'si iade edilir."
+              ]
+            },
+            {
+              "title": "12 Saatten Az — İade yok",
+              "paragraphs": [
+                "Kiralama başlangıcından 12 saatten kısa süre önce yapılan iptallerde iade yapılmaz."
+              ]
+            },
+            {
+              "title": "No-show (Gelmeme) — İade yok",
+              "paragraphs": [
+                "Rezervasyon saatinde haber vermeden gelmeme durumunda iade yapılmaz."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Araç Sahibi İptal Koşulları",
+          "paragraphs": ["Araç sahibinin son dakika iptali yapması durumunda:"],
+          "list": [
+            "Kiracıya alternatif araç sağlamakla yükümlüdür",
+            "Alternatif araç sağlanamazsa, rezervasyon bedeli kiracıya %120 olarak iade edilir",
+            "Tekrarlayan iptallerde araç sahibinin hesabı askıya alınabilir",
+            "RideYo, kiracıya uygun alternatif araç bulmada yardımcı olur"
+          ]
+        },
+        {
+          "title": "İade Süreci",
+          "subsections": [
+            {
+              "title": "Ödeme İadeleri",
+              "list": [
+                "İade talepleri uygulama üzerinden veya müşteri hizmetleri aracılığıyla yapılabilir",
+                "İadeler, ödeme yapılan aynı yönteme (kredi kartı, banka kartı) yapılır",
+                "Kredi kartı iadeleri 5-10 iş günü içinde hesaba yansır",
+                "Banka kartı iadeleri 3-5 iş günü içinde hesaba yansır",
+                "İade durumu SMS ve e-posta ile bildirilir"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Özel Durumlar",
+          "subsections": [
+            {
+              "title": "Mücbir Sebepler",
+              "paragraphs": [
+                "Doğal afet, salgın hastalık, savaş gibi mücbir sebep durumlarında tam iade yapılır. Bu durumların tespiti RideYo yönetimince yapılır."
+              ]
+            },
+            {
+              "title": "Araç Arızası",
+              "paragraphs": [
+                "Kiralama süresince araçta oluşan teknik arıza nedeniyle kullanılamaz hale gelmesi durumunda, kullanılmayan süre için tam iade yapılır veya alternatif araç sağlanır."
+              ]
+            },
+            {
+              "title": "Erken İade",
+              "paragraphs": [
+                "Kiralama süresinden önce araç iade edilmesi durumunda, kullanılmayan süre için iade yapılmaz. Günlük kiralamada erken iade istenirse, saatlik ücret üzerinden hesaplama yapılır."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "İletişim",
+          "paragraphs": [
+            "İptal ve iade işlemleriniz için 7/24 müşteri hizmetlerimize ulaşabilirsiniz.",
+            "Telefon: 0539 526 32 93",
+            "E-posta: destek@ride-yo.com",
+            "WhatsApp: +90 539 526 32 93"
+          ]
+        }
+      ]
+    },
+    "rentalAgreement": {
+      "title": "Mesafeli Satış Sözleşmesi",
+      "lastUpdated": "Son Güncelleme: 23 Ekim 2024",
+      "sections": [
+        {
+          "title": "Giriş",
+          "paragraphs": [
+            "İşbu Mesafeli Satış Sözleşmesi (\"Sözleşme\"), 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri uyarınca, RideYo platformu üzerinden araç kiralayan (\"Kiracı/Tüketici\") ile araç sahibi (\"Kiraya Veren/Satıcı\") arasında aşağıdaki şartlar dahilinde akdedilmiştir."
+          ]
+        },
+        {
+          "title": "Madde 1: Taraflar",
+          "subsections": [
+            {
+              "title": "1.1. Satıcı/Hizmet Sağlayıcı Bilgileri",
+              "list": [
+                "Ünvanı: RideYo Araç Kiralama Hizmetleri",
+                "Adres: Müftü Solakzade Mah. Elmadağ Sk. No:2 Kat:2 Palandöken/Erzurum",
+                "Telefon: 0539 526 32 93",
+                "E-posta: info@ride-yo.com",
+                "Web Sitesi: www.ride-yo.com"
+              ]
+            },
+            {
+              "title": "1.2. Alıcı/Tüketici",
+              "paragraphs": [
+                "RideYo platformu üzerinden araç kiralayan, geçerli sürücü belgesi olan ve platform şartlarını kabul eden gerçek kişi. Alıcı bilgileri rezervasyon sırasında kayıt altına alınmaktadır."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Madde 2: Sözleşme Konusu",
+          "paragraphs": [
+            "İşbu sözleşmenin konusu, Alıcı'nın Satıcı'ya ait RideYo elektronik ticaret platformu üzerinden elektronik ortamda siparişini verdiği araç kiralama hizmetinin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkındaki Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin belirlenmesidir."
+          ]
+        },
+        {
+          "title": "Madde 3: Hizmet Bilgileri ve Fiyatlar",
+          "subsections": [
+            {
+              "title": "3.1. Hizmet Özellikleri",
+              "list": [
+                "Hizmetin türü, marka, model, renk ve tüm özellikleri platformda belirtilmiştir",
+                "Kiralama süresi dakika, saat veya gün bazlı olabilir",
+                "Kilometre paketleri ayrıca belirtilebilir",
+                "Vergiler dahil toplam fiyat rezervasyon öncesi gösterilmektedir"
+              ]
+            },
+            {
+              "title": "3.2. Fiyatlandırma",
+              "list": [
+                "Tüm fiyatlar KDV dahil Türk Lirası (TL) olarak belirtilmiştir",
+                "Platform komisyon ücreti kiralama bedelinin %15'idir",
+                "Geç iade durumunda saatlik ücret uygulanır",
+                "Hasar durumunda ek ücretler söz konusu olabilir"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Madde 4: Ödeme Şekli ve Koşulları",
+          "list": [
+            "Ödeme, kredi kartı veya banka kartı ile yapılabilir",
+            "Kiralama bedeli rezervasyon onayı sırasında tahsil edilir",
+            "Tüm ödemeler güvenli ödeme altyapısı üzerinden gerçekleştirilir",
+            "Kart bilgileri 256-bit SSL sertifikası ile şifrelenir",
+            "Kart bilgileri kaydedilebilir (opsiyonel)",
+            "Depozito tutarı araç tipine göre 500-2000 TL arasında değişir"
+          ]
+        },
+        {
+          "title": "Madde 5: Hizmetin İfası ve Teslim",
+          "subsections": [
+            {
+              "title": "5.1. Teslim Şartları",
+              "list": [
+                "Araç, belirtilen tarih ve saatte belirlenen lokasyonda teslim edilir",
+                "Teslim öncesi araç kontrol formu doldurulur",
+                "Mevcut hasarlar fotoğraflanır ve kayda alınır",
+                "Yakıt seviyesi ve kilometre bilgisi kayıt altına alınır"
+              ]
+            },
+            {
+              "title": "5.2. İade Şartları",
+              "list": [
+                "Araç, kira süresinin bitiminde temiz olarak iade edilir",
+                "Yakıt seviyesi başlangıç seviyesine getirilir",
+                "Hasar kontrolü yapılır ve raporlanır"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Madde 6: Cayma Hakkı",
+          "paragraphs": [
+            "6502 sayılı Kanun'un 50. maddesi ve Mesafeli Sözleşmeler Yönetmeliği'nin 15. maddesi gereğince, belirli bir tarihte veya dönemde yapılması gereken konaklama, eşya taşıma, araba kiralama, yiyecek-içecek tedariki ve eğlence veya dinlenme amacıyla yapılan boş zamanın değerlendirilmesine ilişkin sözleşmelerde tüketicinin cayma hakkı bulunmamaktadır.",
+            "Ancak RideYo olarak müşteri memnuniyeti kapsamında aşağıdaki iptal politikası uygulanmaktadır:"
+          ],
+          "list": [
+            "24 saat öncesine kadar iptal: %100 iade",
+            "12-24 saat arası iptal: %50 iade",
+            "12 saatten az süre kala iptal: İade yapılmaz",
+            "Gelmeme (No-show): İade yapılmaz"
+          ]
+        },
+        {
+          "title": "Madde 7: Garanti ve Sorumluluk",
+          "subsections": [
+            {
+              "title": "7.1. Sigorta Kapsamı",
+              "list": [
+                "Zorunlu Trafik Sigortası (ZTS)",
+                "Mini Kasko (RideYo tarafından sağlanır)",
+                "Yolcu Ferdi Kaza Sigortası",
+                "7/24 Yol Yardım Hizmeti"
+              ]
+            },
+            {
+              "title": "7.2. Sorumluluk Sınırları",
+              "list": [
+                "Alkol veya uyuşturucu etkisinde kullanım sigorta kapsamı dışındadır",
+                "Ehliyet olmadan veya süresi dolmuş ehliyet ile kullanım yasaktır",
+                "Kasıtlı hasar tüketicinin sorumluluğundadır"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Madde 8: Kişisel Verilerin Korunması",
+          "paragraphs": [
+            "Tüketiciye ait kişisel veriler, 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında işlenmekte ve korunmaktadır. Detaylı bilgi için Gizlilik Politikası ve KVKK Aydınlatma Metni'ne başvurulabilir."
+          ]
+        },
+        {
+          "title": "Madde 9: Uyuşmazlık Çözümü",
+          "list": [
+            "Bu sözleşmeden doğan uyuşmazlıklarda Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri yetkilidir",
+            "Parasal sınırlar her yıl Ticaret Bakanlığı tarafından belirlenmektedir",
+            "Erzurum mahkemeleri ve icra daireleri yetkilidir",
+            "Türkiye Cumhuriyeti kanunları uygulanır"
+          ]
+        },
+        {
+          "title": "Madde 10: Yürürlük",
+          "paragraphs": [
+            "İşbu sözleşme, Tüketici tarafından elektronik ortamda onaylanması ile birlikte yürürlüğe girer. Tüketici, sözleşme konusu hizmeti sipariş etmekle işbu sözleşmenin tüm maddelerini kabul etmiş sayılır."
+          ]
+        },
+        {
+          "title": "Satıcı/Hizmet Sağlayıcı İletişim Bilgileri",
+          "paragraphs": [
+            "RideYo Araç Kiralama Hizmetleri",
+            "Adres: Müftü Solakzade Mah. Elmadağ Sk. No:2 Kat:2 Palandöken/Erzurum",
+            "Telefon: 0539 526 32 93",
+            "E-posta: info@ride-yo.com",
+            "Web: www.ride-yo.com"
+          ]
+        }
+      ]
+    },
+    "safety": {
+      "title": "Güvenlik Kuralları",
+      "lastUpdated": "Son Güncelleme: 23 Ekim 2024",
+      "sections": [
+        {
+          "title": "Önemli Güvenlik Uyarısı",
+          "paragraphs": [
+            "RideYo'da güvenliğiniz bizim önceliğimizdir. Aşağıdaki kuralları dikkatlice okuyarak hem kendinizin hem de diğer kullanıcıların güvenliğini sağlayabilirsiniz."
+          ]
+        },
+        {
+          "title": "Araç Kiralama Öncesi",
+          "subsections": [
+            {
+              "title": "Ehliyet Kontrolü",
+              "list": [
+                "Geçerli bir sürücü belgesine sahip olmalısınız",
+                "Ehliyet süresi minimum 2 yıl olmalıdır",
+                "Yaş sınırı 21-70 arasında olmalıdır",
+                "Sürücü puanınız minimum 60 olmalıdır"
+              ]
+            },
+            {
+              "title": "Araç Kontrolleri",
+              "list": [
+                "Aracı teslim almadan önce dış görünüşünü kontrol edin",
+                "Mevcut hasar ve çiziklerin fotoğrafını çekin",
+                "Yakıt seviyesini kontrol edin",
+                "Lastik durumunu inceleyin",
+                "İç mekan temizliğini kontrol edin",
+                "Tüm dokümanların araçta olduğundan emin olun"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sürüş Güvenliği",
+          "subsections": [
+            {
+              "title": "Trafik Kurallarına Uyum",
+              "list": [
+                "Hız limitlerini aşmayın",
+                "Alkollü veya uyuşturucu etkisinde araç kullanmayın",
+                "Emniyet kemerinizi mutlaka takın",
+                "Cep telefonu kullanmayın (handsfree hariç)",
+                "Yorgunken araç kullanmayın",
+                "Trafik işaretlerine uyun"
+              ]
+            },
+            {
+              "title": "Yasaklar",
+              "list": [
+                "Aracı başkasına devretmek yasaktır",
+                "Yurt dışına çıkmak yasaktır",
+                "Araçta sigara içmek yasaktır",
+                "Evcil hayvan taşımak (özel izin olmadan) yasaktır",
+                "Yarış veya gösteri amaçlı kullanmak yasaktır",
+                "Yasal olmayan faaliyetlerde kullanmak yasaktır"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Acil Durumlar",
+          "subsections": [
+            {
+              "title": "Kaza Durumunda",
+              "list": [
+                "1. Önce can güvenliğinizi sağlayın",
+                "2. Gerekirse 112'yi arayın",
+                "3. Polis ve trafik ekiplerini bilgilendirin",
+                "4. RideYo destek hattını (7/24) arayın",
+                "5. Kaza tutanağı düzenletin",
+                "6. Olay yerinin ve hasarın fotoğraflarını çekin",
+                "7. Karşı tarafın bilgilerini alın"
+              ]
+            },
+            {
+              "title": "Arıza Durumunda",
+              "list": [
+                "1. Aracı güvenli bir yere çekin",
+                "2. Uyarı ikaz işaretlerini yerleştirin",
+                "3. RideYo destek hattını arayın",
+                "4. Yol yardım hizmeti gelene kadar bekleyin",
+                "5. Kendiniz müdahale etmeyin"
+              ]
+            },
+            {
+              "title": "7/24 Destek Hatları",
+              "paragraphs": [
+                "Acil Destek: +90 5395263293",
+                "Yol Yardım: +90 5395263293",
+                "WhatsApp: +90 5395263293"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Araç Sahibi Güvenliği",
+          "subsections": [
+            {
+              "title": "Araç Sahipleri İçin Öneriler",
+              "list": [
+                "Aracınızın bakımını düzenli yaptırın",
+                "Sigorta ve muayene belgelerini güncel tutun",
+                "Kiralama öncesi ve sonrası araç kontrolü yapın",
+                "GPS takip sistemini aktif tutun",
+                "Acil durum ekipmanlarını kontrol edin (ilk yardım, yangın söndürücü)",
+                "Kiracı ile doğrudan finansal anlaşma yapmayın",
+                "Tüm işlemleri RideYo platformu üzerinden gerçekleştirin"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Araç Teslimi",
+          "subsections": [
+            {
+              "title": "Teslim Alma",
+              "list": [
+                "Rezervasyon bilgilerinizi hazır bulundurun",
+                "Kimlik ve ehliyet belgelerinizi yanınıza alın",
+                "Araç kontrol formunu birlikte doldurun",
+                "Tüm hasar ve eksiklikleri kaydedin",
+                "Yakıt seviyesini not edin"
+              ]
+            },
+            {
+              "title": "Teslim Etme",
+              "list": [
+                "Aracı temiz teslim edin",
+                "Yakıt seviyesini başlangıç seviyesine getirin",
+                "Araç içinde eşya unutmayın",
+                "Tüm dokümanları teslim edin",
+                "Hasar kontrolü yaptırın",
+                "Teslim formunu imzalayın"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Yaptırımlar",
+          "paragraphs": ["Güvenlik kurallarına uymamanız durumunda:"],
+          "list": [
+            "Hesabınız geçici veya kalıcı olarak askıya alınabilir",
+            "Cezai işlem uygulanabilir",
+            "Sigorta kapsamı dışında kalabilirsiniz",
+            "Yasal süreç başlatılabilir",
+            "Depozito iadeniz yapılmayabilir"
+          ]
+        },
+        {
+          "title": "Hatırlatma",
+          "paragraphs": [
+            "Bu güvenlik kuralları hem sizin hem de tüm RideYo kullanıcılarının güvenliği için hazırlanmıştır. Kurallara uyarak güvenli ve keyifli bir araç paylaşım deneyimi yaşayabilirsiniz.",
+            "Güvenli yolculuklar dileriz!"
+          ]
+        }
+      ]
+    }
+  }
+}

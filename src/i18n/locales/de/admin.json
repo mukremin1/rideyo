@@ -1,0 +1,40 @@
+{
+  "admin": {
+    "noAccess": "Sie haben keinen Zugriff auf diese Seite",
+    "title": "Admin-Bereich",
+    "subtitle": "Kampagnen- und Systemverwaltung",
+    "newCampaign": "Neue Kampagne",
+    "editCampaign": "Kampagne bearbeiten",
+    "createCampaign": "Neue Kampagne erstellen",
+    "campaignName": "Kampagnenname",
+    "description": "Beschreibung",
+    "discountPercent": "Rabattprozentsatz (%)",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "carTypesLabel": "Fahrzeugtypen (leer lassen für alle Fahrzeuge)",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "update": "Aktualisieren",
+    "create": "Erstellen",
+    "cancel": "Abbrechen",
+    "discountBadge": "{{percent}} % Rabatt",
+    "startLabel": "Start:",
+    "endLabel": "Ende:",
+    "carsLabel": "Fahrzeuge:",
+    "deleteConfirm": "Möchten Sie diese Kampagne wirklich löschen?",
+    "empty": "Noch keine Kampagnen erstellt",
+    "toast": {
+      "updateError": "Kampagne konnte nicht aktualisiert werden",
+      "updateSuccess": "Kampagne aktualisiert",
+      "createError": "Kampagne konnte nicht erstellt werden",
+      "createSuccess": "Kampagne erstellt",
+      "deleteError": "Kampagne konnte nicht gelöscht werden",
+      "deleteSuccess": "Kampagne gelöscht"
+    },
+    "carTypes": {
+      "compact": "Kompakt",
+      "sedan": "Limousine",
+      "suv": "SUV"
+    }
+  }
+}

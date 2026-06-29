@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -11,17 +12,17 @@ type Message = {
 };
 
 const Chatbot = () => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Merhaba! RideYo'ya hoş geldiniz. Size nasıl yardımcı olabilirim?",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+
+  useEffect(() => {
+    setMessages([{ role: "assistant", content: t("components.chatbot.welcome") }]);
+  }, [i18n.language, t]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -45,18 +46,18 @@ const Chatbot = () => {
       });
 
       if (resp.status === 429) {
-        setMessages([...newMessages, { role: "assistant", content: "Çok fazla istek gönderildi. Lütfen biraz bekleyin." }]);
+        setMessages([...newMessages, { role: "assistant", content: t("components.chatbot.tooManyRequests") }]);
         setIsLoading(false);
         return;
       }
 
       if (resp.status === 402) {
-        setMessages([...newMessages, { role: "assistant", content: "Servis şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin." }]);
+        setMessages([...newMessages, { role: "assistant", content: t("components.chatbot.serviceUnavailable") }]);
         setIsLoading(false);
         return;
       }
 
-      if (!resp.ok || !resp.body) throw new Error("Stream başlatılamadı");
+      if (!resp.ok || !resp.body) throw new Error(t("components.chatbot.streamError"));
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -64,7 +65,6 @@ const Chatbot = () => {
       let streamDone = false;
       let assistantContent = "";
 
-      // Add empty assistant message
       setMessages([...newMessages, { role: "assistant", content: "" }]);
 
       while (!streamDone) {
@@ -104,7 +104,7 @@ const Chatbot = () => {
       setIsLoading(false);
     } catch (error) {
       console.error("Chat error:", error);
-      setMessages([...newMessages, { role: "assistant", content: "Bir hata oluştu. Lütfen tekrar deneyin." }]);
+      setMessages([...newMessages, { role: "assistant", content: t("components.chatbot.genericError") }]);
       setIsLoading(false);
     }
   };
@@ -120,7 +120,6 @@ const Chatbot = () => {
 
   return (
     <>
-      {/* Floating Button */}
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
@@ -131,13 +130,12 @@ const Chatbot = () => {
         </Button>
       )}
 
-      {/* Chat Window */}
       {isOpen && (
         <Card className="fixed bottom-6 right-6 w-96 h-[500px] shadow-2xl z-50 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">RideYo Asistan</CardTitle>
+              <CardTitle className="text-lg">{t("components.chatbot.title")}</CardTitle>
             </div>
             <Button
               variant="ghost"
@@ -154,9 +152,7 @@ const Chatbot = () => {
                 {messages.map((msg, idx) => (
                   <div
                     key={idx}
-                    className={`flex ${
-                      msg.role === "user" ? "justify-end" : "justify-start"
-                    }`}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`max-w-[80%] rounded-lg px-4 py-2 ${
@@ -183,7 +179,7 @@ const Chatbot = () => {
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Mesajınızı yazın..."
+                  placeholder={t("components.chatbot.placeholder")}
                   disabled={isLoading}
                   className="flex-1"
                 />

@@ -1,4 +1,5 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, CheckCircle2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +38,7 @@ const getNativeFaceDetector = (): NativeFaceDetector | null => {
 };
 
 const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }: ActiveLivenessCheckDialogProps) => {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const blazeModelRef = useRef<blazeface.BlazeFaceModel | null>(null);
   const nativeDetectorRef = useRef<NativeFaceDetector | null>(null);
@@ -47,7 +49,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
   const detectingRef = useRef(false);
 
   const [loading, setLoading] = useState(false);
-  const [statusText, setStatusText] = useState("Kamera hazırlanıyor…");
+  const [statusText, setStatusText] = useState(() => t("verification.liveness.preparingCamera"));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
@@ -127,7 +129,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
         .then((found) => {
           if (found && !completedRef.current) {
             setFaceDetected(true);
-            setStatusText("Yüz algılandı, onaylanıyor…");
+            setStatusText(t("verification.liveness.faceDetected"));
             completeLiveness();
           }
         })
@@ -138,7 +140,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
           detectingRef.current = false;
         });
     }, 450);
-  }, [completeLiveness, detectFace]);
+  }, [completeLiveness, detectFace, t]);
 
   useEffect(() => {
     if (!open) {
@@ -147,7 +149,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
       setLoading(false);
       setInitialized(false);
       setFaceDetected(false);
-      setStatusText("Kamera hazırlanıyor…");
+      setStatusText(t("verification.liveness.preparingCamera"));
       return;
     }
 
@@ -155,7 +157,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
     detectingRef.current = false;
     setErrorMessage(null);
     setLoading(true);
-    setStatusText("Kamera hazırlanıyor…");
+    setStatusText(t("verification.liveness.preparingCamera"));
 
     const init = async () => {
       try {
@@ -169,7 +171,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
       nativeDetectorRef.current = getNativeFaceDetector();
 
       if (!blazeModelRef.current) {
-        setStatusText("Yüz tanıma modeli yükleniyor…");
+        setStatusText(t("verification.liveness.loadingModel"));
         blazeModelRef.current = await blazeface.load({
           maxFaces: 1,
           scoreThreshold: 0.35,
@@ -183,7 +185,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
       streamRef.current = stream;
 
       const video = videoRef.current;
-      if (!video) throw new Error("Kamera baslatilamadi.");
+      if (!video) throw new Error(t("verification.liveness.cameraStartFailed"));
       video.srcObject = stream;
       video.setAttribute("playsinline", "true");
       await video.play();
@@ -202,7 +204,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
 
       timeoutRef.current = window.setTimeout(() => {
         if (!completedRef.current) {
-          setErrorMessage("Otomatik algılama başarısız. Alttaki butonla onaylayın veya tekrar deneyin.");
+          setErrorMessage(t("verification.liveness.autoDetectFailed"));
         }
       }, 25000);
 
@@ -210,8 +212,8 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
       setLoading(false);
       setStatusText(
         nativeDetectorRef.current
-          ? "Yüzünüzü çerçeveye getirin"
-          : "Yüzünüzü çerçeveye getirin (algılanınca otomatik onaylanır)",
+          ? t("verification.liveness.alignFaceNative")
+          : t("verification.liveness.alignFaceBlaze"),
       );
       runDetectionLoop();
     };
@@ -219,9 +221,9 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
     void init().catch((error: unknown) => {
       setLoading(false);
       setInitialized(false);
-      let message = error instanceof Error ? error.message : "Canlılık kontrolü başlatılamadı.";
+      let message = error instanceof Error ? error.message : t("verification.liveness.startFailed");
       if (message.includes("NotAllowed") || message.includes("Permission")) {
-        message = "Kamera izni reddedildi. Ayarlardan Rideyo için kamera iznini açın.";
+        message = t("verification.liveness.cameraDenied");
       }
       setErrorMessage(message);
       onFailure?.(message);
@@ -230,7 +232,7 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
     return () => {
       void cleanup();
     };
-  }, [cleanup, onFailure, open, runDetectionLoop]);
+  }, [cleanup, onFailure, open, runDetectionLoop, t]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -238,10 +240,10 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5 text-primary" />
-            Canlılık Kontrolü
+            {t("verification.liveness.title")}
           </DialogTitle>
           <DialogDescription>
-            Yüzünüzü çerçeveye getirin — algılandığı anda doğrulama tamamlanır.
+            {t("verification.liveness.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -275,18 +277,18 @@ const ActiveLivenessCheckDialog = ({ open, onOpenChange, onSuccess, onFailure }:
             disabled={!initialized || loading}
             onClick={() => completeLiveness()}
           >
-            Yüzüm görünüyor — Onayla
+            {t("verification.liveness.confirmFace")}
           </Button>
           <Button
             type="button"
             variant="outline"
             className="w-full"
             onClick={() => {
-              onFailure?.("Canlılık kontrolü iptal edildi.");
+              onFailure?.(t("verification.liveness.cancelled"));
               onOpenChange(false);
             }}
           >
-            İptal
+            {t("verification.liveness.cancel")}
           </Button>
         </DialogFooter>
       </DialogContent>

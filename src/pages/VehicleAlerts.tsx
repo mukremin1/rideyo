@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Car, CheckCircle, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { useDateLocale } from "@/hooks/useDateLocale";
 
 interface VehicleAlert {
   id: string;
@@ -31,6 +32,8 @@ interface VehicleAlertRow extends Omit<VehicleAlert, "cars"> {
 }
 
 const VehicleAlerts = () => {
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState<VehicleAlert[]>([]);
@@ -42,15 +45,10 @@ const VehicleAlerts = () => {
       return;
     }
     fetchAlerts();
-    
-    // Subscribe to realtime updates
+
     const channel = supabase
-      .channel('vehicle-alerts')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'vehicle_alerts'
-      }, () => {
+      .channel("vehicle-alerts")
+      .on("postgres_changes", { event: "*", schema: "public", table: "vehicle_alerts" }, () => {
         fetchAlerts();
       })
       .subscribe();
@@ -64,13 +62,7 @@ const VehicleAlerts = () => {
     try {
       const { data, error } = await supabase
         .from("vehicle_alerts")
-        .select(`
-          *,
-          cars (
-            name,
-            plate_number
-          )
-        `)
+        .select(`*, cars ( name, plate_number )`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -80,8 +72,8 @@ const VehicleAlerts = () => {
       }));
       setAlerts(normalized);
     } catch (error) {
-      console.error("Uyarılar yüklenemedi:", error);
-      toast.error("Uyarılar yüklenemedi");
+      console.error("Alerts load error:", error);
+      toast.error(t("owner.vehicleAlerts.loadError"));
     } finally {
       setLoading(false);
     }
@@ -90,15 +82,15 @@ const VehicleAlerts = () => {
   const resolveAlert = async (alertId: string) => {
     const { error } = await supabase
       .from("vehicle_alerts")
-      .update({ 
+      .update({
         is_resolved: true,
         resolved_at: new Date().toISOString(),
-        resolved_by: user?.id
+        resolved_by: user?.id,
       })
       .eq("id", alertId);
 
     if (!error) {
-      toast.success("Uyarı çözüldü olarak işaretlendi");
+      toast.success(t("owner.vehicleAlerts.resolveSuccess"));
       fetchAlerts();
     }
   };
@@ -114,15 +106,8 @@ const VehicleAlerts = () => {
     return <Icon className="w-5 h-5" />;
   };
 
-  const getAlertLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      hood_open: "Kaput Açıldı",
-      accident: "Kaza",
-      speeding: "Hız Sınırı Aşıldı",
-      unauthorized_access: "Yetkisiz Erişim",
-    };
-    return labels[type] || type;
-  };
+  const getAlertLabel = (type: string) =>
+    t(`owner.vehicleAlerts.types.${type}`, { defaultValue: type });
 
   const getSeverityColor = (severity: string) => {
     const colors: Record<string, string> = {
@@ -141,29 +126,25 @@ const VehicleAlerts = () => {
       <main className="pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">Araç Uyarıları</h1>
-            <p className="text-muted-foreground">
-              Araçlarınızdan gelen güvenlik ve durum bildirimleri
-            </p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">{t("owner.vehicleAlerts.title")}</h1>
+            <p className="text-muted-foreground">{t("owner.vehicleAlerts.subtitle")}</p>
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-xl text-muted-foreground">Yükleniyor...</p>
+              <p className="text-xl text-muted-foreground">{t("owner.common.loading")}</p>
             </div>
           ) : alerts.length === 0 ? (
             <div className="text-center py-12">
               <CheckCircle className="w-16 h-16 mx-auto text-green-500 mb-4" />
-              <p className="text-xl text-muted-foreground">Tüm araçlar güvende</p>
+              <p className="text-xl text-muted-foreground">{t("owner.vehicleAlerts.allSafe")}</p>
             </div>
           ) : (
             <div className="space-y-4">
               {alerts.map((alert) => (
                 <Card
                   key={alert.id}
-                  className={`p-6 ${
-                    !alert.is_resolved ? "border-l-4 " + getSeverityColor(alert.severity) : ""
-                  }`}
+                  className={`p-6 ${!alert.is_resolved ? "border-l-4 " + getSeverityColor(alert.severity) : ""}`}
                 >
                   <div className="flex gap-4">
                     <div className={`w-12 h-12 rounded-full ${getSeverityColor(alert.severity)} bg-opacity-20 flex items-center justify-center flex-shrink-0`}>
@@ -178,31 +159,23 @@ const VehicleAlerts = () => {
                           </p>
                         </div>
                         <div className="flex gap-2">
-                          <Badge
-                            variant={alert.severity === "critical" ? "destructive" : "outline"}
-                          >
+                          <Badge variant={alert.severity === "critical" ? "destructive" : "outline"}>
                             {alert.severity.toUpperCase()}
                           </Badge>
                           {alert.is_resolved && (
-                            <Badge variant="secondary">Çözüldü</Badge>
+                            <Badge variant="secondary">{t("owner.vehicleAlerts.resolved")}</Badge>
                           )}
                         </div>
                       </div>
                       <p className="text-muted-foreground mb-3">{alert.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
-                          {format(new Date(alert.created_at), "d MMMM yyyy, HH:mm", {
-                            locale: tr,
-                          })}
+                          {format(new Date(alert.created_at), "d MMMM yyyy, HH:mm", { locale: dateLocale })}
                         </span>
                         {!alert.is_resolved && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => resolveAlert(alert.id)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => resolveAlert(alert.id)}>
                             <CheckCircle className="w-4 h-4 mr-2" />
-                            Çözüldü İşaretle
+                            {t("owner.vehicleAlerts.markResolved")}
                           </Button>
                         )}
                       </div>

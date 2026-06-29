@@ -1,0 +1,951 @@
+{
+  "legal": {
+    "terms": {
+      "title": "Terms of Use",
+      "lastUpdated": "Last Updated: October 23, 2024",
+      "sections": [
+        {
+          "title": "1. General Provisions",
+          "paragraphs": [
+            "These Terms of Use constitute a legal agreement governing your use of the RideYo platform. By using the platform, you are deemed to have accepted these terms. If you do not accept these terms, please do not use the platform."
+          ]
+        },
+        {
+          "title": "2. Service Description",
+          "paragraphs": [
+            "RideYo is a digital platform that connects vehicle owners with renters. The platform facilitates vehicle sharing but does not own the vehicles. All vehicles are provided by independent vehicle owners."
+          ]
+        },
+        {
+          "title": "3. User Accounts",
+          "subsections": [
+            {
+              "title": "3.1 Registration",
+              "list": [
+                "You must be 18 years of age or older to use the platform",
+                "You must hold a valid driver's license",
+                "You must provide accurate and up-to-date information",
+                "You are responsible for account security"
+              ]
+            },
+            {
+              "title": "3.2 Account Types",
+              "list": [
+                "User Account: You can rent vehicles",
+                "Vehicle Owner Account: You can list your vehicle for rent and also rent vehicles"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. Rental Terms",
+          "subsections": [
+            {
+              "title": "4.1 Reservation",
+              "list": [
+                "Reservations are binding once confirmed",
+                "A hold is placed for per-minute rentals",
+                "Full payment is required for hourly and daily rentals",
+                "Prices are set by the vehicle owner"
+              ]
+            },
+            {
+              "title": "4.2 Vehicle Handover",
+              "list": [
+                "Vehicle pickup and return must occur at the scheduled times",
+                "The vehicle's condition must be checked at handover",
+                "Fuel level must be returned at the same level as at pickup"
+              ]
+            },
+            {
+              "title": "4.3 Usage",
+              "list": [
+                "Only you may drive the vehicle (as the licensed driver)",
+                "You must comply with traffic regulations",
+                "You may not use the vehicle for commercial purposes (unless otherwise stated)",
+                "You may not drive under the influence of alcohol or drugs"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Payment and Billing",
+          "list": [
+            "All payments must be made through the platform",
+            "Per-minute rental: Charged for the time used",
+            "Hourly rental: Charged at the specified hourly rate",
+            "Daily rental: Charged in 24-hour periods",
+            "Late return incurs additional fees",
+            "Platform service fee is 15%"
+          ]
+        },
+        {
+          "title": "6. Cancellation Policy",
+          "list": [
+            "Free cancellation up to 24 hours before rental start",
+            "Cancellation within 24 hours: 50% refund",
+            "Cancellation after rental start: No refund",
+            "Vehicle owner cancellation: Full refund + 20% compensation"
+          ]
+        },
+        {
+          "title": "7. Insurance and Liability",
+          "subsections": [
+            {
+              "title": "7.1 Coverage",
+              "list": [
+                "All vehicles are covered by comprehensive insurance",
+                "Mandatory traffic insurance is included",
+                "Minor damage deductible: 500 TL",
+                "Major damage deductible: 2,000 TL"
+              ]
+            },
+            {
+              "title": "7.2 Responsibilities",
+              "list": [
+                "Traffic fines are the renter's responsibility",
+                "Accidents must be reported immediately",
+                "Intentional damage is fully the renter's responsibility"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "8. Rules for Vehicle Owners",
+          "list": [
+            "Your vehicle's registration, insurance, and inspection must be current",
+            "The vehicle must be delivered clean and in working condition",
+            "Pricing must be fair and aligned with market conditions",
+            "You are obligated to honor reservations",
+            "Vehicle specifications must be stated accurately and completely"
+          ]
+        },
+        {
+          "title": "9. Prohibited Conduct",
+          "list": [
+            "Off-platform payment or communication",
+            "Providing false information or documents",
+            "Harassment or threats toward other users",
+            "Attempting to manipulate systems",
+            "Using vehicles for illegal activities"
+          ]
+        },
+        {
+          "title": "10. Account Suspension and Termination",
+          "paragraphs": [
+            "RideYo reserves the right to suspend or terminate your account in case of violation of these terms. Legal action may be initiated in cases of serious violations."
+          ]
+        },
+        {
+          "title": "11. Disclaimer",
+          "paragraphs": [
+            "RideYo is an intermediary platform between vehicle owners and renters. We do not guarantee the quality, safety, or suitability of vehicles. We are not a party to disputes between users."
+          ]
+        },
+        {
+          "title": "12. Applicable Law",
+          "paragraphs": [
+            "These Terms of Use are governed by the laws of the Republic of Türkiye. Disputes shall be resolved in the courts of Trabzon."
+          ]
+        },
+        {
+          "title": "13. Changes",
+          "paragraphs": [
+            "RideYo reserves the right to modify these Terms of Use at any time. Significant changes will be communicated to users. Continued use of the platform after changes constitutes acceptance of the new terms."
+          ]
+        },
+        {
+          "title": "14. Contact",
+          "paragraphs": [
+            "For questions about these Terms of Use:",
+            "Email: destek@ride-yo.com",
+            "Phone: +90 (462) 123 45 67",
+            "Address: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last Updated: October 23, 2024",
+      "sections": [
+        {
+          "title": "1. Introduction",
+          "paragraphs": [
+            "At RideYo, we are committed to protecting the privacy of our users. This Privacy Policy explains how we collect, use, store, and protect your personal data."
+          ]
+        },
+        {
+          "title": "2. Information Collected",
+          "subsections": [
+            {
+              "title": "2.1 Personal Information",
+              "list": [
+                "First and last name",
+                "Email address",
+                "Phone number",
+                "Credit card information (encrypted)",
+                "Driver's license information",
+                "Address information"
+              ]
+            },
+            {
+              "title": "2.2 Automatically Collected Information",
+              "list": [
+                "IP address",
+                "Browser type and version",
+                "Device information",
+                "Location information (with your consent)",
+                "Platform usage data"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Use of Information",
+          "paragraphs": ["We use the information we collect for the following purposes:"],
+          "list": [
+            "Providing vehicle rental services",
+            "Processing payments",
+            "Providing customer support",
+            "Developing and improving the platform",
+            "Security and fraud prevention",
+            "Fulfilling legal obligations",
+            "Sending personalized offers and notifications (with your consent)"
+          ]
+        },
+        {
+          "title": "4. Information Sharing",
+          "paragraphs": ["We may share your personal information with third parties in the following cases:"],
+          "list": [
+            "With vehicle owners to facilitate rental transactions",
+            "With payment processors for secure payment infrastructure",
+            "With official authorities as required by law",
+            "With service providers for platform operations"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "Your information is never sold or rented to third parties for marketing purposes."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Data Security",
+          "paragraphs": [
+            "We use industry-standard security measures to protect your personal data:"
+          ],
+          "list": [
+            "SSL/TLS encryption",
+            "Secure data storage",
+            "Regular security audits",
+            "Limited access controls",
+            "Strong encryption protocols"
+          ]
+        },
+        {
+          "title": "6. Cookies",
+          "paragraphs": [
+            "Our website uses cookies to improve user experience. Cookies are small text files stored by your browser. You can manage cookie preferences in your browser settings."
+          ]
+        },
+        {
+          "title": "7. Your Rights",
+          "paragraphs": ["Under KVKK (Turkish Personal Data Protection Law), you have the following rights:"],
+          "list": [
+            "To learn whether your personal data is being processed",
+            "To request information if it has been processed",
+            "To learn the purpose of processing and whether it is used appropriately",
+            "To know third parties to whom data is transferred domestically or abroad",
+            "To request correction if incomplete or inaccurate",
+            "To request deletion or destruction",
+            "To object to results arising solely from automated analysis of your data to your detriment"
+          ]
+        },
+        {
+          "title": "8. Children's Privacy",
+          "paragraphs": [
+            "Our services are not designed for individuals under 18. We do not knowingly collect personal information from individuals under 18."
+          ]
+        },
+        {
+          "title": "9. Changes",
+          "paragraphs": [
+            "This Privacy Policy may be updated from time to time. When significant changes occur, we will notify you by email or through the platform."
+          ]
+        },
+        {
+          "title": "10. Contact",
+          "paragraphs": [
+            "For questions about our Privacy Policy:",
+            "Email: gizlilik@ride-yo.com",
+            "Phone: +90 (462) 123 45 67",
+            "Address: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "kvkk": {
+      "title": "KVKK Disclosure Notice",
+      "lastUpdated": "Information Under the Personal Data Protection Law",
+      "sections": [
+        {
+          "title": "1. Data Controller",
+          "paragraphs": [
+            "Pursuant to Law No. 6698 on the Protection of Personal Data (\"KVKK\"), your personal data may be processed by RideYo as the data controller within the scope described below.",
+            "Company Name: RideYo Teknoloji A.Ş.",
+            "Address: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon",
+            "Email: kvkk@ride-yo.com"
+          ]
+        },
+        {
+          "title": "2. Personal Data Processed",
+          "subsections": [
+            {
+              "title": "2.1 Identity Information",
+              "list": ["First and last name", "Turkish ID number", "Date of birth", "Driver's license number and details"]
+            },
+            {
+              "title": "2.2 Contact Information",
+              "list": ["Email address", "Phone number", "Address information"]
+            },
+            {
+              "title": "2.3 Financial Information",
+              "list": [
+                "Credit card information (encrypted)",
+                "Bank account information (for vehicle owners)",
+                "Transaction history"
+              ]
+            },
+            {
+              "title": "2.4 Vehicle and Rental Information",
+              "list": [
+                "Rented vehicle information",
+                "Rental dates and durations",
+                "Vehicle photos and descriptions",
+                "Location information"
+              ]
+            },
+            {
+              "title": "2.5 Transaction Security Information",
+              "list": ["IP address", "Cookie records", "Device information", "Log records"]
+            }
+          ]
+        },
+        {
+          "title": "3. Purposes of Processing Personal Data",
+          "paragraphs": ["Your personal data is processed for the following purposes:"],
+          "list": [
+            "Providing vehicle rental services",
+            "Creating and managing user accounts",
+            "Processing payments",
+            "Customer relationship management and support services",
+            "Security and fraud prevention",
+            "Fulfilling legal obligations",
+            "Platform development and improvement",
+            "Statistical analysis and reporting",
+            "Marketing and promotional activities (with your explicit consent)"
+          ]
+        },
+        {
+          "title": "4. Transfer of Personal Data",
+          "paragraphs": ["Your personal data may be transferred for the purposes stated above to:"],
+          "list": [
+            "Vehicle owners (for rental transactions)",
+            "Payment institutions (for payment processing)",
+            "Law firms (for legal proceedings)",
+            "Authorized public institutions (for legal requirements)",
+            "Business partners and service providers (for platform operations)"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "Transfers are carried out in compliance with Articles 8 and 9 of KVKK."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Method of Collecting Personal Data",
+          "paragraphs": ["Your personal data is collected:"],
+          "list": [
+            "Through the website and mobile application",
+            "Via registration and membership forms",
+            "During rental transactions",
+            "Through email, phone, and other communication channels",
+            "Through automated systems (cookies, logs)"
+          ],
+          "subsections": [
+            {
+              "paragraphs": ["as described above."]
+            }
+          ]
+        },
+        {
+          "title": "6. Rights of the Data Subject",
+          "paragraphs": [
+            "Pursuant to Article 11 of KVKK, as data subjects you have the following rights:"
+          ],
+          "list": [
+            "To learn whether your personal data is being processed",
+            "To request information if your personal data has been processed",
+            "To learn the purpose of processing and whether it is used appropriately",
+            "To know third parties to whom your personal data is transferred domestically or abroad",
+            "To request correction if your personal data is incomplete or inaccurate",
+            "To request deletion or destruction of your personal data under the conditions set forth in Article 7 of KVKK",
+            "To request notification of correction, deletion, or destruction to third parties to whom personal data was transferred",
+            "To object to results arising solely from automated analysis of processed data to your detriment",
+            "To claim compensation for damages arising from unlawful processing of your personal data"
+          ]
+        },
+        {
+          "title": "7. Exercising Your Rights",
+          "paragraphs": [
+            "To exercise the rights listed above, you may submit your request containing the information necessary to identify you and explanations regarding the right you wish to exercise under Article 11 of KVKK through the following methods:"
+          ],
+          "list": [
+            "In writing: By sending a wet-signed application letter in person or via notary to Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon",
+            "By email: By sending an application signed with registered electronic mail (KEP), secure electronic signature, or mobile signature to kvkk@ride-yo.com"
+          ],
+          "subsections": [
+            {
+              "paragraphs": [
+                "Your applications will be concluded free of charge within 30 days at the latest, depending on the nature of the request. If the process requires additional cost, the fee determined by the Personal Data Protection Board may be charged."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "8. Data Security",
+          "paragraphs": [
+            "As RideYo, we take technical and administrative measures to ensure the security of your personal data. Your data is protected against unauthorized access, loss, and misuse."
+          ]
+        },
+        {
+          "title": "9. Changes",
+          "paragraphs": [
+            "This disclosure notice may be changed in line with changes in legal regulations or updates to company policies. Significant changes will be communicated to you."
+          ]
+        },
+        {
+          "title": "10. Contact",
+          "paragraphs": [
+            "For questions about KVKK and the processing of your personal data:",
+            "Email: kvkk@ride-yo.com",
+            "Phone: +90 (462) 123 45 67",
+            "Address: Atatürk Alanı, Devlet Sahil Yolu Cd., Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "lastUpdated": "Last Updated: October 23, 2024",
+      "sections": [
+        {
+          "title": "1. What Are Cookies?",
+          "paragraphs": [
+            "Cookies are small text files stored on your device or network server by browsers when you visit websites. At RideYo, we use various cookies on our website and mobile application."
+          ]
+        },
+        {
+          "title": "2. Types of Cookies",
+          "subsections": [
+            {
+              "title": "2.1. Essential Cookies",
+              "paragraphs": [
+                "These cookies are necessary for the website to function properly. They provide basic functions such as security, network management, and accessibility."
+              ]
+            },
+            {
+              "title": "2.2. Functionality Cookies",
+              "paragraphs": [
+                "These remember user preferences to provide a more personalized experience. They store information such as language selection and theme preferences."
+              ]
+            },
+            {
+              "title": "2.3. Performance and Analytics Cookies",
+              "paragraphs": [
+                "These are used to measure and improve website performance. They collect anonymous data such as which pages are visited and how long users stay."
+              ]
+            },
+            {
+              "title": "2.4. Targeting and Advertising Cookies",
+              "paragraphs": [
+                "These are used to display customized advertisements based on users' interests."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Cookies We Use",
+          "list": [
+            "Session Cookies: Authentication for logged-in users",
+            "Preference Cookies: Language, theme, and display preferences",
+            "Security Cookies: Fraud detection and security",
+            "Analytics Cookies: Usage statistics and performance measurement",
+            "GPS Cookies: For location-based services"
+          ]
+        },
+        {
+          "title": "4. Cookie Management",
+          "paragraphs": [
+            "You can control, delete, or block cookies through your browser settings. However, disabling some cookies may cause certain website features to not work properly."
+          ],
+          "subsections": [
+            {
+              "title": "Cookie Management in Popular Browsers:",
+              "list": [
+                "Google Chrome: Settings → Privacy and security → Cookies and other site data",
+                "Mozilla Firefox: Settings → Privacy & Security → Cookies and Site Data",
+                "Safari: Preferences → Privacy → Manage Cookies and website data",
+                "Microsoft Edge: Settings → Privacy, search, and services → Cookies"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Third-Party Cookies",
+          "paragraphs": [
+            "Some third-party service providers on our website (payment systems, map services, analytics tools) may use their own cookies. These cookies are subject to the privacy policies of the respective companies."
+          ]
+        },
+        {
+          "title": "6. Cookie Policy Updates",
+          "paragraphs": [
+            "This cookie policy may be updated from time to time. We will inform you of significant changes. Changes to the policy take effect from the date of publication."
+          ]
+        },
+        {
+          "title": "7. Contact",
+          "paragraphs": [
+            "For questions about our cookie policy, you can contact us:",
+            "Email: info@ride-yo.com",
+            "Phone: +90 (462) 123 45 67",
+            "Address: Trabzon, Türkiye"
+          ]
+        }
+      ]
+    },
+    "cancellation": {
+      "title": "Cancellation and Refund Policy",
+      "lastUpdated": "Last Updated: October 23, 2024",
+      "sections": [
+        {
+          "title": "General Information",
+          "paragraphs": [
+            "The cancellation and refund conditions for reservations made through the RideYo platform are set out below. Please read these conditions carefully before making a reservation."
+          ]
+        },
+        {
+          "title": "Renter Cancellation Terms",
+          "subsections": [
+            {
+              "title": "24+ Hours Before — Full Refund",
+              "paragraphs": [
+                "For cancellations made 24 hours or more before the rental start, 100% of the amount paid will be refunded."
+              ]
+            },
+            {
+              "title": "12-24 Hours Before — Partial Refund",
+              "paragraphs": [
+                "For cancellations made 12-24 hours before the rental start, 50% of the amount paid will be refunded."
+              ]
+            },
+            {
+              "title": "Less Than 12 Hours — No Refund",
+              "paragraphs": [
+                "For cancellations made less than 12 hours before the rental start, no refund will be issued."
+              ]
+            },
+            {
+              "title": "No-show — No Refund",
+              "paragraphs": [
+                "If you fail to show up at the reservation time without notice, no refund will be issued."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Vehicle Owner Cancellation Terms",
+          "paragraphs": ["In case of a last-minute cancellation by the vehicle owner:"],
+          "list": [
+            "The owner is obligated to provide an alternative vehicle to the renter",
+            "If no alternative vehicle is available, the reservation fee will be refunded to the renter at 120%",
+            "Repeated cancellations may result in suspension of the vehicle owner's account",
+            "RideYo assists in finding a suitable alternative vehicle for the renter"
+          ]
+        },
+        {
+          "title": "Refund Process",
+          "subsections": [
+            {
+              "title": "Payment Refunds",
+              "list": [
+                "Refund requests can be made through the app or customer service",
+                "Refunds are made to the same payment method used (credit card, debit card)",
+                "Credit card refunds appear in the account within 5-10 business days",
+                "Debit card refunds appear in the account within 3-5 business days",
+                "Refund status is notified via SMS and email"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Special Circumstances",
+          "subsections": [
+            {
+              "title": "Force Majeure",
+              "paragraphs": [
+                "Full refunds are issued in cases of force majeure such as natural disasters, epidemics, or war. Determination of such circumstances is made by RideYo management."
+              ]
+            },
+            {
+              "title": "Vehicle Breakdown",
+              "paragraphs": [
+                "If the vehicle becomes unusable due to a technical breakdown during the rental period, a full refund is issued for the unused period or an alternative vehicle is provided."
+              ]
+            },
+            {
+              "title": "Early Return",
+              "paragraphs": [
+                "If the vehicle is returned before the end of the rental period, no refund is issued for the unused time. For daily rentals, early return is calculated at the hourly rate."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Contact",
+          "paragraphs": [
+            "For cancellation and refund inquiries, you can reach our 24/7 customer service:",
+            "Phone: 0539 526 32 93",
+            "Email: destek@ride-yo.com",
+            "WhatsApp: +90 539 526 32 93"
+          ]
+        }
+      ]
+    },
+    "rentalAgreement": {
+      "title": "Distance Sales Agreement",
+      "lastUpdated": "Last Updated: October 23, 2024",
+      "sections": [
+        {
+          "title": "Introduction",
+          "paragraphs": [
+            "This Distance Sales Agreement (\"Agreement\") is entered into between the renter (\"Tenant/Consumer\") and the vehicle owner (\"Lessor/Seller\") renting a vehicle through the RideYo platform, under the provisions of Law No. 6502 on the Protection of Consumers and the Regulation on Distance Contracts."
+          ]
+        },
+        {
+          "title": "Article 1: Parties",
+          "subsections": [
+            {
+              "title": "1.1. Seller/Service Provider Information",
+              "list": [
+                "Company Name: RideYo Vehicle Rental Services",
+                "Address: Müftü Solakzade Mah. Elmadağ Sk. No:2 Kat:2 Palandöken/Erzurum",
+                "Phone: 0539 526 32 93",
+                "Email: info@ride-yo.com",
+                "Website: www.ride-yo.com"
+              ]
+            },
+            {
+              "title": "1.2. Buyer/Consumer",
+              "paragraphs": [
+                "A natural person who rents a vehicle through the RideYo platform, holds a valid driver's license, and accepts the platform terms. Buyer information is recorded during reservation."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Article 2: Subject of the Agreement",
+          "paragraphs": [
+            "The subject of this agreement is to determine the rights and obligations of the parties regarding the sale and delivery of the vehicle rental service ordered electronically by the Buyer through the RideYo e-commerce platform owned by the Seller, in accordance with Law No. 6502 on the Protection of Consumers and the Regulation on Distance Contracts."
+          ]
+        },
+        {
+          "title": "Article 3: Service Information and Prices",
+          "subsections": [
+            {
+              "title": "3.1. Service Features",
+              "list": [
+                "The type, brand, model, color, and all features of the service are specified on the platform",
+                "Rental duration may be per minute, hour, or day",
+                "Mileage packages may be specified separately",
+                "Total price including taxes is shown before reservation"
+              ]
+            },
+            {
+              "title": "3.2. Pricing",
+              "list": [
+                "All prices are stated in Turkish Lira (TL) including VAT",
+                "Platform commission fee is 15% of the rental fee",
+                "Hourly rate applies in case of late return",
+                "Additional fees may apply in case of damage"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Article 4: Payment Method and Terms",
+          "list": [
+            "Payment can be made by credit card or debit card",
+            "Rental fee is collected upon reservation confirmation",
+            "All payments are processed through secure payment infrastructure",
+            "Card information is encrypted with 256-bit SSL certificate",
+            "Card information may be saved (optional)",
+            "Deposit amount varies between 500-2000 TL depending on vehicle type"
+          ]
+        },
+        {
+          "title": "Article 5: Performance and Delivery of Service",
+          "subsections": [
+            {
+              "title": "5.1. Delivery Terms",
+              "list": [
+                "The vehicle is delivered at the specified location on the specified date and time",
+                "A vehicle inspection form is completed before delivery",
+                "Existing damage is photographed and recorded",
+                "Fuel level and mileage information is recorded"
+              ]
+            },
+            {
+              "title": "5.2. Return Terms",
+              "list": [
+                "The vehicle is returned clean at the end of the rental period",
+                "Fuel level is restored to the starting level",
+                "Damage inspection is performed and reported"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Article 6: Right of Withdrawal",
+          "paragraphs": [
+            "Pursuant to Article 50 of Law No. 6502 and Article 15 of the Regulation on Distance Contracts, consumers do not have the right of withdrawal in contracts relating to accommodation, transport of goods, car rental, food and beverage supply, and leisure activities to be performed on a specific date or period.",
+            "However, as RideYo, the following cancellation policy applies for customer satisfaction:"
+          ],
+          "list": [
+            "Cancellation up to 24 hours before: 100% refund",
+            "Cancellation 12-24 hours before: 50% refund",
+            "Cancellation less than 12 hours before: No refund",
+            "No-show: No refund"
+          ]
+        },
+        {
+          "title": "Article 7: Warranty and Liability",
+          "subsections": [
+            {
+              "title": "7.1. Insurance Coverage",
+              "list": [
+                "Mandatory Traffic Insurance (MTPL)",
+                "Mini Comprehensive Insurance (provided by RideYo)",
+                "Passenger Personal Accident Insurance",
+                "24/7 Roadside Assistance"
+              ]
+            },
+            {
+              "title": "7.2. Limitations of Liability",
+              "list": [
+                "Use under the influence of alcohol or drugs is not covered by insurance",
+                "Use without a license or with an expired license is prohibited",
+                "Intentional damage is the consumer's responsibility"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Article 8: Protection of Personal Data",
+          "paragraphs": [
+            "Personal data of the consumer is processed and protected under Law No. 6698 on the Protection of Personal Data. For detailed information, please refer to the Privacy Policy and KVKK Disclosure Notice."
+          ]
+        },
+        {
+          "title": "Article 9: Dispute Resolution",
+          "list": [
+            "Consumer Arbitration Committees and Consumer Courts have jurisdiction over disputes arising from this agreement",
+            "Monetary limits are determined annually by the Ministry of Trade",
+            "Erzurum courts and enforcement offices have jurisdiction",
+            "Laws of the Republic of Türkiye apply"
+          ]
+        },
+        {
+          "title": "Article 10: Effectiveness",
+          "paragraphs": [
+            "This agreement enters into force upon electronic approval by the Consumer. By ordering the service subject to this agreement, the Consumer is deemed to have accepted all articles of this agreement."
+          ]
+        },
+        {
+          "title": "Seller/Service Provider Contact Information",
+          "paragraphs": [
+            "RideYo Vehicle Rental Services",
+            "Address: Müftü Solakzade Mah. Elmadağ Sk. No:2 Kat:2 Palandöken/Erzurum",
+            "Phone: 0539 526 32 93",
+            "Email: info@ride-yo.com",
+            "Web: www.ride-yo.com"
+          ]
+        }
+      ]
+    },
+    "safety": {
+      "title": "Safety Guidelines",
+      "lastUpdated": "Last Updated: October 23, 2024",
+      "sections": [
+        {
+          "title": "Important Safety Notice",
+          "paragraphs": [
+            "Your safety is our priority at RideYo. By reading the rules below carefully, you can help ensure the safety of yourself and other users."
+          ]
+        },
+        {
+          "title": "Before Renting a Vehicle",
+          "subsections": [
+            {
+              "title": "License Verification",
+              "list": [
+                "You must hold a valid driver's license",
+                "License must be held for a minimum of 2 years",
+                "Age must be between 21 and 70",
+                "Your driver points must be at least 60"
+              ]
+            },
+            {
+              "title": "Vehicle Inspection",
+              "list": [
+                "Inspect the exterior before taking delivery of the vehicle",
+                "Photograph existing damage and scratches",
+                "Check the fuel level",
+                "Inspect tire condition",
+                "Check interior cleanliness",
+                "Ensure all documents are in the vehicle"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Driving Safety",
+          "subsections": [
+            {
+              "title": "Traffic Rule Compliance",
+              "list": [
+                "Do not exceed speed limits",
+                "Do not drive under the influence of alcohol or drugs",
+                "Always wear your seatbelt",
+                "Do not use your mobile phone (except hands-free)",
+                "Do not drive when fatigued",
+                "Obey traffic signs"
+              ]
+            },
+            {
+              "title": "Prohibitions",
+              "list": [
+                "Transferring the vehicle to another person is prohibited",
+                "Taking the vehicle abroad is prohibited",
+                "Smoking in the vehicle is prohibited",
+                "Transporting pets (without special permission) is prohibited",
+                "Using the vehicle for racing or demonstrations is prohibited",
+                "Using the vehicle for illegal activities is prohibited"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Emergencies",
+          "subsections": [
+            {
+              "title": "In Case of Accident",
+              "list": [
+                "1. Ensure your personal safety first",
+                "2. Call 112 if necessary",
+                "3. Notify police and traffic authorities",
+                "4. Call the RideYo support line (24/7)",
+                "5. Obtain an accident report",
+                "6. Photograph the scene and damage",
+                "7. Collect information from the other party"
+              ]
+            },
+            {
+              "title": "In Case of Breakdown",
+              "list": [
+                "1. Move the vehicle to a safe location",
+                "2. Place warning triangles",
+                "3. Call the RideYo support line",
+                "4. Wait for roadside assistance to arrive",
+                "5. Do not attempt repairs yourself"
+              ]
+            },
+            {
+              "title": "24/7 Support Lines",
+              "paragraphs": [
+                "Emergency Support: +90 5395263293",
+                "Roadside Assistance: +90 5395263293",
+                "WhatsApp: +90 5395263293"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Vehicle Owner Safety",
+          "subsections": [
+            {
+              "title": "Recommendations for Vehicle Owners",
+              "list": [
+                "Maintain your vehicle regularly",
+                "Keep insurance and inspection documents up to date",
+                "Inspect the vehicle before and after rentals",
+                "Keep the GPS tracking system active",
+                "Check emergency equipment (first aid kit, fire extinguisher)",
+                "Do not make direct financial arrangements with renters",
+                "Conduct all transactions through the RideYo platform"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Vehicle Handover",
+          "subsections": [
+            {
+              "title": "Pickup",
+              "list": [
+                "Have your reservation details ready",
+                "Bring your ID and driver's license",
+                "Complete the vehicle inspection form together",
+                "Record all damage and deficiencies",
+                "Note the fuel level"
+              ]
+            },
+            {
+              "title": "Return",
+              "list": [
+                "Return the vehicle clean",
+                "Restore fuel level to the starting level",
+                "Do not leave belongings in the vehicle",
+                "Return all documents",
+                "Have a damage inspection performed",
+                "Sign the return form"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Penalties",
+          "paragraphs": ["If you fail to comply with safety rules:"],
+          "list": [
+            "Your account may be temporarily or permanently suspended",
+            "Penalties may be applied",
+            "You may fall outside insurance coverage",
+            "Legal proceedings may be initiated",
+            "Your deposit may not be refunded"
+          ]
+        },
+        {
+          "title": "Reminder",
+          "paragraphs": [
+            "These safety guidelines have been prepared for the safety of you and all RideYo users. By following the rules, you can enjoy a safe and pleasant vehicle sharing experience.",
+            "We wish you safe travels!"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -9,7 +9,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const projectRef = "ucjnonpozhzuyjuowwdx";
+const projectRef = "pehemxfydtwgpcasftyq";
 const supabaseUrl = `https://${projectRef}.supabase.co`;
 
 const checks = [];

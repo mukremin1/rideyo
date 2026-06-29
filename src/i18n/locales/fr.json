@@ -1,0 +1,108 @@
+{
+  "language": { "label": "Langue", "select": "Choisir la langue", "changed": "Langue mise à jour" },
+  "nav": {
+    "home": "Accueil", "fleet": "Flotte", "howItWorks": "Comment ça marche", "owners": "Propriétaires",
+    "support": "Assistance", "myBookings": "Mes réservations", "favorites": "Favoris",
+    "subscriptionPlans": "Abonnements", "account": "Compte", "profileInfo": "Profil",
+    "identityVerified": "Identité vérifiée", "identityVerify": "Vérifier l'identité",
+    "driverScore": "Score conducteur", "ownerPanel": "Tableau propriétaire", "myCars": "Mes véhicules",
+    "addCar": "Ajouter un véhicule", "notifications": "Notifications", "vehicleAlerts": "Alertes véhicule",
+    "supportCenter": "Centre d'aide", "adminPanel": "Administration", "signOut": "Déconnexion",
+    "signIn": "Connexion", "signUp": "Inscription", "explore": "Explorer", "rental": "Location",
+    "owner": "Propriétaire", "menu": "Menu", "cars": "Véhicules", "bookings": "Réservations"
+  },
+  "common": {
+    "continue": "Continuer", "back": "Retour", "loading": "Chargement...", "save": "Enregistrer",
+    "cancel": "Annuler", "confirm": "Confirmer", "error": "Une erreur s'est produite", "success": "Succès",
+    "goToCars": "Voir les véhicules", "goToAuth": "Connexion", "required": "Obligatoire", "optional": "Optionnel",
+    "notFound": "Page introuvable", "notFoundDesc": "La page demandée n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil"
+  },
+  "home": {
+    "promoBanner": "Économisez jusqu'à 25 % avec les abonnements",
+    "enableNotifications": "Activer les notifications", "viewPlans": "Voir les offres",
+    "mapTitle": "Explorer sur la carte", "mapDesc": "Voir les véhicules disponibles près de vous.",
+    "enableLocation": "Activer la localisation", "hideMap": "Masquer la carte", "showMap": "Afficher la carte",
+    "heroBadge": "Location de voiture sûre, transparente et flexible",
+    "heroTitle1": "Louez la voiture qu'il vous faut", "heroTitle2": "en quelques minutes",
+    "heroDesc": "Location à la minute, à l'heure ou à la journée. Vérification d'identité, tarifs transparents et support 24h/24.",
+    "rentCar": "Louer une voiture", "browseFleet": "Voir la flotte", "listYourCar": "Proposer votre véhicule",
+    "stat247": "Disponible 24h/24", "statCities": "Actif dans plusieurs villes", "statSecure": "Paiement sécurisé"
+  },
+  "auth": {
+    "title": "Bienvenue", "signInTab": "Connexion", "signUpTab": "Inscription",
+    "email": "E-mail", "password": "Mot de passe", "confirmPassword": "Confirmer le mot de passe",
+    "fullName": "Nom complet", "phone": "Téléphone", "renter": "Locataire", "carOwner": "Propriétaire",
+    "termsRequired": "Vous devez accepter les conditions pour vous inscrire.",
+    "signInSuccess": "Connexion réussie !", "signUpSuccess": "Inscription réussie ! Vérifiez votre e-mail.",
+    "invalidEmail": "Entrez une adresse e-mail valide", "passwordMin": "Mot de passe : 6 caractères minimum",
+    "passwordMismatch": "Les mots de passe ne correspondent pas", "nameMin": "Nom : 2 caractères minimum",
+    "phoneInvalid": "Entrez un numéro de téléphone valide"
+  },
+  "payment": {
+    "title": "Paiement", "subtitle": "paiement sécurisé pour", "checking": "Vérification du paiement",
+    "checkingDesc": "Validation de la réservation...", "noInfo": "Informations de paiement introuvables",
+    "noInfoDesc": "Choisissez un véhicule et créez une réservation avant de payer.",
+    "loginRequired": "Connexion requise", "loginRequiredDesc": "Connectez-vous pour payer.",
+    "alreadyPaid": "Cette réservation est déjà payée.", "validationFailed": "Impossible de vérifier le paiement.",
+    "success": "Paiement effectué avec succès !", "failed": "Échec du paiement",
+    "redirect3ds": "Redirection vers la vérification bancaire...", "summary": "Récapitulatif",
+    "car": "Véhicule", "rentalType": "Type de location", "start": "Début", "end": "Fin",
+    "rentalAmount": "Montant location", "kmPackage": "Forfait km", "provisionFee": "Caution",
+    "insuranceFee": "Assurance", "additionalDriver": "Conducteur supplémentaire", "total": "Total",
+    "payNow": "Finaliser le paiement", "processing": "Traitement...", "savedCards": "Cartes enregistrées",
+    "newCard": "Nouvelle carte", "saveCard": "Enregistrer ma carte", "typeHour": "À l'heure",
+    "typeDay": "À la journée", "typeMinute": "À la minute", "callbackVerifying": "Vérification du paiement",
+    "callbackWait": "Veuillez patienter...", "callbackSuccess": "Paiement réussi",
+    "callbackRedirect": "Redirection vers le démarrage de location...", "callbackFailed": "Échec du paiement",
+    "callbackRetry": "Réessayer", "callbackMyBookings": "Mes réservations"
+  },
+  "rental": {
+    "titleStart": "Démarrer la location", "titleUnlock": "Déverrouiller le véhicule",
+    "titleActive": "Location en cours", "titleCompleted": "Location terminée",
+    "noInfo": "Informations de location introuvables", "noInfoDesc": "Effectuez le paiement avant de commencer.",
+    "loginRequired": "Connexion requise", "loginRequiredDesc": "Connectez-vous pour démarrer la location.",
+    "checking": "Vérification de la location", "checkingDesc": "Vérification réservation et paiement...",
+    "validationFailed": "Impossible de vérifier la location.", "paymentRequired": "Le paiement doit être effectué.",
+    "step1Title": "Étape 1 : Déverrouiller", "step1Desc": "Paiement effectué — allez au véhicule",
+    "step2Title": "Étape 2 : Photos", "step2Desc": "Documentez l'état du véhicule",
+    "step3Title": "Étape 3 : Démarrer", "step3Desc": "Dernières vérifications",
+    "nearCar": "Assurez-vous d'être près du véhicule",
+    "autoUnlock": "Déverrouillage auto à {{meters}} m.",
+    "unlockDoors": "Déverrouiller", "unlocking": "Déverrouillage...", "doorsOpen": "Portes ouvertes",
+    "unlockFirst": "Déverrouiller d'abord", "unlockedBanner": "Véhicule déverrouillé",
+    "unlockedBannerDesc": "Prenez des photos et démarrez", "damageNotes": "Notes sur les dommages",
+    "damagePlaceholder": "Décrivez les dommages existants...", "carLocation": "Emplacement du véhicule",
+    "carLocationPlaceholder": "ex. Parking B2, place 45", "photosTaken": "Photos prises",
+    "photosCount": "{{count}} photo(s)", "locationSaved": "Emplacement enregistré",
+    "doorsUnlockedCheck": "Véhicule déverrouillé", "doorsUnlockedCheckDesc": "Portes ouvertes",
+    "startRental": "Démarrer la location", "starting": "Démarrage...",
+    "unlockBeforeStart": "Déverrouillez le véhicule avant de démarrer.",
+    "takePhotosFirst": "Prenez d'abord des photos", "startSuccess": "Location démarrée !",
+    "activeRental": "Location active", "lockDoors": "Verrouiller", "elapsedTime": "Temps écoulé",
+    "totalDistance": "Distance totale", "liveLocation": "Position en direct",
+    "locationUpdates": "Mise à jour automatique", "gpsWaiting": "En attente du GPS...",
+    "endRental": "Terminer la location", "endPhotosDesc": "Photos de retour",
+    "endDamagePlaceholder": "Nouveaux dommages...", "keyInGlovebox": "Clé dans la boîte à gants",
+    "keyInGloveboxDesc": "Laissez la clé dans la boîte à gants avant de terminer.",
+    "endAndLock": "Terminer et verrouiller", "ending": "Fin en cours...",
+    "completedTitle": "Location terminée !",
+    "completedDesc": "Location de {{carName}} terminée. Portes verrouillées.",
+    "goToBookings": "Mes réservations", "minutes": "min", "km": "km"
+  },
+  "bookings": {
+    "title": "Mes réservations", "pay": "Payer", "startRental": "Démarrer", "cancel": "Annuler",
+    "noBookings": "Aucune réservation", "browseCars": "Voir les véhicules"
+  },
+  "profile": {
+    "title": "Profil", "languageSettings": "Langue",
+    "languageDesc": "Choisissez la langue de l'application pour une utilisation internationale.",
+    "subscription": "Abonnement", "driverVerification": "Vérification conducteur",
+    "verified": "Vérifié", "pending": "En attente", "signOut": "Déconnexion"
+  },
+  "paymentStatus": {
+    "pending": "Paiement en attente", "authorized": "Caution autorisée", "completed": "Payé",
+    "in_progress": "Location active", "failed": "Échec du paiement", "refunded": "Remboursé",
+    "cancelled": "Annulé", "unknown": "Inconnu"
+  }
+}

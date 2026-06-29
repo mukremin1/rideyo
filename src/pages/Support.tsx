@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -17,18 +18,18 @@ interface Message {
 }
 
 const Support = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Merhaba! RideYo müşteri hizmetlerine hoş geldiniz. Öncelikle yapay zeka asistanım size yardımcı olacak. İsterseniz daha sonra canlı destek ile görüşebilirsiniz. Size nasıl yardımcı olabilirim?",
-    },
-  ]);
+  const { t, i18n } = useTranslation();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    setMessages([{ role: "assistant", content: t("support.page.welcome") }]);
+  }, [i18n.language, t]);
+
   const handleWhatsApp = () => {
-    const message = encodeURIComponent("Merhaba, RideYo hakkında bilgi almak istiyorum.");
-    window.open(`https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
+    const message = encodeURIComponent(t("support.page.whatsappMessage"));
+    window.open(`https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, "")}?text=${message}`, "_blank");
   };
 
   const handlePhoneCall = () => {
@@ -59,7 +60,7 @@ const Support = () => {
 
     try {
       const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support`;
-      
+
       const response = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
@@ -70,7 +71,7 @@ const Support = () => {
       });
 
       if (!response.ok || !response.body) {
-        throw new Error("Stream başlatılamadı");
+        throw new Error(t("support.page.streamError"));
       }
 
       const reader = response.body.getReader();
@@ -109,7 +110,6 @@ const Support = () => {
         }
       }
 
-      // Final flush
       if (textBuffer.trim()) {
         for (const raw of textBuffer.split("\n")) {
           if (!raw || raw.startsWith(":") || !raw.startsWith("data: ")) continue;
@@ -126,7 +126,7 @@ const Support = () => {
       }
     } catch (error) {
       console.error("Chat error:", error);
-      toast.error("Mesaj gönderilemedi");
+      toast.error(t("support.page.sendFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -140,33 +140,21 @@ const Support = () => {
         <div className="container mx-auto max-w-4xl">
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-4xl font-bold text-foreground">
-                Müşteri Hizmetleri
-              </h1>
+              <h1 className="text-4xl font-bold text-foreground">{t("support.page.title")}</h1>
               <Badge variant="secondary" className="gap-2">
                 <Bot className="w-4 h-4" />
-                AI Öncelikli
+                {t("support.page.aiBadge")}
               </Badge>
             </div>
-            <p className="text-muted-foreground mb-4">
-              Önce yapay zeka asistanımız size yardımcı olacak, ardından canlı destek ile görüşebilirsiniz
-            </p>
+            <p className="text-muted-foreground mb-4">{t("support.page.subtitle")}</p>
             <div className="flex gap-3">
-              <Button 
-                onClick={handleWhatsApp} 
-                variant="outline" 
-                className="gap-2"
-              >
+              <Button onClick={handleWhatsApp} variant="outline" className="gap-2">
                 <MessageSquare className="w-4 h-4" />
-                WhatsApp ile İletişim
+                {t("support.page.whatsappContact")}
               </Button>
-              <Button 
-                onClick={handlePhoneCall} 
-                variant="outline" 
-                className="gap-2"
-              >
+              <Button onClick={handlePhoneCall} variant="outline" className="gap-2">
                 <Phone className="w-4 h-4" />
-                Telefon: {WHATSAPP_NUMBER}
+                {t("support.page.phone")}: {WHATSAPP_NUMBER}
               </Button>
             </div>
           </div>
@@ -177,9 +165,7 @@ const Support = () => {
                 {messages.map((message, index) => (
                   <div
                     key={index}
-                    className={`flex gap-3 ${
-                      message.role === "user" ? "justify-end" : "justify-start"
-                    }`}
+                    className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     {message.role === "assistant" && (
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -220,15 +206,11 @@ const Support = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                placeholder="Mesajınızı yazın..."
+                placeholder={t("support.page.placeholder")}
                 disabled={isLoading}
               />
               <Button onClick={sendMessage} disabled={isLoading || !input.trim()}>
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>
           </Card>

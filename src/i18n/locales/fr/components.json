@@ -1,0 +1,168 @@
+{
+  "components": {
+    "features": {
+      "badge": "Avantages",
+      "title": "Pourquoi RideYo ?",
+      "subtitle": "Tous les services dont vous avez besoin pour une expérience de location mobile moderne sur une seule plateforme.",
+      "items": {
+        "fastBooking": {
+          "title": "Réservation rapide",
+          "description": "Créez une réservation en quelques étapes, effectuez le paiement et prenez la route."
+        },
+        "flexiblePricing": {
+          "title": "Tarification flexible",
+          "description": "Choisissez entre la location à la minute, à l'heure et à la journée avec des forfaits kilométriques."
+        },
+        "fuelSupport": {
+          "title": "Prise en charge du carburant",
+          "description": "Les frais de carburant sont pris en charge par nos soins sur certains forfaits de location."
+        },
+        "secureExperience": {
+          "title": "Expérience sécurisée",
+          "description": "Conduisez en toute sécurité avec la vérification d'identité, des options d'assurance et une flotte bien entretenue."
+        },
+        "access247": {
+          "title": "Accès 24h/24",
+          "description": "Réservez à tout moment et contactez notre équipe d'assistance quand vous en avez besoin."
+        },
+        "mobileFirst": {
+          "title": "Mobile d'abord",
+          "description": "Gérez tout depuis votre téléphone — carte, paiement et location dans une seule application."
+        }
+      }
+    },
+    "about": {
+      "title": "À propos de RideYo",
+      "description": "RideYo est une plateforme mobile qui numérise l'expérience de location de voitures à travers la Turquie. Nous vous accompagnons avec une flotte fiable, des tarifs transparents et un service centré sur l'utilisateur.",
+      "stats": {
+        "users": "Utilisateurs inscrits",
+        "secure": "Transactions sécurisées",
+        "support": "Support client",
+        "experience": "Expérience du secteur"
+      },
+      "advantagesTitle": "Avantages de la plateforme",
+      "advantages": [
+        "Des options pour tous les besoins grâce à une large flotte de véhicules",
+        "Tarification transparente sans frais cachés",
+        "Assurance complète et options de conducteur supplémentaire",
+        "Réservation rapide, vérification numérique et remise des clés simplifiée"
+      ],
+      "quote": "Nous combinons technologie et service pour que chaque trajet soit sûr, simple et prévisible.",
+      "quoteAuthor": "— L'équipe RideYo"
+    },
+    "howItWorks": {
+      "badge": "Processus",
+      "title": "Louez en 4 étapes",
+      "subtitle": "Une expérience de location simple, rapide et entièrement numérique.",
+      "steps": {
+        "createAccount": {
+          "title": "Créez votre compte",
+          "description": "Inscrivez-vous et complétez la vérification de votre identité et de votre permis de conduire."
+        },
+        "chooseCar": {
+          "title": "Choisissez votre véhicule",
+          "description": "Trouvez le véhicule idéal sur la carte ou dans la liste."
+        },
+        "startBooking": {
+          "title": "Lancez votre réservation",
+          "description": "Effectuez le paiement et accédez au véhicule avec une clé numérique."
+        },
+        "driveSafely": {
+          "title": "Conduisez en toute sécurité",
+          "description": "Utilisez le véhicule pendant votre période de location et restituez-le à la fin."
+        }
+      }
+    },
+    "reservationSteps": {
+      "title": "Processus de réservation",
+      "subtitle": "Créez votre réservation en quelques étapes. L'ensemble du processus est géré via l'application mobile.",
+      "steps": {
+        "carSelection": {
+          "title": "Sélection du véhicule",
+          "description": "Filtrez par prix, emplacement et type de véhicule pour trouver le bon modèle."
+        },
+        "duration": {
+          "title": "Définir la durée",
+          "description": "Planifiez une location à la minute, à l'heure ou à la journée selon vos besoins."
+        },
+        "pickup": {
+          "title": "Point de prise en charge",
+          "description": "Choisissez les lieux de prise en charge et de restitution pour finaliser votre itinéraire."
+        },
+        "insurance": {
+          "title": "Assurance et options",
+          "description": "Configurez les forfaits d'assurance et les options de conducteur supplémentaire."
+        },
+        "payment": {
+          "title": "Paiement sécurisé",
+          "description": "Finalisez la transaction via une infrastructure de paiement sécurisée avec votre carte."
+        },
+        "confirmation": {
+          "title": "Confirmation de réservation",
+          "description": "Après approbation, les détails de votre réservation apparaissent dans votre compte."
+        }
+      },
+      "viewFleet": "Voir la flotte de véhicules",
+      "identityVerification": "Vérification d'identité"
+    },
+    "nearby": {
+      "title": "Véhicules à proximité",
+      "grantPermission": "Autoriser la localisation",
+      "noCarsNearby": "Aucun véhicule disponible à proximité. Voir tous les véhicules.",
+      "allCars": "Tous les véhicules",
+      "viewAll": "Tout voir →",
+      "perHour": "/heure"
+    },
+    "carsMap": {
+      "loading": "Chargement de la carte...",
+      "yourLocation": "Votre position",
+      "rent": "Louer",
+      "perHour": "/heure"
+    },
+    "chatbot": {
+      "title": "Assistant RideYo",
+      "welcome": "Bonjour ! Bienvenue sur RideYo. Comment puis-je vous aider ?",
+      "placeholder": "Saisissez votre message...",
+      "tooManyRequests": "Trop de requêtes. Veuillez patienter un instant.",
+      "serviceUnavailable": "Le service est actuellement indisponible. Veuillez réessayer plus tard.",
+      "streamError": "Impossible de démarrer le flux",
+      "genericError": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "offlineIndicator": {
+      "online": "Vous êtes de nouveau en ligne !",
+      "offline": "Pas de connexion Internet — vous êtes en mode hors ligne"
+    },
+    "brandLogo": {
+      "homeAriaLabel": "Accueil RideYo"
+    },
+    "carImageUpload": {
+      "invalidFile": "Veuillez sélectionner un fichier image",
+      "fileTooLarge": "La taille du fichier doit être inférieure à 5 Mo",
+      "uploadError": "Erreur lors du téléversement de la photo",
+      "uploadSuccess": "Photo téléversée avec succès",
+      "altText": "Photo du véhicule",
+      "uploading": "Téléversement en cours...",
+      "uploadTitle": "Téléverser une photo du véhicule",
+      "uploadHint": "PNG, JPG ou WEBP (max. 5 Mo)",
+      "selectPhoto": "Sélectionner une photo"
+    },
+    "locationPickerMap": {
+      "clickToSelect": "Cliquez sur la carte pour sélectionner un emplacement",
+      "locating": "Localisation en cours...",
+      "currentLocation": "Position actuelle",
+      "selectedLocation": "Emplacement sélectionné",
+      "coordinates": "Coordonnées :"
+    },
+    "gpsTracker": {
+      "waitingForData": "En attente des données GPS...",
+      "online": "En ligne",
+      "offline": "Hors ligne",
+      "location": "Emplacement",
+      "speed": "Vitesse",
+      "battery": "Batterie",
+      "lastUpdate": "Dernière mise à jour",
+      "viewOnMap": "Voir sur la carte →",
+      "speedUnit": "km/h"
+    }
+  }
+}

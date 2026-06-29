@@ -8,6 +8,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Fuel } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { resolveCoordinatesFromLocation, type LatLngTuple } from "@/lib/locationGeocoding";
 
 // Fix for default marker icon
@@ -74,6 +75,7 @@ const MapController = ({ center }: { center: [number, number] }) => {
 };
 
 const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCarSelect }: CarsMapProps) => {
+  const { t } = useTranslation();
   const [cars, setCars] = useState<CarLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [derivedCoords, setDerivedCoords] = useState<Record<string, LatLngTuple>>({});
@@ -153,7 +155,7 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
   if (loading) {
     return (
       <div className="flex items-center justify-center bg-muted rounded-lg" style={{ height }}>
-        <div className="text-muted-foreground">Harita yükleniyor...</div>
+        <div className="text-muted-foreground">{t("components.carsMap.loading")}</div>
       </div>
     );
   }
@@ -174,7 +176,7 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
               <Popup>
                 <div className="text-center p-2">
                   <MapPin className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-                  <p className="font-semibold">Konumunuz</p>
+                  <p className="font-semibold">{t("components.carsMap.yourLocation")}</p>
                 </div>
               </Popup>
             </Marker>
@@ -209,9 +211,9 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
                   </div>
 
                   <div className="pt-2 border-t flex items-center justify-between">
-                    <span className="font-bold text-primary">{car.price_per_hour}₺/saat</span>
+                    <span className="font-bold text-primary">{car.price_per_hour}₺{t("components.carsMap.perHour")}</span>
                     <Button size="sm" onClick={() => handleCarClick(car.id)} className="text-xs h-7">
-                      Kirala
+                      {t("components.carsMap.rent")}
                     </Button>
                   </div>
                 </div>

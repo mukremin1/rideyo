@@ -1,0 +1,132 @@
+{
+  "support": {
+    "page": {
+      "title": "Service client",
+      "subtitle": "Notre assistant IA vous aidera en premier, puis vous pourrez parler avec le support en direct",
+      "aiBadge": "IA en premier",
+      "whatsappContact": "Contacter via WhatsApp",
+      "phone": "Téléphone",
+      "whatsappMessage": "Bonjour, je souhaiterais obtenir des informations sur RideYo.",
+      "welcome": "Bonjour ! Bienvenue au service client RideYo. Notre assistant IA vous aidera en premier. Vous pourrez également parler avec le support en direct par la suite. Comment puis-je vous aider ?",
+      "placeholder": "Saisissez votre message...",
+      "sendFailed": "Le message n'a pas pu être envoyé",
+      "streamError": "Impossible de démarrer le flux"
+    },
+    "contact": {
+      "title": "Contact",
+      "reachUs": "Nous contacter",
+      "addressLabel": "Adresse",
+      "address": "Place Atatürk, Devlet Sahil Yolu Cd.\nTrabzon, Turquie",
+      "phoneLabel": "Téléphone",
+      "phone": "+90 (462) 123 45 67",
+      "emailLabel": "E-mail",
+      "email": "destek@ride-yo.com",
+      "hoursTitle": "Horaires d'ouverture",
+      "hoursWeekday": "Lundi - Vendredi : 09:00 - 18:00",
+      "hoursSaturday": "Samedi : 10:00 - 16:00",
+      "hoursSunday": "Dimanche : Fermé",
+      "sendMessage": "Envoyer un message",
+      "namePlaceholder": "Votre nom complet",
+      "emailPlaceholder": "Votre adresse e-mail",
+      "phonePlaceholder": "Votre numéro de téléphone",
+      "subjectPlaceholder": "Objet",
+      "messagePlaceholder": "Votre message",
+      "submit": "Envoyer",
+      "toastTitle": "Message reçu",
+      "toastDesc": "Nous vous répondrons dans les plus brefs délais."
+    },
+    "about": {
+      "title": "À propos de nous",
+      "intro": "RideYo est la plateforme de partage de voitures la plus innovante de Turquie. Fondée en 2024, notre mission est d'aider les personnes à utiliser leurs véhicules plus efficacement et de permettre aux propriétaires de véhicules de générer des revenus avec leurs voitures.",
+      "visionTitle": "Notre vision",
+      "vision": "Créer un écosystème où chacun peut accéder à un véhicule fiable en cas de besoin, en rendant les transports urbains plus durables, économiques et flexibles.",
+      "missionTitle": "Notre mission",
+      "mission": "Construire un pont sécurisé entre propriétaires de véhicules et locataires grâce à notre approche axée sur la technologie et la confiance, en proposant des options de location flexibles à la minute, à l'heure et à la journée pour tous les budgets.",
+      "valuesTitle": "Nos valeurs",
+      "values": {
+        "trust": "Confiance : La sécurité de tous les utilisateurs de notre plateforme est notre priorité.",
+        "transparency": "Transparence : Nous avons des tarifs clairs et des politiques de communication ouvertes.",
+        "sustainability": "Durabilité : Nous réduisons l'empreinte carbone en encourageant le partage de véhicules.",
+        "innovation": "Innovation : Nous offrons la meilleure expérience grâce à une technologie en constante évolution."
+      },
+      "howTitle": "Comment fonctionnons-nous ?",
+      "how": "RideYo permet aux propriétaires de véhicules de mettre en location leurs véhicules inutilisés sur la plateforme. Les locataires peuvent facilement louer des véhicules à la minute, à l'heure ou à la journée. Toutes les transactions se font numériquement via notre infrastructure de paiement sécurisée.",
+      "closing": "Notre histoire a commencé à Trabzon et s'étendra bientôt à travers toute la Turquie. Faites partie de cette aventure !"
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "subtitle": "Tout ce que vous voulez savoir sur RideYo",
+      "generalTitle": "Questions générales",
+      "renterTitle": "Pour les locataires",
+      "ownerTitle": "Pour les propriétaires de véhicules",
+      "notFoundTitle": "Vous ne trouvez pas votre question ?",
+      "notFoundDesc": "N'hésitez pas à nous contacter",
+      "contactLink": "Aller à la page contact →",
+      "general": [
+        { "q": "Comment fonctionne RideYo ?", "a": "RideYo est une plateforme qui permet aux propriétaires de véhicules de mettre en location leurs véhicules inutilisés. Les utilisateurs peuvent louer à la minute, à l'heure ou à la journée. Toutes les transactions sont gérées de manière sécurisée via l'application." },
+        { "q": "Dans quelles villes êtes-vous présents ?", "a": "Nous opérons actuellement à Trabzon. Nous prévoyons de nous étendre prochainement à Istanbul, Ankara, Izmir et d'autres grandes villes." },
+        { "q": "Le paiement est-il sécurisé ?", "a": "Oui, tous les paiements sont traités via notre infrastructure de paiement sécurisée. Les détails de votre carte sont chiffrés et conformes à la norme PCI-DSS." },
+        { "q": "Existe-t-il une application mobile ?", "a": "Oui ! RideYo dispose d'une application mobile pour iOS et Android. Vous pouvez également y accéder depuis votre navigateur web." }
+      ],
+      "renter": [
+        { "q": "De quoi ai-je besoin pour louer un véhicule ?", "a": "Créez d'abord un compte et complétez la vérification d'identité. Ensuite, sélectionnez un véhicule adapté, définissez la durée de location et payez via l'application." },
+        { "q": "Quels documents sont requis ?", "a": "Une pièce d'identité valide et au moins 2 ans de permis de conduire sont requis. Vous devez avoir entre 21 et 70 ans avec un score conducteur minimum de 60." },
+        { "q": "Comment le tarif est-il calculé ?", "a": "Chaque véhicule a des tarifs à la minute, à l'heure et à la journée. Les frais sont calculés automatiquement en fonction de la durée de votre location." },
+        { "q": "Y a-t-il une durée minimale de location ?", "a": "Minimum 30 minutes pour les locations à la minute, 1 heure pour les locations horaires et 1 jour pour les locations journalières." },
+        { "q": "Quelle est la politique d'annulation ?", "a": "Annulation gratuite jusqu'à 24 heures avant le début. Remboursement à 50 % entre 12 et 24 heures, aucun remboursement dans les 12 heures ou en cas d'absence." },
+        { "q": "Comment se déroulent la prise en charge et la restitution ?", "a": "Coordonnez-vous avec le propriétaire et effectuez la prise en charge et la restitution au lieu convenu." },
+        { "q": "Que se passe-t-il en cas d'accident ?", "a": "Tous les véhicules sont assurés. En cas d'accident, contactez immédiatement l'assistance RideYo (24h/24)." },
+        { "q": "Qui paie le carburant ?", "a": "Le carburant est à la charge du locataire. Restituez le véhicule avec le même niveau de carburant qu'à la prise en charge." },
+        { "q": "Et les amendes de circulation ?", "a": "Les amendes de circulation pendant la période de location sont à la charge du locataire." },
+        { "q": "Qu'est-ce que le score conducteur ?", "a": "Le score conducteur est calculé à partir de votre historique de location, des avis, des points de pénalité et de votre dossier de conduite." }
+      ],
+      "owner": [
+        { "q": "Comment puis-je mettre mon véhicule en location ?", "a": "Créez un compte propriétaire de véhicule et ajoutez les détails de votre véhicule sur la page « Ajouter un véhicule »." },
+        { "q": "Quels documents sont requis ?", "a": "La carte grise, l'assurance responsabilité civile, l'assurance tous risques optionnelle, la pièce d'identité et les photos du véhicule sont requis." },
+        { "q": "Combien puis-je gagner ?", "a": "Les revenus dépendent du type de véhicule, des tarifs et de la fréquence de location. RideYo prélève une commission de 15 %." },
+        { "q": "Et l'assurance ?", "a": "Toutes les locations sont couvertes par l'assurance tous risques mini RideYo. L'assurance responsabilité civile obligatoire est requise sur chaque véhicule." },
+        { "q": "Comment et quand les paiements sont-ils effectués ?", "a": "RideYo collecte le paiement auprès des locataires, prélève une commission de 15 % et transfère le solde sous 7 jours ouvrables." },
+        { "q": "Comment puis-je protéger mon véhicule ?", "a": "Suivez votre véhicule en temps réel avec le GPS. Tous les locataires passent par une vérification d'identité et de permis." },
+        { "q": "Puis-je refuser des réservations ?", "a": "Oui, vous pouvez accepter ou refuser les demandes de réservation reçues." },
+        { "q": "Que faire si mon véhicule est endommagé ?", "a": "Informez RideYo immédiatement. Les dommages assurés sont couverts par l'assurance." },
+        { "q": "Et les impôts ?", "a": "Les revenus de location de véhicules sont imposables. RideYo fournit des rapports de revenus mensuels." },
+        { "q": "Comment choisir les locataires ?", "a": "Vérifiez le score conducteur, les avis, l'historique de location et la vérification d'identité." }
+      ]
+    },
+    "install": {
+      "title": "Installer l'application RideYo",
+      "subtitle": "Installez-la sur votre téléphone et emportez-la partout. Fonctionne même sans Internet !",
+      "installedTitle": "Application installée ! 🎉",
+      "installedDesc": "RideYo est maintenant installée sur votre appareil. Ouvrez-la depuis votre écran d'accueil.",
+      "installButton": "Installer l'application",
+      "installHint": "Installation en un clic — pas besoin de l'App Store !",
+      "howToInstall": "Comment installer ?",
+      "howToInstallDesc": "Utilisez « Ajouter à l'écran d'accueil » depuis le menu de votre navigateur",
+      "iphoneTitle": "iPhone (Safari)",
+      "iphoneSteps": ["Appuyez sur le bouton Partager", "Trouvez « Ajouter à l'écran d'accueil »", "Appuyez sur « Ajouter »"],
+      "androidTitle": "Android (Chrome)",
+      "androidSteps": ["Appuyez sur le bouton menu (⋮)", "Trouvez « Ajouter à l'écran d'accueil »", "Appuyez sur « Ajouter »"],
+      "fastAccessTitle": "Accès rapide",
+      "fastAccessDesc": "Ouvrez directement depuis votre écran d'accueil — pas besoin de chercher dans le navigateur",
+      "offlineTitle": "Fonctionne hors ligne",
+      "offlineDesc": "Utilisez sans Internet ; les données sont mises en cache",
+      "secureTitle": "Sécurisé",
+      "secureDesc": "Toutes les données sont chiffrées ; votre vie privée est protégée"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "unreadCount": "{{count}} notifications non lues",
+      "markAllRead": "Tout marquer comme lu",
+      "empty": "Vous n'avez pas encore de notification",
+      "markRead": "Lu",
+      "loadError": "Impossible de charger les notifications",
+      "allMarkedRead": "Toutes les notifications marquées comme lues",
+      "types": {
+        "booking": "Réservation",
+        "campaign": "Campagne",
+        "system": "Système",
+        "review": "Avis"
+      }
+    }
+  }
+}

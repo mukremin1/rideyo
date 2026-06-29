@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -30,6 +31,7 @@ interface Campaign {
 }
 
 const Admin = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -73,7 +75,7 @@ const Admin = () => {
         .single();
 
       if (error || !data) {
-        toast.error("Bu sayfaya erişim yetkiniz yok");
+        toast.error(t("admin.noAccess"));
         navigate("/");
         return;
       }
@@ -117,20 +119,20 @@ const Admin = () => {
         .eq("id", editingCampaign.id);
 
       if (error) {
-        toast.error("Kampanya güncellenemedi");
+        toast.error(t("admin.toast.updateError"));
         return;
       }
-      toast.success("Kampanya güncellendi");
+      toast.success(t("admin.toast.updateSuccess"));
     } else {
       const { error } = await supabase
         .from("campaigns")
         .insert(campaignData);
 
       if (error) {
-        toast.error("Kampanya oluşturulamadı");
+        toast.error(t("admin.toast.createError"));
         return;
       }
-      toast.success("Kampanya oluşturuldu");
+      toast.success(t("admin.toast.createSuccess"));
     }
 
     setShowForm(false);
@@ -154,7 +156,7 @@ const Admin = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bu kampanyayı silmek istediğinizden emin misiniz?")) return;
+    if (!confirm(t("admin.deleteConfirm"))) return;
 
     const { error } = await supabase
       .from("campaigns")
@@ -162,11 +164,11 @@ const Admin = () => {
       .eq("id", id);
 
     if (error) {
-      toast.error("Kampanya silinemedi");
+      toast.error(t("admin.toast.deleteError"));
       return;
     }
 
-    toast.success("Kampanya silindi");
+    toast.success(t("admin.toast.deleteSuccess"));
     fetchCampaigns();
   };
 
@@ -196,7 +198,7 @@ const Admin = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 pt-24 pb-12 text-center">
-          <p className="text-xl text-muted-foreground">Yükleniyor...</p>
+          <p className="text-xl text-muted-foreground">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -210,8 +212,8 @@ const Admin = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">Admin Panel</h1>
-              <p className="text-muted-foreground">Kampanya ve sistem yönetimi</p>
+              <h1 className="text-4xl font-bold text-foreground mb-2">{t("admin.title")}</h1>
+              <p className="text-muted-foreground">{t("admin.subtitle")}</p>
             </div>
             <Button onClick={() => {
               setShowForm(true);
@@ -219,18 +221,18 @@ const Admin = () => {
               resetForm();
             }}>
               <Plus className="w-4 h-4 mr-2" />
-              Yeni Kampanya
+              {t("admin.newCampaign")}
             </Button>
           </div>
 
           {showForm && (
             <Card className="p-6 mb-8">
               <h2 className="text-2xl font-bold mb-6">
-                {editingCampaign ? "Kampanya Düzenle" : "Yeni Kampanya Oluştur"}
+                {editingCampaign ? t("admin.editCampaign") : t("admin.createCampaign")}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <Label>Kampanya Adı</Label>
+                  <Label>{t("admin.campaignName")}</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -239,7 +241,7 @@ const Admin = () => {
                 </div>
 
                 <div>
-                  <Label>Açıklama</Label>
+                  <Label>{t("admin.description")}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -248,7 +250,7 @@ const Admin = () => {
                 </div>
 
                 <div>
-                  <Label>İndirim Yüzdesi (%)</Label>
+                  <Label>{t("admin.discountPercent")}</Label>
                   <Input
                     type="number"
                     min="1"
@@ -261,7 +263,7 @@ const Admin = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Başlangıç Tarihi</Label>
+                    <Label>{t("admin.startDate")}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-start">
@@ -280,7 +282,7 @@ const Admin = () => {
                   </div>
 
                   <div>
-                    <Label>Bitiş Tarihi</Label>
+                    <Label>{t("admin.endDate")}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-start">
@@ -300,7 +302,7 @@ const Admin = () => {
                 </div>
 
                 <div>
-                  <Label className="mb-3 block">Araç Tipleri (boş bırakırsanız tüm araçlar)</Label>
+                  <Label className="mb-3 block">{t("admin.carTypesLabel")}</Label>
                   <div className="flex gap-2">
                     {["compact", "sedan", "suv"].map((type) => (
                       <Button
@@ -309,7 +311,7 @@ const Admin = () => {
                         variant={formData.car_types.includes(type) ? "default" : "outline"}
                         onClick={() => handleCarTypeToggle(type)}
                       >
-                        {type === "compact" ? "Kompakt" : type === "sedan" ? "Sedan" : "SUV"}
+                        {t(`admin.carTypes.${type}`)}
                       </Button>
                     ))}
                   </div>
@@ -320,12 +322,12 @@ const Admin = () => {
                     checked={formData.is_active}
                     onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                   />
-                  <Label>Aktif</Label>
+                  <Label>{t("admin.active")}</Label>
                 </div>
 
                 <div className="flex gap-2">
                   <Button type="submit">
-                    {editingCampaign ? "Güncelle" : "Oluştur"}
+                    {editingCampaign ? t("admin.update") : t("admin.create")}
                   </Button>
                   <Button
                     type="button"
@@ -336,7 +338,7 @@ const Admin = () => {
                       resetForm();
                     }}
                   >
-                    İptal
+                    {t("admin.cancel")}
                   </Button>
                 </div>
               </form>
@@ -351,18 +353,18 @@ const Admin = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-xl font-bold">{campaign.name}</h3>
                       {campaign.is_active ? (
-                        <Badge>Aktif</Badge>
+                        <Badge>{t("admin.active")}</Badge>
                       ) : (
-                        <Badge variant="secondary">Pasif</Badge>
+                        <Badge variant="secondary">{t("admin.inactive")}</Badge>
                       )}
-                      <Badge variant="outline">%{campaign.discount_percentage} İndirim</Badge>
+                      <Badge variant="outline">{t("admin.discountBadge", { percent: campaign.discount_percentage })}</Badge>
                     </div>
                     <p className="text-muted-foreground mb-3">{campaign.description}</p>
                     <div className="flex gap-4 text-sm text-muted-foreground">
-                      <span>Başlangıç: {format(new Date(campaign.start_date), "dd/MM/yyyy")}</span>
-                      <span>Bitiş: {format(new Date(campaign.end_date), "dd/MM/yyyy")}</span>
+                      <span>{t("admin.startLabel")} {format(new Date(campaign.start_date), "dd/MM/yyyy")}</span>
+                      <span>{t("admin.endLabel")} {format(new Date(campaign.end_date), "dd/MM/yyyy")}</span>
                       {campaign.car_types && (
-                        <span>Araçlar: {campaign.car_types.join(", ")}</span>
+                        <span>{t("admin.carsLabel")} {campaign.car_types.join(", ")}</span>
                       )}
                     </div>
                   </div>
@@ -389,7 +391,7 @@ const Admin = () => {
 
           {campaigns.length === 0 && !showForm && (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Henüz kampanya oluşturulmamış</p>
+              <p className="text-muted-foreground">{t("admin.empty")}</p>
             </div>
           )}
         </div>

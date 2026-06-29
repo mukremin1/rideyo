@@ -7,6 +7,40 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const PAID_STATUSES = new Set(["completed", "in_progress", "authorized", "paid"]);
+
+async function requirePaidBooking(
+  supabase: ReturnType<typeof createClient>,
+  bookingId: string | undefined,
+  userId: string | undefined,
+  carId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!bookingId || !userId) {
+    return { ok: false, error: "Kapi acmak icin rezervasyon bilgisi gereklidir" };
+  }
+
+  const { data: booking, error } = await supabase
+    .from("bookings")
+    .select("id, user_id, car_id, payment_status")
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  if (error || !booking) {
+    return { ok: false, error: "Rezervasyon bulunamadi" };
+  }
+  if (booking.user_id !== userId) {
+    return { ok: false, error: "Bu rezervasyon size ait degil" };
+  }
+  if (booking.car_id !== carId) {
+    return { ok: false, error: "Arac rezervasyonla eslesmiyor" };
+  }
+  if (!PAID_STATUSES.has(booking.payment_status)) {
+    return { ok: false, error: "Kapi acmak icin odeme tamamlanmali" };
+  }
+
+  return { ok: true };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -46,6 +80,14 @@ serve(async (req) => {
 
     switch (action) {
       case "unlock": {
+        const paidCheck = await requirePaidBooking(supabase, bookingId, userId, carId);
+        if (!paidCheck.ok) {
+          return new Response(
+            JSON.stringify({ success: false, error: paidCheck.error }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+
         const { error } = await supabase.from("cars").update({ lock_status: "unlocked" }).eq("id", carId);
         if (error) throw error;
 
@@ -82,6 +124,14 @@ serve(async (req) => {
       }
 
       case "start_rental": {
+        const paidCheck = await requirePaidBooking(supabase, bookingId, userId, carId);
+        if (!paidCheck.ok) {
+          return new Response(
+            JSON.stringify({ success: false, error: paidCheck.error }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+
         const { error } = await supabase
           .from("cars")
           .update({ lock_status: "unlocked", available: false })

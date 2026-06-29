@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Camera, Flashlight, FlashlightOff, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +15,7 @@ interface VehicleDropoffPhotoProps {
 
 const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffPhotoProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { capturePhoto } = useCamera();
   const [photoData, setPhotoData] = useState<string | null>(null);
@@ -31,7 +33,6 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
 
   const checkLightConditions = async () => {
     try {
-      // Check ambient light using device light sensor or video analysis
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: "environment" } 
       });
@@ -40,7 +41,6 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         
-        // Analyze video brightness after a short delay
         setTimeout(() => {
           analyzeBrightness();
         }, 1000);
@@ -66,7 +66,6 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
     const data = imageData.data;
     let totalBrightness = 0;
 
-    // Calculate average brightness
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i];
       const g = data[i + 1];
@@ -76,13 +75,12 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
 
     const avgBrightness = totalBrightness / (data.length / 4);
     
-    // If brightness is below 80 (on scale of 0-255), enable flash
     if (avgBrightness < 80) {
       setIsDarkEnvironment(true);
       setIsFlashEnabled(true);
       toast({
-        title: "Karanlık Ortam Algılandı",
-        description: "Flaş otomatik olarak aktif edildi",
+        title: t("vehiclePhoto.darkDetected"),
+        description: t("vehiclePhoto.flashAutoEnabled"),
       });
     }
   };
@@ -97,8 +95,8 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
   const handleTakePhoto = async () => {
     if (!user) {
       toast({
-        title: "Giriş Gerekli",
-        description: "Fotoğraf çekebilmek için giriş yapmalısınız",
+        title: t("vehiclePhoto.loginRequired"),
+        description: t("vehiclePhoto.loginRequiredDesc"),
         variant: "destructive",
       });
       return;
@@ -108,7 +106,6 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
       const photo = await capturePhoto(isFlashEnabled);
       
       if (photo && photo.dataUrl) {
-        // Save photo to database
         const { error } = await supabase
           .from("vehicle_photos")
           .insert({
@@ -124,8 +121,8 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
         if (error) {
           console.error("Fotoğraf kaydetme hatası:", error);
           toast({
-            title: "Kayıt Hatası",
-            description: "Fotoğraf çekildi ancak kaydedilemedi",
+            title: t("vehiclePhoto.saveError"),
+            description: t("vehiclePhoto.saveErrorDesc"),
             variant: "destructive",
           });
           return;
@@ -139,15 +136,15 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
         }
 
         toast({
-          title: "Fotoğraf Çekildi!",
-          description: "Araç teslim fotoğrafı başarıyla kaydedildi",
+          title: t("vehiclePhoto.photoTaken"),
+          description: t("vehiclePhoto.dropoffSaved"),
         });
       }
     } catch (error) {
       console.error("Fotoğraf çekme hatası:", error);
       toast({
-        title: "Hata",
-        description: "Fotoğraf çekilemedi, lütfen tekrar deneyin",
+        title: t("common.error"),
+        description: t("vehiclePhoto.captureError"),
         variant: "destructive",
       });
     }
@@ -161,14 +158,14 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
     return (
       <div className="space-y-4">
         <div className="relative rounded-xl overflow-hidden border-2 border-primary">
-          <img src={photoData} alt="Araç teslim fotoğrafı" className="w-full" />
+          <img src={photoData} alt={t("vehiclePhoto.dropoffAlt")} className="w-full" />
           <div className="absolute top-4 right-4">
             <CheckCircle className="w-8 h-8 text-primary bg-background rounded-full" />
           </div>
         </div>
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <p className="text-sm font-medium text-primary">
-            ✓ Araç teslim fotoğrafı başarıyla alındı
+            {t("vehiclePhoto.dropoffSuccess")}
           </p>
         </div>
         <Button
@@ -179,7 +176,7 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
             checkLightConditions();
           }}
         >
-          Yeniden Çek
+          {t("vehiclePhoto.retake")}
         </Button>
       </div>
     );
@@ -189,11 +186,11 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
     <div className="space-y-4">
       <div className="bg-card border border-border rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-foreground">Araç Teslim Fotoğrafı</h3>
+          <h3 className="font-semibold text-foreground">{t("vehiclePhoto.dropoffTitle")}</h3>
           {isDarkEnvironment && (
             <div className="flex items-center gap-2 text-xs bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full">
               <Flashlight className="w-3 h-3" />
-              Karanlık Ortam
+              {t("vehiclePhoto.darkEnvironment")}
             </div>
           )}
         </div>
@@ -209,14 +206,14 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
           {isFlashEnabled && (
             <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
               <Flashlight className="w-3 h-3" />
-              Flaş Aktif
+              {t("vehiclePhoto.flashActive")}
             </div>
           )}
         </div>
 
         <p className="text-sm text-muted-foreground mb-4">
-          Aracı bırakırken lütfen hasar durumunu gösteren net bir fotoğraf çekin.
-          {isDarkEnvironment && " Karanlık ortam algılandı, flaş otomatik aktif."}
+          {t("vehiclePhoto.dropoffHint")}
+          {isDarkEnvironment && t("vehiclePhoto.dropoffHintDark")}
         </p>
 
         <div className="flex gap-3">
@@ -228,12 +225,12 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
             {isFlashEnabled ? (
               <>
                 <Flashlight className="w-4 h-4" />
-                Flaş Açık
+                {t("vehiclePhoto.flashOn")}
               </>
             ) : (
               <>
                 <FlashlightOff className="w-4 h-4" />
-                Flaş Kapalı
+                {t("vehiclePhoto.flashOff")}
               </>
             )}
           </Button>
@@ -242,7 +239,7 @@ const VehicleDropoffPhoto = ({ carId, bookingId, onPhotoTaken }: VehicleDropoffP
             onClick={handleTakePhoto}
           >
             <Camera className="w-4 h-4" />
-            Fotoğraf Çek
+            {t("vehiclePhoto.takePhoto")}
           </Button>
         </div>
       </div>

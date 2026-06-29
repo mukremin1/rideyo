@@ -1,0 +1,40 @@
+{
+  "admin": {
+    "noAccess": "Bu sayfaya erişim yetkiniz yok",
+    "title": "Admin Panel",
+    "subtitle": "Kampanya ve sistem yönetimi",
+    "newCampaign": "Yeni Kampanya",
+    "editCampaign": "Kampanya Düzenle",
+    "createCampaign": "Yeni Kampanya Oluştur",
+    "campaignName": "Kampanya Adı",
+    "description": "Açıklama",
+    "discountPercent": "İndirim Yüzdesi (%)",
+    "startDate": "Başlangıç Tarihi",
+    "endDate": "Bitiş Tarihi",
+    "carTypesLabel": "Araç Tipleri (boş bırakırsanız tüm araçlar)",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "update": "Güncelle",
+    "create": "Oluştur",
+    "cancel": "İptal",
+    "discountBadge": "%{{percent}} İndirim",
+    "startLabel": "Başlangıç:",
+    "endLabel": "Bitiş:",
+    "carsLabel": "Araçlar:",
+    "deleteConfirm": "Bu kampanyayı silmek istediğinizden emin misiniz?",
+    "empty": "Henüz kampanya oluşturulmamış",
+    "toast": {
+      "updateError": "Kampanya güncellenemedi",
+      "updateSuccess": "Kampanya güncellendi",
+      "createError": "Kampanya oluşturulamadı",
+      "createSuccess": "Kampanya oluşturuldu",
+      "deleteError": "Kampanya silinemedi",
+      "deleteSuccess": "Kampanya silindi"
+    },
+    "carTypes": {
+      "compact": "Kompakt",
+      "sedan": "Sedan",
+      "suv": "SUV"
+    }
+  }
+}

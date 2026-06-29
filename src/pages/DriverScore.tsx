@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
@@ -24,22 +25,25 @@ interface DriverHistory {
 const DriverScore = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [driverHistory, setDriverHistory] = useState<DriverHistory | null>(null);
   const [isEligible, setIsEligible] = useState(false);
   const [eligibilityReason, setEligibilityReason] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    fetchDriverData();
-  }, [user]);
+  const getScoreLabel = useCallback(
+    (score: number) => {
+      if (score >= 90) return t("verification.driverScore.labels.excellent");
+      if (score >= 80) return t("verification.driverScore.labels.veryGood");
+      if (score >= 70) return t("verification.driverScore.labels.good");
+      if (score >= 60) return t("verification.driverScore.labels.fair");
+      return t("verification.driverScore.labels.low");
+    },
+    [t],
+  );
 
-  const fetchDriverData = async () => {
+  const fetchDriverData = useCallback(async () => {
     try {
-      // Fetch driver history
       const { data: history, error: historyError } = await supabase
         .from("driver_history")
         .select("*")
@@ -47,11 +51,10 @@ const DriverScore = () => {
         .single();
 
       if (historyError && historyError.code !== "PGRST116") throw historyError;
-      
+
       if (history) {
         setDriverHistory(history);
 
-        // Check eligibility using the database function
         const { data: eligibility, error: eligibilityError } = await supabase
           .rpc("check_driver_eligibility", { p_user_id: user?.id });
 
@@ -62,11 +65,19 @@ const DriverScore = () => {
       }
     } catch (error) {
       console.error("Sürücü verileri yüklenemedi:", error);
-      toast.error("Sürücü verileri yüklenemedi");
+      toast.error(t("verification.driverScore.loadFailed"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t, user?.id]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    void fetchDriverData();
+  }, [fetchDriverData, navigate, user]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-500";
@@ -74,20 +85,12 @@ const DriverScore = () => {
     return "text-red-500";
   };
 
-  const getScoreLabel = (score: number) => {
-    if (score >= 90) return "Mükemmel";
-    if (score >= 80) return "Çok İyi";
-    if (score >= 70) return "İyi";
-    if (score >= 60) return "Orta";
-    return "Düşük";
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 pt-24 pb-12 text-center">
-          <p className="text-xl text-muted-foreground">Yükleniyor...</p>
+          <p className="text-xl text-muted-foreground">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -101,18 +104,20 @@ const DriverScore = () => {
         <main className="pt-24 pb-12 px-4">
           <div className="container mx-auto max-w-4xl">
             <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold text-foreground mb-2">Sürücü Puanım</h1>
-              <p className="text-muted-foreground">Her sürücü 100 puan ile başlar</p>
+              <h1 className="text-4xl font-bold text-foreground mb-2">{t("verification.driverScore.title")}</h1>
+              <p className="text-muted-foreground">{t("verification.driverScore.baselineSubtitle")}</p>
             </div>
             <Card className="p-6 mb-6">
               <div className="text-center mb-4">
                 <Award className="w-16 h-16 mx-auto mb-4 text-primary" />
                 <div className={`text-6xl font-bold mb-2 ${getScoreColor(baselineScore)}`}>{baselineScore}</div>
-                <p className="text-lg text-muted-foreground mb-4">{getScoreLabel(baselineScore)} Sürücü</p>
+                <p className="text-lg text-muted-foreground mb-4">
+                  {getScoreLabel(baselineScore)} {t("verification.driverScore.driverSuffix")}
+                </p>
                 <Progress value={baselineScore} className="h-3" />
               </div>
               <p className="text-sm text-center text-muted-foreground">
-                Puanınız araç kullanımınıza göre güncellenir.
+                {t("verification.driverScore.baselineHint")}
               </p>
             </Card>
           </div>
@@ -131,11 +136,10 @@ const DriverScore = () => {
       <main className="pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">Sürücü Puanım</h1>
-            <p className="text-muted-foreground">Puanınız kullanımınıza göre güncellenir</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">{t("verification.driverScore.title")}</h1>
+            <p className="text-muted-foreground">{t("verification.driverScore.updateSubtitle")}</p>
           </div>
 
-          {/* Eligibility Status */}
           <Card className="p-6 mb-6">
             <div className="flex items-center gap-4">
               {isEligible ? (
@@ -144,10 +148,10 @@ const DriverScore = () => {
                     <CheckCircle className="w-6 h-6 text-green-500" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg">Araç Kiralayabilirsiniz</h3>
-                    <p className="text-muted-foreground">Sürücü puanınız yeterli seviyede</p>
+                    <h3 className="font-bold text-lg">{t("verification.driverScore.eligibleTitle")}</h3>
+                    <p className="text-muted-foreground">{t("verification.driverScore.eligibleDesc")}</p>
                   </div>
-                  <Badge className="bg-green-500">Uygun</Badge>
+                  <Badge className="bg-green-500">{t("verification.driverScore.eligibleBadge")}</Badge>
                 </>
               ) : (
                 <>
@@ -155,16 +159,15 @@ const DriverScore = () => {
                     <XCircle className="w-6 h-6 text-red-500" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg">Araç Kiralama Kısıtlandı</h3>
+                    <h3 className="font-bold text-lg">{t("verification.driverScore.restrictedTitle")}</h3>
                     <p className="text-muted-foreground">{eligibilityReason}</p>
                   </div>
-                  <Badge variant="destructive">Uygun Değil</Badge>
+                  <Badge variant="destructive">{t("verification.driverScore.notEligibleBadge")}</Badge>
                 </>
               )}
             </div>
           </Card>
 
-          {/* Driver Score */}
           <Card className="p-6 mb-6">
             <div className="text-center mb-6">
               <Award className="w-16 h-16 mx-auto mb-4 text-primary" />
@@ -172,7 +175,7 @@ const DriverScore = () => {
                 {score}
               </div>
               <p className="text-lg text-muted-foreground mb-4">
-                {getScoreLabel(score)} Sürücü
+                {getScoreLabel(score)} {t("verification.driverScore.driverSuffix")}
               </p>
               <Progress value={score} className="h-3" />
             </div>
@@ -180,7 +183,7 @@ const DriverScore = () => {
 
           {driverHistory.notes && (
             <Card className="p-6">
-              <h3 className="font-bold text-lg mb-4">Puan Geçmişi</h3>
+              <h3 className="font-bold text-lg mb-4">{t("verification.driverScore.historyTitle")}</h3>
               <div className="space-y-2 text-sm">
                 {driverHistory.notes.split("\n").filter(Boolean).map((note, index) => (
                   <div key={index} className="flex items-start gap-2">

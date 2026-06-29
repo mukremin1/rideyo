@@ -15,8 +15,9 @@ import BottomNav from "@/components/BottomNav";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 import { eachDayOfInterval, format, parseISO, startOfDay } from "date-fns";
-import { tr } from "date-fns/locale";
+import { useDateLocale } from "@/hooks/useDateLocale";
 
 type CarOption = { id: string; name: string; plate: string };
 
@@ -40,6 +41,8 @@ const sameDay = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear();
 
 const AvailabilityCalendar = () => {
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const { user, loading: authLoading } = useAuth();
   const [selectedCar, setSelectedCar] = useState("");
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
@@ -97,19 +100,19 @@ const AvailabilityCalendar = () => {
     const { data: profiles } = renterIds.length
       ? await supabase.from("profiles").select("id, full_name").in("id", renterIds)
       : { data: [] };
-    const profileMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name ?? "Kiracı"]));
+    const profileMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name ?? t("owner.common.renter")]));
 
     const rentalTypeLabel: Record<string, string> = {
-      minute: "Dakikalık",
-      hour: "Saatlik",
-      day: "Günlük",
+      minute: t("owner.common.rentalTypes.minute"),
+      hour: t("owner.common.rentalTypes.hour"),
+      day: t("owner.common.rentalTypes.day"),
     };
 
     setUpcomingBookings(
       (bookings ?? []).slice(0, 5).map((b) => ({
         id: b.id,
-        dates: `${format(parseISO(b.start_time), "d MMM", { locale: tr })} - ${format(parseISO(b.end_time), "d MMM yyyy", { locale: tr })}`,
-        renter: profileMap.get(b.user_id) ?? "Kiracı",
+        dates: `${format(parseISO(b.start_time), "d MMM", { locale: dateLocale })} - ${format(parseISO(b.end_time), "d MMM yyyy", { locale: dateLocale })}`,
+        renter: profileMap.get(b.user_id) ?? t("owner.common.renter"),
         type: rentalTypeLabel[b.rental_type] ?? b.rental_type,
         amount: b.total_price.toLocaleString("tr-TR"),
       })),
@@ -126,10 +129,10 @@ const AvailabilityCalendar = () => {
       (blocked ?? []).map((row) => ({
         id: row.id,
         date: parseISO(row.blocked_date),
-        reason: row.reason ?? "Engellendi",
+        reason: row.reason ?? t("owner.availability.blockedDefault"),
       })),
     );
-  }, []);
+  }, [t, dateLocale]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -147,15 +150,15 @@ const AvailabilityCalendar = () => {
 
   const handleBlockDates = async () => {
     if (!selectedCar) {
-      toast.error("Lütfen bir araç seçin");
+      toast.error(t("owner.availability.toast.selectCar"));
       return;
     }
     if (selectedDates.length === 0) {
-      toast.error("Lütfen en az bir tarih seçin");
+      toast.error(t("owner.availability.toast.selectDate"));
       return;
     }
     if (!blockReason.trim()) {
-      toast.error("Lütfen engelleme nedeni girin");
+      toast.error(t("owner.availability.toast.enterReason"));
       return;
     }
 
@@ -170,11 +173,11 @@ const AvailabilityCalendar = () => {
     });
 
     if (error) {
-      toast.error("Tarihler engellenemedi");
+      toast.error(t("owner.availability.toast.blockError"));
       return;
     }
 
-    toast.success(`${selectedDates.length} gün engellendi`);
+    toast.success(t("owner.availability.toast.blockSuccess", { count: selectedDates.length }));
     setSelectedDates([]);
     setBlockReason("");
     setIsDialogOpen(false);
@@ -184,10 +187,10 @@ const AvailabilityCalendar = () => {
   const handleUnblockDate = async (dateId: string) => {
     const { error } = await supabase.from("car_blocked_dates").delete().eq("id", dateId);
     if (error) {
-      toast.error("Engel kaldırılamadı");
+      toast.error(t("owner.availability.toast.unblockError"));
       return;
     }
-    toast.success("Tarih engeli kaldırıldı");
+    toast.success(t("owner.availability.toast.unblockSuccess"));
     if (selectedCar) fetchCarCalendar(selectedCar);
   };
 
@@ -200,7 +203,7 @@ const AvailabilityCalendar = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 pt-24 text-center text-muted-foreground">
-          Yükleniyor...
+          {t("owner.common.loading")}
         </main>
         <Footer />
       </div>
@@ -214,10 +217,8 @@ const AvailabilityCalendar = () => {
       <main className="flex-1 container mx-auto px-4 pt-24 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-3">Müsaitlik Takvimi</h1>
-            <p className="text-lg text-muted-foreground">
-              Araçlarınızın müsait olmadığı günleri yönetin
-            </p>
+            <h1 className="text-4xl font-bold mb-3">{t("owner.availability.title")}</h1>
+            <p className="text-lg text-muted-foreground">{t("owner.availability.subtitle")}</p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
@@ -226,8 +227,8 @@ const AvailabilityCalendar = () => {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Araç Seçin</CardTitle>
-                      <CardDescription>Takvimde görmek istediğiniz aracı seçin</CardDescription>
+                      <CardTitle>{t("owner.availability.selectCar")}</CardTitle>
+                      <CardDescription>{t("owner.availability.selectCarDesc")}</CardDescription>
                     </div>
                     <Car className="w-8 h-8 text-primary" />
                   </div>
@@ -236,7 +237,7 @@ const AvailabilityCalendar = () => {
                   {hasCars ? (
                     <Select value={selectedCar} onValueChange={setSelectedCar}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Araç seçin" />
+                        <SelectValue placeholder={t("owner.availability.selectCarPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {cars.map((car) => (
@@ -248,9 +249,9 @@ const AvailabilityCalendar = () => {
                     </Select>
                   ) : (
                     <div className="flex flex-col items-start gap-3 rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-                      <p>Henüz kayıtlı aracınız yok. Takvim görünümü için önce araç ekleyin.</p>
+                      <p>{t("owner.availability.noCars")}</p>
                       <Button asChild size="sm">
-                        <Link to="/add-car">Araç Ekle</Link>
+                        <Link to="/add-car">{t("owner.availability.addCar")}</Link>
                       </Button>
                     </div>
                   )}
@@ -262,24 +263,24 @@ const AvailabilityCalendar = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CalendarIcon className="w-5 h-5" />
-                      Takvim
+                      {t("owner.availability.calendar")}
                     </CardTitle>
-                    <CardDescription>Tarih seçin ve müsaitliği yönetin</CardDescription>
+                    <CardDescription>{t("owner.availability.calendarDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex flex-wrap gap-4 mb-4">
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 bg-primary rounded" />
-                          <span className="text-sm">Rezerve</span>
+                          <span className="text-sm">{t("owner.availability.legendBooked")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 bg-destructive rounded" />
-                          <span className="text-sm">Engellenmiş</span>
+                          <span className="text-sm">{t("owner.availability.legendBlocked")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-primary rounded" />
-                          <span className="text-sm">Seçili</span>
+                          <span className="text-sm">{t("owner.availability.legendSelected")}</span>
                         </div>
                       </div>
 
@@ -315,19 +316,17 @@ const AvailabilityCalendar = () => {
                         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                           <DialogTrigger asChild>
                             <Button className="w-full">
-                              {selectedDates.length} Günü Engelle
+                              {t("owner.availability.blockDays", { count: selectedDates.length })}
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Tarih Engelleme</DialogTitle>
-                              <DialogDescription>
-                                Seçili tarihlerde araç kiralamaya kapalı olacak
-                              </DialogDescription>
+                              <DialogTitle>{t("owner.availability.blockDialogTitle")}</DialogTitle>
+                              <DialogDescription>{t("owner.availability.blockDialogDesc")}</DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <Label>Seçili Tarihler</Label>
+                                <Label>{t("owner.availability.selectedDates")}</Label>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                   {selectedDates.map((date, i) => (
                                     <Badge key={i} variant="secondary">
@@ -337,10 +336,10 @@ const AvailabilityCalendar = () => {
                                 </div>
                               </div>
                               <div>
-                                <Label htmlFor="reason">Engelleme Nedeni</Label>
+                                <Label htmlFor="reason">{t("owner.availability.blockReason")}</Label>
                                 <Textarea
                                   id="reason"
-                                  placeholder="Örn: Periyodik bakım, kişisel kullanım"
+                                  placeholder={t("owner.availability.blockReasonPlaceholder")}
                                   value={blockReason}
                                   onChange={(e) => setBlockReason(e.target.value)}
                                   className="mt-2"
@@ -348,14 +347,14 @@ const AvailabilityCalendar = () => {
                               </div>
                               <div className="flex gap-2">
                                 <Button onClick={handleBlockDates} className="flex-1">
-                                  Onayla
+                                  {t("owner.common.confirm")}
                                 </Button>
                                 <Button
                                   variant="outline"
                                   onClick={() => setIsDialogOpen(false)}
                                   className="flex-1"
                                 >
-                                  İptal
+                                  {t("owner.common.cancel")}
                                 </Button>
                               </div>
                             </div>
@@ -374,12 +373,12 @@ const AvailabilityCalendar = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Clock className="w-5 h-5" />
-                      Yaklaşan Rezervasyonlar
+                      {t("owner.availability.upcomingBookings")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {upcomingBookings.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Yaklaşan rezervasyon yok.</p>
+                      <p className="text-sm text-muted-foreground">{t("owner.availability.noUpcoming")}</p>
                     ) : (
                       <div className="space-y-3">
                         {upcomingBookings.map((booking) => (
@@ -401,12 +400,12 @@ const AvailabilityCalendar = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Engellenmiş Tarihler</CardTitle>
-                    <CardDescription>Kiralama için kapalı günler</CardDescription>
+                    <CardTitle>{t("owner.availability.blockedDates")}</CardTitle>
+                    <CardDescription>{t("owner.availability.blockedDatesDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {blockedDates.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Engellenmiş tarih yok.</p>
+                      <p className="text-sm text-muted-foreground">{t("owner.availability.noBlocked")}</p>
                     ) : (
                       <div className="space-y-3">
                         {blockedDates.map((blocked) => (

@@ -14,7 +14,6 @@ import {
   Lock,
   Shield,
   ArrowLeft,
-  CheckCircle,
   Calendar,
   Clock,
   HelpCircle,
@@ -27,7 +26,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { useDateLocale } from "@/hooks/useDateLocale";
 import { isBookingPaid } from "@/lib/paymentStatus";
 import { invokeEdgeFunction, createSupabaseInvoker } from "@/lib/serverApi";
 import {
@@ -68,9 +68,10 @@ const Payment = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const [loading, setLoading] = useState(false);
   const [saveCard, setSaveCard] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
@@ -85,7 +86,7 @@ const Payment = () => {
   const state = location.state as PaymentState | null;
 
   const bookingId = state?.bookingId;
-  const carName = state?.carName || "Araç";
+  const carName = state?.carName || t("payment.defaultCarName");
   const totalPrice = state?.totalPrice || 0;
   const rentalType = state?.rentalType || "hour";
   const startTime = state?.startTime ? new Date(state.startTime) : new Date();
@@ -109,6 +110,18 @@ const Payment = () => {
     cvv: "",
   });
 
+  const goToStartRental = () => {
+    if (!bookingId) return;
+    navigate(`/start-rental?bookingId=${bookingId}`, {
+      replace: true,
+      state: {
+        bookingId,
+        carId: state?.carId,
+        carName,
+      },
+    });
+  };
+
   useEffect(() => {
     if (!user) return;
 
@@ -121,7 +134,7 @@ const Payment = () => {
         .order("created_at", { ascending: false });
 
       if (error) {
-        toast.error("Kayıtlı kartlar yüklenemedi");
+        toast.error(t("payment.savedCardsLoadError"));
       } else {
         setSavedCards(data || []);
         const defaultCard = (data || []).find((card) => card.is_default);
@@ -152,7 +165,7 @@ const Payment = () => {
         .maybeSingle();
 
       if (error || !data) {
-        toast.error("Ödeme kaydı doğrulanamadı.");
+        toast.error(t("payment.validationFailed"));
         setBookingValidated(false);
         setBookingValidationLoading(false);
         navigate("/cars");
@@ -160,8 +173,9 @@ const Payment = () => {
       }
 
       if (isBookingPaid(data.payment_status)) {
-        toast.message("Bu rezervasyonun ödemesi zaten tamamlanmış.");
-        navigate("/start-rental", {
+        toast.message(t("payment.alreadyPaid"));
+        navigate(`/start-rental?bookingId=${bookingId}`, {
+          replace: true,
           state: {
             bookingId,
             carId: state?.carId,
@@ -178,32 +192,7 @@ const Payment = () => {
     void validateBooking();
   }, [bookingId, carName, navigate, state?.carId, user]);
 
-  const faqs = [
-    {
-      id: "payment-methods",
-      question: "Hangi ödeme yöntemlerini kabul ediyorsunuz?",
-      answer:
-        "Visa, Mastercard ve Troy kartlarını kabul ediyoruz. Yakında mobil cüzdan desteği de eklenecek.",
-    },
-    {
-      id: "refunds",
-      question: "Provizyon ücreti ne zaman iade edilir?",
-      answer:
-        "Dakikalık kiralamalarda provizyon ücreti, kiralama bittiğinde ve herhangi bir ceza yoksa aynı gün içinde iade edilir.",
-    },
-    {
-      id: "security",
-      question: "Ödeme bilgilerim güvende mi?",
-      answer:
-        "Kart bilgileriniz SSL ile şifrelenir ve ödeme sağlayıcısı üzerinden güvenli şekilde işlenir.",
-    },
-    {
-      id: "invoice",
-      question: "Fatura bilgilerini nereden görebilirim?",
-      answer:
-        "Ödeme tamamlandıktan sonra e-posta adresinize fatura gönderilir. Ayrıca profilinizden geçmiş ödemeleri görebilirsiniz.",
-    },
-  ];
+  const faqIds = ["payment-methods", "refunds", "security", "invoice"] as const;
 
   const formatCardNumber = (value: string) => {
     const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
@@ -253,26 +242,26 @@ const Payment = () => {
   const validateCard = () => {
     if (selectedSavedCardId) {
       if (cardData.cvv.length < 3) {
-        toast.error("Kayıtlı kart için CVV girin");
+        toast.error(t("payment.validation.savedCardCvv"));
         return false;
       }
       return true;
     }
     const cardNumber = cardData.cardNumber.replace(/\s/g, "");
     if (cardNumber.length < 16) {
-      toast.error("Geçerli bir kart numarası girin");
+      toast.error(t("payment.validation.cardNumber"));
       return false;
     }
     if (cardData.cardHolder.length < 3) {
-      toast.error("Kart sahibinin adını girin");
+      toast.error(t("payment.validation.cardHolder"));
       return false;
     }
     if (cardData.expiryDate.length < 5) {
-      toast.error("Geçerli bir son kullanma tarihi girin");
+      toast.error(t("payment.validation.expiry"));
       return false;
     }
     if (cardData.cvv.length < 3) {
-      toast.error("Geçerli bir CVV girin");
+      toast.error(t("payment.validation.cvv"));
       return false;
     }
     return true;
@@ -297,7 +286,7 @@ const Payment = () => {
       document.body.appendChild(iframe);
 
       const doc = iframe.contentDocument ?? iframe.contentWindow?.document;
-      if (!doc) throw new Error("3DS penceresi açılamadı");
+      if (!doc) throw new Error(t("payment.threeDSWindowError"));
       doc.open();
       doc.write(decoded);
       doc.close();
@@ -314,7 +303,7 @@ const Payment = () => {
     e.preventDefault();
 
     if (!user || !bookingId || !bookingValidated) {
-      toast.error("Ödeme için rezervasyon doğrulaması tamamlanamadı.");
+      toast.error(t("payment.validationBookingFailed"));
       return;
     }
 
@@ -323,7 +312,7 @@ const Payment = () => {
     if (!selectedSavedCardId) {
       const expiry = parseExpiry(cardData.expiryDate);
       if (!expiry) {
-        toast.error("Geçerli bir son kullanma tarihi girin");
+        toast.error(t("payment.validation.expiry"));
         return;
       }
     }
@@ -347,7 +336,7 @@ const Payment = () => {
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Oturum bulunamadı. Tekrar giriş yapın.");
+        throw new Error(t("payment.sessionNotFound"));
       }
 
       const { data: paymentResult, error: paymentError } = await invokeEdgeFunction(
@@ -366,31 +355,21 @@ const Payment = () => {
 
       if (paymentError || !paymentResult?.success) {
         throw new Error(
-          paymentResult?.error || paymentError?.message || "Ödeme işlemi başarısız.",
+          paymentResult?.error || paymentError?.message || t("payment.paymentProcessFailed"),
         );
       }
 
       if (paymentResult.requires3DS && paymentResult.threeDSHtmlContent) {
-        toast.message("Banka doğrulama ekranına yönlendiriliyorsunuz...");
+        toast.message(t("payment.redirect3ds"));
         launch3DS(paymentResult.threeDSHtmlContent as string);
         return;
       }
 
-      setPaymentSuccess(true);
-      toast.success("Ödeme başarıyla tamamlandı!");
-
-      setTimeout(() => {
-        navigate("/start-rental", {
-          state: {
-            bookingId,
-            carId: state?.carId,
-            carName,
-          },
-        });
-      }, 2000);
+      toast.success(t("payment.success"));
+      goToStartRental();
     } catch (error) {
       console.error("Ödeme hatası:", error);
-      toast.error(error instanceof Error ? error.message : "Ödeme işlemi başarısız oldu");
+      toast.error(error instanceof Error ? error.message : t("payment.failed"));
     } finally {
       setLoading(false);
     }
@@ -399,10 +378,10 @@ const Payment = () => {
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) {
-      toast.error("Lütfen tüm iletişim alanlarını doldurun.");
+      toast.error(t("payment.contactFieldsRequired"));
       return;
     }
-    toast.success("Mesajınız alındı, kısa sürede dönüş yapacağız.");
+    toast.success(t("payment.contactSuccess"));
     setContactForm({ name: "", email: "", message: "" });
   };
 
@@ -415,7 +394,7 @@ const Payment = () => {
   };
 
   const formatSavedCardLabel = (card: SavedCard) => {
-    const typeLabel = card.card_type ? card.card_type.toUpperCase() : "KART";
+    const typeLabel = card.card_type ? card.card_type.toUpperCase() : t("payment.cardLabel");
     const expiry = `${String(card.expiry_month).padStart(2, "0")}/${String(card.expiry_year).slice(-2)}`;
     return `${typeLabel} •••• ${card.last_four_digits} • ${expiry}`;
   };
@@ -423,11 +402,11 @@ const Payment = () => {
   const getRentalTypeText = (type: string) => {
     switch (type) {
       case "minute":
-        return "Dakikalık";
+        return t("payment.typeMinute");
       case "hour":
-        return "Saatlik";
+        return t("payment.typeHour");
       case "day":
-        return "Günlük";
+        return t("payment.typeDay");
       default:
         return type;
     }
@@ -440,11 +419,9 @@ const Payment = () => {
         <main className="pt-24 pb-12">
           <div className="container mx-auto px-4 max-w-lg text-center">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-4">Ödeme Bilgisi Bulunamadı</h1>
-              <p className="text-muted-foreground mb-6">
-                Ödeme yapmak için önce bir araç seçip rezervasyon yapmanız gerekmektedir.
-              </p>
-              <Button onClick={() => navigate("/cars")}>Araçlara Git</Button>
+              <h1 className="text-2xl font-bold text-foreground mb-4">{t("payment.noInfo")}</h1>
+              <p className="text-muted-foreground mb-6">{t("payment.noInfoDesc")}</p>
+              <Button onClick={() => navigate("/cars")}>{t("common.goToCars")}</Button>
             </Card>
           </div>
         </main>
@@ -460,9 +437,9 @@ const Payment = () => {
         <main className="pt-24 pb-12">
           <div className="container mx-auto px-4 max-w-lg text-center">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-4">Giriş Gerekli</h1>
-              <p className="text-muted-foreground mb-6">Ödeme adımı için önce hesabınıza giriş yapın.</p>
-              <Button onClick={() => navigate("/auth")}>Giriş Yap</Button>
+              <h1 className="text-2xl font-bold text-foreground mb-4">{t("payment.loginRequired")}</h1>
+              <p className="text-muted-foreground mb-6">{t("payment.loginRequiredDesc")}</p>
+              <Button onClick={() => navigate("/auth")}>{t("common.goToAuth")}</Button>
             </Card>
           </div>
         </main>
@@ -478,32 +455,8 @@ const Payment = () => {
         <main className="pt-24 pb-12">
           <div className="container mx-auto px-4 max-w-lg text-center">
             <Card className="p-8">
-              <h1 className="text-xl font-semibold text-foreground mb-3">Ödeme Kontrol Ediliyor</h1>
-              <p className="text-muted-foreground">Rezervasyon bilgileriniz doğrulanıyor...</p>
-            </Card>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (paymentSuccess) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-24 pb-12">
-          <div className="container mx-auto px-4 max-w-lg">
-            <Card className="p-8 text-center">
-              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
-              </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">Ödeme Başarılı!</h1>
-              <p className="text-muted-foreground mb-4">{carName} için ödemeniz başarıyla tamamlandı.</p>
-              <p className="text-3xl font-bold text-primary mb-6">{totalPrice.toFixed(2)}₺</p>
-              <p className="text-sm text-muted-foreground">
-                Şimdi kiralamayı başlatma ekranına yönlendiriliyorsunuz...
-              </p>
+              <h1 className="text-xl font-semibold text-foreground mb-3">{t("payment.checking")}</h1>
+              <p className="text-muted-foreground">{t("payment.checkingDesc")}</p>
             </Card>
           </div>
         </main>
@@ -523,41 +476,41 @@ const Payment = () => {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            Geri Dön
+            {t("common.back")}
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-8 items-start">
             <section>
-              <h1 className="text-3xl font-bold text-foreground mb-2">Ödeme</h1>
-              <p className="text-muted-foreground mb-8">{carName} için güvenli ödeme yapın</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">{t("payment.title")}</h1>
+              <p className="text-muted-foreground mb-8">{carName} {t("payment.subtitle")}</p>
 
               <Card className="p-6 mb-6">
-                <h2 className="font-semibold text-foreground mb-4">Rezervasyon Özeti</h2>
+                <h2 className="font-semibold text-foreground mb-4">{t("payment.bookingSummary")}</h2>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Araç</span>
+                    <span className="text-muted-foreground">{t("payment.car")}</span>
                     <span className="font-medium">{carName}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Kiralama Türü</span>
+                    <span className="text-muted-foreground">{t("payment.rentalType")}</span>
                     <span className="font-medium">{getRentalTypeText(rentalType)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="w-4 h-4" />
-                      <span>Başlangıç</span>
+                      <span>{t("payment.start")}</span>
                     </div>
                     <span className="font-medium text-sm">
-                      {format(startTime, "dd MMM yyyy HH:mm", { locale: tr })}
+                      {format(startTime, "dd MMM yyyy HH:mm", { locale: dateLocale })}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Clock className="w-4 h-4" />
-                      <span>Bitiş</span>
+                      <span>{t("payment.end")}</span>
                     </div>
                     <span className="font-medium text-sm">
-                      {format(endTime, "dd MMM yyyy HH:mm", { locale: tr })}
+                      {format(endTime, "dd MMM yyyy HH:mm", { locale: dateLocale })}
                     </span>
                   </div>
                 </div>
@@ -566,41 +519,41 @@ const Payment = () => {
               <Card className="p-6 mb-6 bg-primary/5 border-primary/20">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center pb-2 border-b border-border">
-                    <span className="text-muted-foreground">Kiralama Tutarı</span>
+                    <span className="text-muted-foreground">{t("payment.rentalAmount")}</span>
                     <span className="font-semibold text-primary">{rentalAmount.toFixed(2)}₺</span>
                   </div>
                   {kmPackageLabel && (
                     <div className="flex justify-between items-center pb-2 border-b border-border">
-                      <span className="text-muted-foreground">KM Paketi</span>
+                      <span className="text-muted-foreground">{t("payment.kmPackage")}</span>
                       <span className="font-semibold text-primary">
                         {kmPackageLabel} • {kmPackagePrice.toFixed(2)}₺
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between items-center pb-2 border-b border-border">
-                    <span className="text-muted-foreground">Provizyon Ücreti</span>
+                    <span className="text-muted-foreground">{t("payment.provisionFee")}</span>
                     <span className="font-semibold text-primary">{provisionFee}₺</span>
                   </div>
                   {rentalType === "day" && insurancePrice > 0 && (
                     <div className="flex justify-between items-center pb-2 border-b border-border">
-                      <span className="text-muted-foreground">Sigorta Ücreti</span>
+                      <span className="text-muted-foreground">{t("payment.insuranceFee")}</span>
                       <span className="font-semibold text-primary">{insurancePrice}₺</span>
                     </div>
                   )}
                   {additionalDriverFee > 0 && (
                     <div className="flex justify-between items-center pb-2 border-b border-border">
                       <span className="text-muted-foreground">
-                        Ek Sürücü{additionalDriverName ? ` (${additionalDriverName})` : ""}
+                        {t("payment.additionalDriver")}{additionalDriverName ? ` (${additionalDriverName})` : ""}
                       </span>
                       <span className="font-semibold text-primary">{additionalDriverFee.toFixed(2)}₺</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-sm text-muted-foreground">Toplam Tutar</p>
+                      <p className="text-sm text-muted-foreground">{t("payment.totalAmountLabel")}</p>
                       {rentalType === "minute" && (
                         <p className="text-xs text-muted-foreground">
-                          Provizyon ücreti kiralama sonrası iade edilir
+                          {t("payment.provisionRefundNote")}
                         </p>
                       )}
                     </div>
@@ -609,18 +562,18 @@ const Payment = () => {
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground mt-4">
                   <Lock className="w-4 h-4" />
-                  <span className="text-sm">256-bit SSL</span>
+                  <span className="text-sm">{t("payment.ssl256")}</span>
                 </div>
               </Card>
 
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-6">
                   <CreditCard className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Ödeme Yöntemlerim</h2>
+                  <h2 className="text-lg font-semibold">{t("payment.paymentMethods")}</h2>
                 </div>
 
                 {loadingSavedCards ? (
-                  <p className="text-sm text-muted-foreground">Kayıtlı kartlar yükleniyor...</p>
+                  <p className="text-sm text-muted-foreground">{t("payment.loadingSavedCards")}</p>
                 ) : savedCards.length > 0 ? (
                   <div className="space-y-3">
                     {savedCards.map((card) => (
@@ -636,7 +589,7 @@ const Payment = () => {
                       >
                         <span className="text-sm font-medium">{formatSavedCardLabel(card)}</span>
                         {card.is_default && (
-                          <span className="text-xs text-primary font-semibold">Varsayılan</span>
+                          <span className="text-xs text-primary font-semibold">{t("payment.defaultCard")}</span>
                         )}
                       </button>
                     ))}
@@ -647,29 +600,29 @@ const Payment = () => {
                         className="w-full"
                         onClick={() => setSelectedSavedCardId(null)}
                       >
-                        Yeni kart kullan
+                        {t("payment.useNewCard")}
                       </Button>
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Kayıtlı kart bulunamadı. Aşağıdan yeni kart ekleyin.</p>
+                  <p className="text-sm text-muted-foreground">{t("payment.noSavedCards")}</p>
                 )}
               </Card>
 
               <Card className="p-6 mt-6">
                 <div className="flex items-center gap-2 mb-6">
                   <CreditCard className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Kart Bilgileri</h2>
+                  <h2 className="text-lg font-semibold">{t("payment.cardDetails")}</h2>
                 </div>
                 {selectedSavedCardId && (
                   <p className="text-sm text-muted-foreground mb-4">
-                    Kayıtlı kartla ödeme yapıyorsunuz. Yeni kart kullanmak için yukarıdan seçim kaldırın.
+                    {t("payment.savedCardHint")}
                   </p>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="cardNumber">Kart Numarası</Label>
+                    <Label htmlFor="cardNumber">{t("payment.cardNumber")}</Label>
                     <div className="relative">
                       <Input
                         id="cardNumber"
@@ -701,7 +654,7 @@ const Payment = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="cardHolder">Kart Sahibinin Adı</Label>
+                    <Label htmlFor="cardHolder">{t("payment.cardHolder")}</Label>
                     <Input
                       id="cardHolder"
                       placeholder="AD SOYAD"
@@ -714,7 +667,7 @@ const Payment = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="expiry">Son Kullanma Tarihi</Label>
+                      <Label htmlFor="expiry">{t("payment.expiry")}</Label>
                       <Input
                         id="expiry"
                         placeholder="AA/YY"
@@ -725,7 +678,7 @@ const Payment = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cvv">CVV</Label>
+                      <Label htmlFor="cvv">{t("payment.cvv")}</Label>
                       <Input
                         id="cvv"
                         type="password"
@@ -745,7 +698,7 @@ const Payment = () => {
                       disabled={Boolean(selectedSavedCardId)}
                     />
                     <Label htmlFor="saveCard" className="text-sm text-muted-foreground cursor-pointer">
-                      Kart bilgilerimi gelecek ödemeler için kaydet
+                      {t("payment.saveCardForFuture")}
                     </Label>
                   </div>
 
@@ -758,12 +711,12 @@ const Payment = () => {
                       {loading ? (
                         <span className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          İşleniyor...
+                          {t("payment.processing")}
                         </span>
                       ) : (
                         <span className="flex items-center gap-2">
                           <Lock className="w-4 h-4" />
-                          {totalPrice.toFixed(2)}₺ Öde
+                          {t("payment.payAmount", { amount: totalPrice.toFixed(2) })}
                         </span>
                       )}
                     </Button>
@@ -774,11 +727,11 @@ const Payment = () => {
                   <div className="flex items-center justify-center gap-6 text-muted-foreground">
                     <div className="flex items-center gap-2 text-sm">
                       <Shield className="w-4 h-4" />
-                      <span>3D Secure</span>
+                      <span>{t("payment.secure3ds")}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Lock className="w-4 h-4" />
-                      <span>SSL Korumalı</span>
+                      <span>{t("payment.sslProtected")}</span>
                     </div>
                   </div>
                   <div className="flex justify-center gap-4 mt-4">
@@ -809,15 +762,15 @@ const Payment = () => {
               </Card>
 
               <p className="text-center text-sm text-muted-foreground mt-6">
-                Ödeme yaparak{" "}
+                {t("payment.termsPrefix")}{" "}
                 <Link to="/rental-agreement" className="text-primary hover:underline">
-                  Kiralama Sözleşmesi
+                  {t("payment.rentalAgreement")}
                 </Link>{" "}
-                ve{" "}
+                {t("payment.termsAnd")}{" "}
                 <Link to="/cancellation-policy" className="text-primary hover:underline">
-                  İptal/İade Koşullarını
+                  {t("payment.cancellationPolicy")}
                 </Link>{" "}
-                kabul etmiş olursunuz.
+                {t("payment.termsSuffix")}
               </p>
             </section>
 
@@ -825,27 +778,27 @@ const Payment = () => {
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <HelpCircle className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">7/24 Destek</h2>
+                  <h2 className="text-lg font-semibold">{t("payment.support247")}</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Ödeme sırasında takıldığınız noktalar için destek ekibimiz her zaman yanınızda.
+                  {t("payment.supportDesc")}
                 </p>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="w-4 h-4" />
-                    <span>0850 000 00 00</span>
+                    <span>{t("payment.supportPhone")}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="w-4 h-4" />
-                    <span>destek@tiktak.com</span>
+                    <span>{t("payment.supportEmail")}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="w-4 h-4" />
-                    <span>İstanbul, Türkiye</span>
+                    <span>{t("payment.supportLocation")}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <ClockIcon className="w-4 h-4" />
-                    <span>Yanıt süresi: 10 dk</span>
+                    <span>{t("payment.supportResponse")}</span>
                   </div>
                 </div>
               </Card>
@@ -853,40 +806,40 @@ const Payment = () => {
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <MessageSquare className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Hızlı İletişim</h2>
+                  <h2 className="text-lg font-semibold">{t("payment.quickContact")}</h2>
                 </div>
                 <form onSubmit={handleContactSubmit} className="space-y-3">
                   <div className="space-y-1">
-                    <Label htmlFor="contactName">Ad Soyad</Label>
+                    <Label htmlFor="contactName">{t("payment.contactName")}</Label>
                     <Input
                       id="contactName"
                       value={contactForm.name}
                       onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                      placeholder="Adınız"
+                      placeholder={t("payment.contactNamePlaceholder")}
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="contactEmail">E-posta</Label>
+                    <Label htmlFor="contactEmail">{t("payment.contactEmail")}</Label>
                     <Input
                       id="contactEmail"
                       type="email"
                       value={contactForm.email}
                       onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                      placeholder="ornek@email.com"
+                      placeholder={t("payment.contactEmailPlaceholder")}
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="contactMessage">Mesajınız</Label>
+                    <Label htmlFor="contactMessage">{t("payment.contactMessage")}</Label>
                     <Textarea
                       id="contactMessage"
                       value={contactForm.message}
                       onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                      placeholder="Size nasıl yardımcı olabiliriz?"
+                      placeholder={t("payment.contactMessagePlaceholder")}
                       rows={3}
                     />
                   </div>
                   <Button type="submit" className="w-full">
-                    Gönder
+                    {t("payment.send")}
                   </Button>
                 </form>
               </Card>
@@ -897,13 +850,13 @@ const Payment = () => {
             <Card className="p-6">
               <div className="flex items-center gap-2 mb-4">
                 <HelpCircle className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-semibold">Sık Sorulan Sorular</h2>
+                <h2 className="text-lg font-semibold">{t("payment.faqTitle")}</h2>
               </div>
               <Accordion type="single" collapsible className="w-full">
-                {faqs.map((faq) => (
-                  <AccordionItem key={faq.id} value={faq.id}>
-                    <AccordionTrigger>{faq.question}</AccordionTrigger>
-                    <AccordionContent>{faq.answer}</AccordionContent>
+                {faqIds.map((faqId) => (
+                  <AccordionItem key={faqId} value={faqId}>
+                    <AccordionTrigger>{t(`payment.faqs.${faqId}.question`)}</AccordionTrigger>
+                    <AccordionContent>{t(`payment.faqs.${faqId}.answer`)}</AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>

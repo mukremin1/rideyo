@@ -1,5 +1,6 @@
 ﻿import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ const CarDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,9 +83,9 @@ const CarDetail = () => {
   const [additionalDriverLicense, setAdditionalDriverLicense] = useState("");
   const KM_PRICE_PER_UNIT = 15;
   const kmPackages = [
-    { id: "100", label: "100 KM", price: 1000 },
-    { id: "200", label: "200 KM", price: 2000 },
-    { id: "none", label: `Paketsiz devam et (${KM_PRICE_PER_UNIT} TL/km)`, price: 0 },
+    { id: "100", label: t("carDetail.kmPackage100"), price: 1000 },
+    { id: "200", label: t("carDetail.kmPackage200"), price: 2000 },
+    { id: "none", label: t("carDetail.kmPackageNone", { price: KM_PRICE_PER_UNIT }), price: 0 },
   ];
   const selectedKmPackageData = kmPackages.find((pkg) => pkg.id === selectedKmPackage) || null;
   const kmPackagePrice = selectedKmPackageData?.price ?? 0;
@@ -126,14 +128,16 @@ const CarDetail = () => {
 
       setLockStatus(newStatus);
       toast({
-        title: newStatus === "locked" ? "Araç Kilitlendi" : "Araç Kilidi Açıldı",
-        description: `${car.name} ${newStatus === "locked" ? "kilitlendi" : "kilidi açıldı"}`,
+        title: newStatus === "locked" ? t("carDetail.lockSuccessLocked") : t("carDetail.lockSuccessUnlocked"),
+        description: newStatus === "locked"
+          ? t("carDetail.lockDescLocked", { name: car.name })
+          : t("carDetail.lockDescUnlocked", { name: car.name }),
       });
     } catch (error) {
       console.error("Kilit işlemi hatası:", error);
       toast({
-        title: "Hata",
-        description: "Kilit işlemi yapılamadı",
+        title: t("common.error"),
+        description: t("carDetail.lockError"),
         variant: "destructive",
       });
     } finally {
@@ -159,8 +163,8 @@ const CarDetail = () => {
       if (error) throw error;
 
       toast({
-        title: "Konum Güncellendi",
-        description: "Araç konumu kontrol edildi",
+        title: t("carDetail.locationUpdated"),
+        description: t("carDetail.locationChecked"),
       });
     } catch (error) {
       console.error("Konum kontrolü hatası:", error);
@@ -243,8 +247,8 @@ const CarDetail = () => {
       if (error) {
         console.error("Araç yüklenirken hata:", error);
         toast({
-          title: "Hata",
-          description: "Araç yüklenemedi",
+          title: t("common.error"),
+          description: t("carDetail.loadError"),
           variant: "destructive",
         });
         return;
@@ -270,7 +274,7 @@ const CarDetail = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 pt-24 pb-12 text-center">
-          <p className="text-xl text-muted-foreground">Yükleniyor...</p>
+          <p className="text-xl text-muted-foreground">{t("common.loading")}</p>
         </div>
         <Footer />
       </div>
@@ -283,10 +287,10 @@ const CarDetail = () => {
         <Navbar />
         <div className="container mx-auto px-4 pt-24 pb-12">
           <div className="text-center py-12">
-            <h1 className="text-4xl font-bold text-foreground mb-4">Araç Bulunamadı</h1>
-            <p className="text-muted-foreground mb-8">Aradığınız araç mevcut değil.</p>
+            <h1 className="text-4xl font-bold text-foreground mb-4">{t("carDetail.notFoundTitle")}</h1>
+            <p className="text-muted-foreground mb-8">{t("carDetail.notFoundDesc")}</p>
             <Link to="/cars">
-              <Button>Araçlara Dön</Button>
+              <Button>{t("carDetail.backToCars")}</Button>
             </Link>
           </div>
         </div>
@@ -298,8 +302,8 @@ const CarDetail = () => {
   const handleReserve = async () => {
     if (!user) {
       toast({
-        title: "Giriş Gerekli",
-        description: "Araç kiralamak için giriş yapmalısınız",
+        title: t("carDetail.loginRequired"),
+        description: t("carDetail.loginRequiredDesc"),
       });
       navigate("/auth");
       return;
@@ -308,7 +312,7 @@ const CarDetail = () => {
     const eligibility = await checkRentalEligibility(user.id, user.user_metadata);
     if (!eligibility.eligible) {
       toast({
-        title: "Doğrulama Gerekli",
+        title: t("carDetail.verificationRequired"),
         description: eligibility.reason,
         variant: "destructive",
       });
@@ -320,8 +324,8 @@ const CarDetail = () => {
 
     if (!selectedPricing) {
       toast({
-        title: "Fiyat Seçimi Gerekli",
-        description: "Lütfen bir fiyatlandırma seçeneği seçin",
+        title: t("carDetail.pricingRequired"),
+        description: t("carDetail.pricingRequiredDesc"),
         variant: "destructive",
       });
       return;
@@ -329,8 +333,8 @@ const CarDetail = () => {
 
     if (selectedPricing === "day" && (!pickupAddress.trim() || !dropoffAddress.trim())) {
       toast({
-        title: "Eksik Bilgi",
-        description: "Lütfen alış ve bırakış konumunu kontrol edin",
+        title: t("carDetail.missingInfo"),
+        description: t("carDetail.missingInfoDesc"),
         variant: "destructive",
       });
       return;
@@ -338,8 +342,8 @@ const CarDetail = () => {
 
     if (selectedPricing === "day" && !selectedInsurance) {
       toast({
-        title: "Sigorta Seçimi Gerekli",
-        description: "Günlük kiralama için sigorta paketi seçimi zorunludur",
+        title: t("carDetail.insuranceRequired"),
+        description: t("carDetail.insuranceRequiredDesc"),
         variant: "destructive",
       });
       return;
@@ -348,8 +352,8 @@ const CarDetail = () => {
     if (selectedPricing === "day" && additionalDriverEnabled) {
       if (!additionalDriverName.trim() || !additionalDriverLicense.trim()) {
         toast({
-          title: "Ek Sürücü Bilgisi Eksik",
-          description: "Ek sürücü adı ve ehliyet numarasını girin.",
+          title: t("carDetail.additionalDriverMissing"),
+          description: t("carDetail.additionalDriverMissingDesc"),
           variant: "destructive",
         });
         return;
@@ -417,7 +421,7 @@ const CarDetail = () => {
         additional_driver_fee: pricing.additionalDriverFee,
       });
 
-      if (bookingError || !bookingData) throw new Error(bookingError ?? "Rezervasyon oluşturulamadı.");
+      if (bookingError || !bookingData) throw new Error(bookingError ?? t("carDetail.reservationCreateFailed"));
 
       navigate("/payment", {
         state: {
@@ -445,9 +449,9 @@ const CarDetail = () => {
       });
     } catch (error: unknown) {
       console.error("Rezervasyon hatası:", error);
-      const message = error instanceof Error ? error.message : "Bir hata oluştu";
+      const message = error instanceof Error ? error.message : t("common.error");
       toast({
-        title: "Rezervasyon Hatası",
+        title: t("carDetail.reservationError"),
         description: message,
         variant: "destructive",
       });
@@ -487,13 +491,13 @@ const CarDetail = () => {
         <div className="container mx-auto max-w-6xl">
           <Link to="/cars" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm">
             <ArrowLeft className="w-4 h-4" />
-            Araçlara Dön
+            {t("carDetail.backToCars")}
           </Link>
 
           {subscription && (
             <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
               <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                🎉 {subscription.tier.toUpperCase()} üyesi olarak %{subscription.discount_percentage} indirim kazanıyorsunuz!
+                🎉 {t("carDetail.subscriptionBanner", { tier: subscription.tier.toUpperCase(), percent: subscription.discount_percentage })}
               </p>
             </div>
           )}
@@ -501,7 +505,7 @@ const CarDetail = () => {
           {campaign && (
             <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
               <p className="text-sm font-medium text-green-700 dark:text-green-300">
-                🏷️ {campaign.name} — %{campaign.discount_percentage} kampanya indirimi uygulanacak
+                🏷️ {t("carDetail.campaignBanner", { name: campaign.name, percent: campaign.discount_percentage })}
               </p>
             </div>
           )}
@@ -516,25 +520,25 @@ const CarDetail = () => {
                 />
                 {car.available ? (
                   <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground text-lg px-4 py-2">
-                    Müsait
+                    {t("carDetail.available")}
                   </Badge>
                 ) : (
                   <Badge variant="destructive" className="absolute top-4 right-4 text-lg px-4 py-2">
-                    Kullanımda
+                    {t("carDetail.inUse")}
                   </Badge>
                 )}
               </div>
 
               <div className="bg-card border border-border rounded-2xl p-6">
-                <h3 className="font-semibold text-foreground mb-4 text-lg">Araç Özellikleri</h3>
+                <h3 className="font-semibold text-foreground mb-4 text-lg">{t("carDetail.featuresTitle")}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                       <Users className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="text-sm text-muted-foreground">Kapasite</div>
-                      <div className="font-semibold text-foreground">{car.seats} Kişi</div>
+                      <div className="text-sm text-muted-foreground">{t("carDetail.capacity")}</div>
+                      <div className="font-semibold text-foreground">{t("carDetail.seats", { count: car.seats })}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -542,7 +546,7 @@ const CarDetail = () => {
                       <Fuel className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="text-sm text-muted-foreground">Yakıt</div>
+                      <div className="text-sm text-muted-foreground">{t("carDetail.fuel")}</div>
                       <div className="font-semibold text-foreground">{car.fuel_type}</div>
                     </div>
                   </div>
@@ -551,7 +555,7 @@ const CarDetail = () => {
                       <Settings className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="text-sm text-muted-foreground">Vites</div>
+                      <div className="text-sm text-muted-foreground">{t("carDetail.transmission")}</div>
                       <div className="font-semibold text-foreground">{car.transmission}</div>
                     </div>
                   </div>
@@ -560,15 +564,15 @@ const CarDetail = () => {
                       <Shield className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="text-sm text-muted-foreground">Sigorta</div>
-                      <div className="font-semibold text-foreground">Tam Kasko</div>
+                      <div className="text-sm text-muted-foreground">{t("carDetail.insuranceLabel")}</div>
+                      <div className="font-semibold text-foreground">{t("carDetail.fullCoverage")}</div>
                     </div>
                   </div>
                 </div>
 
                 {car.description && (
                   <div className="mt-6 pt-6 border-t border-border">
-                    <h4 className="font-semibold text-foreground mb-2">Açıklama</h4>
+                    <h4 className="font-semibold text-foreground mb-2">{t("carDetail.description")}</h4>
                     <p className="text-muted-foreground">{car.description}</p>
                   </div>
                 )}
@@ -578,7 +582,7 @@ const CarDetail = () => {
                 <div className="mt-6">
                   <div className="bg-card border border-border rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-foreground text-lg">Araç Konumu</h3>
+                      <h3 className="font-semibold text-foreground text-lg">{t("carDetail.locationTitle")}</h3>
                       <Button
                         variant="outline"
                         size="sm"
@@ -586,7 +590,7 @@ const CarDetail = () => {
                         className="gap-2"
                       >
                         <Navigation className="w-4 h-4" />
-                        Konumu Güncelle
+                        {t("carDetail.updateLocation")}
                       </Button>
                     </div>
                     <CarLocationMap
@@ -604,12 +608,12 @@ const CarDetail = () => {
                         {lockStatus === "locked" ? (
                           <>
                             <Lock className="w-4 h-4" />
-                            Kilitli
+                            {t("carDetail.locked")}
                           </>
                         ) : (
                           <>
                             <Unlock className="w-4 h-4" />
-                            Açık
+                            {t("carDetail.unlocked")}
                           </>
                         )}
                       </Button>
@@ -622,12 +626,12 @@ const CarDetail = () => {
                         {lockStatus === "locked" ? (
                           <>
                             <Unlock className="w-4 h-4" />
-                            Kilidi Aç
+                            {t("carDetail.unlock")}
                           </>
                         ) : (
                           <>
                             <Lock className="w-4 h-4" />
-                            Kilitle
+                            {t("carDetail.lock")}
                           </>
                         )}
                       </Button>
@@ -647,29 +651,29 @@ const CarDetail = () => {
                   </div>
                   {car.plate_number && (
                     <div className="text-sm text-muted-foreground mt-2">
-                      Plaka: <span className="font-semibold">{car.plate_number}</span>
+                      {t("carDetail.plate")}: <span className="font-semibold">{car.plate_number}</span>
                     </div>
                   )}
                   {car.year && (
                     <div className="text-sm text-muted-foreground mt-1">
-                      Model Yılı: <span className="font-semibold">{car.year}</span>
+                      {t("carDetail.modelYear")}: <span className="font-semibold">{car.year}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1 mt-2">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-5 h-5 fill-accent text-accent" />
                     ))}
-                    <span className="text-muted-foreground ml-2">(128 değerlendirme)</span>
+                    <span className="text-muted-foreground ml-2">{t("carDetail.reviews", { count: 128 })}</span>
                   </div>
                 </div>
 
                 <div className="border-t border-border pt-6 mb-6">
-                  <h3 className="font-semibold text-foreground mb-4 text-lg">Kiralama Paketleri</h3>
+                  <h3 className="font-semibold text-foreground mb-4 text-lg">{t("carDetail.packagesTitle")}</h3>
                   
                   <Tabs defaultValue="minute" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="minute">Dakika</TabsTrigger>
-                      <TabsTrigger value="day">Gün</TabsTrigger>
+                      <TabsTrigger value="minute">{t("carDetail.tabMinute")}</TabsTrigger>
+                      <TabsTrigger value="day">{t("carDetail.tabDay")}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="minute" className="space-y-4 mt-4">
@@ -678,26 +682,26 @@ const CarDetail = () => {
                           <div className="flex items-center gap-3">
                             <Clock className="w-8 h-8 text-primary" />
                             <div>
-                              <h4 className="font-bold text-xl">Dakikalık Kiralama</h4>
-                              <p className="text-sm text-muted-foreground">Esnek kullanım</p>
+                              <h4 className="font-bold text-xl">{t("carDetail.minuteRental")}</h4>
+                              <p className="text-sm text-muted-foreground">{t("carDetail.flexibleUse")}</p>
                             </div>
                           </div>
                           <div className="text-right">
                             <div className="text-3xl font-bold text-primary">{car.price_per_minute}₺</div>
-                            <div className="text-xs text-muted-foreground">dakika başı</div>
+                            <div className="text-xs text-muted-foreground">{t("carDetail.perMinute")}</div>
                           </div>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">15 Dakika</span>
+                            <span className="text-muted-foreground">{t("carDetail.minutes15")}</span>
                             <span className="font-semibold">{(car.price_per_minute * 15).toFixed(2)}₺</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">30 Dakika</span>
+                            <span className="text-muted-foreground">{t("carDetail.minutes30")}</span>
                             <span className="font-semibold">{(car.price_per_minute * 30).toFixed(2)}₺</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">45 Dakika</span>
+                            <span className="text-muted-foreground">{t("carDetail.minutes45")}</span>
                             <span className="font-semibold">{(car.price_per_minute * 45).toFixed(2)}₺</span>
                           </div>
                         </div>
@@ -706,18 +710,18 @@ const CarDetail = () => {
                           className="w-full mt-4"
                           onClick={() => setSelectedPricing("minute")}
                         >
-                          {selectedPricing === "minute" ? "✓ Seçildi" : "Seç"}
+                          {selectedPricing === "minute" ? t("carDetail.selected") : t("carDetail.select")}
                         </Button>
                       </div>
                       <div className="bg-background border border-border rounded-xl p-6">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <h4 className="font-semibold text-lg">Saatlik Kiralama</h4>
-                            <p className="text-sm text-muted-foreground">Dakikalık altından saat seçimi</p>
+                            <h4 className="font-semibold text-lg">{t("carDetail.hourlyRental")}</h4>
+                            <p className="text-sm text-muted-foreground">{t("carDetail.hourlyDesc")}</p>
                           </div>
                           <div className="text-right">
                             <div className="text-2xl font-bold text-primary">{car.price_per_hour}₺</div>
-                            <div className="text-xs text-muted-foreground">saat başı</div>
+                            <div className="text-xs text-muted-foreground">{t("carDetail.perHour")}</div>
                           </div>
                         </div>
                         <div className="grid grid-cols-4 gap-2">
@@ -731,12 +735,12 @@ const CarDetail = () => {
                                 setSelectedPricing("hour");
                               }}
                             >
-                              {hour === 0.5 ? "30 dk" : `${hour} Saat`}
+                              {hour === 0.5 ? t("carDetail.halfHour") : t("carDetail.hours", { count: hour })}
                             </Button>
                           ))}
                         </div>
                         <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                          <span>Toplam</span>
+                          <span>{t("carDetail.total")}</span>
                           <span className="font-semibold text-foreground">
                             {(car.price_per_hour * rentalHours).toFixed(2)}₺
                           </span>
@@ -744,10 +748,10 @@ const CarDetail = () => {
                       </div>
                       <div>
                         <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
-                          <Badge variant="secondary">KM</Badge>
-                          Paketleri
+                          <Badge variant="secondary">{t("carDetail.kmBadge")}</Badge>
+                          {t("carDetail.kmPackages")}
                         </h4>
-                        <p className="text-xs text-muted-foreground mb-3">Paketsiz kullanım: {KM_PRICE_PER_UNIT}₺/km</p>
+                        <p className="text-xs text-muted-foreground mb-3">{t("carDetail.kmNoPackage", { price: KM_PRICE_PER_UNIT })}</p>
                         <div className="grid grid-cols-2 gap-3">
                           {kmPackages.map((pkg) => (
                             <button
@@ -762,10 +766,10 @@ const CarDetail = () => {
                             >
                               <div className="text-xl font-bold text-foreground">{pkg.label}</div>
                               <div className="text-lg font-semibold text-primary">
-                                {pkg.price > 0 ? `${pkg.price}₺` : "Seç"}
+                                {pkg.price > 0 ? `${pkg.price}₺` : t("carDetail.select")}
                               </div>
                               {selectedKmPackage === pkg.id && (
-                                <div className="mt-2 text-xs font-semibold text-primary">✓ Seçildi</div>
+                                <div className="mt-2 text-xs font-semibold text-primary">{t("carDetail.selected")}</div>
                               )}
                             </button>
                           ))}
@@ -780,20 +784,20 @@ const CarDetail = () => {
                           <div className="flex items-center gap-3">
                             <Calendar className="w-8 h-8 text-primary" />
                             <div>
-                              <h4 className="font-bold text-xl">Günlük Kiralama</h4>
-                              <p className="text-sm text-muted-foreground">En ekonomik</p>
+                              <h4 className="font-bold text-xl">{t("carDetail.dailyRental")}</h4>
+                              <p className="text-sm text-muted-foreground">{t("carDetail.mostEconomical")}</p>
                             </div>
                           </div>
                           <div className="text-right">
                             <div className="text-3xl font-bold text-primary">{car.price_per_day}₺</div>
-                            <div className="text-xs text-muted-foreground">günlük</div>
+                            <div className="text-xs text-muted-foreground">{t("carDetail.perDay")}</div>
                           </div>
                         </div>
                         
                         <div className="mb-6 space-y-3">
                           <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium text-foreground">Gün Sayısı</label>
-                            <div className="text-2xl font-bold text-primary">{rentalDays} Gün</div>
+                            <label className="text-sm font-medium text-foreground">{t("carDetail.dayCount")}</label>
+                            <div className="text-2xl font-bold text-primary">{t("carDetail.days", { count: rentalDays })}</div>
                           </div>
                           <Slider
                             value={[rentalDays]}
@@ -804,17 +808,17 @@ const CarDetail = () => {
                             className="w-full"
                           />
                           <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>1 gün</span>
-                            <span>30 gün</span>
+                            <span>{t("carDetail.dayMin")}</span>
+                            <span>{t("carDetail.dayMax")}</span>
                           </div>
                         </div>
 
                         <div className="bg-background border border-border rounded-lg p-4 mb-4">
                           <div className="flex justify-between items-center">
                             <div>
-                              <div className="text-sm text-muted-foreground">Toplam Tutar</div>
+                              <div className="text-sm text-muted-foreground">{t("carDetail.totalAmount")}</div>
                               <div className="text-xs text-muted-foreground mt-1">
-                                {rentalDays} gün × {car.price_per_day}₺
+                                {t("carDetail.daysMultiplier", { days: rentalDays, price: car.price_per_day })}
                               </div>
                             </div>
                             <div className="text-right">
@@ -823,7 +827,7 @@ const CarDetail = () => {
                               </div>
                               {subscription && (
                                 <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                  -%{subscription.discount_percentage} indirim uygulanacak
+                                  {t("carDetail.discountApplied", { percent: subscription.discount_percentage })}
                                 </div>
                               )}
                             </div>
@@ -835,15 +839,15 @@ const CarDetail = () => {
                           className="w-full"
                           onClick={() => setSelectedPricing("day")}
                         >
-                          {selectedPricing === "day" ? "✓ Seçildi" : "Seç"}
+                          {selectedPricing === "day" ? t("carDetail.selected") : t("carDetail.select")}
                         </Button>
                       </div>
                       <div>
                         <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
-                          <Badge variant="secondary">KM</Badge>
-                          Paketleri
+                          <Badge variant="secondary">{t("carDetail.kmBadge")}</Badge>
+                          {t("carDetail.kmPackages")}
                         </h4>
-                        <p className="text-xs text-muted-foreground mb-3">Paketsiz kullanım: {KM_PRICE_PER_UNIT}₺/km</p>
+                        <p className="text-xs text-muted-foreground mb-3">{t("carDetail.kmNoPackage", { price: KM_PRICE_PER_UNIT })}</p>
                         <div className="grid grid-cols-2 gap-3">
                           {kmPackages.map((pkg) => (
                             <button
@@ -858,10 +862,10 @@ const CarDetail = () => {
                             >
                               <div className="text-xl font-bold text-foreground">{pkg.label}</div>
                               <div className="text-lg font-semibold text-primary">
-                                {pkg.price > 0 ? `${pkg.price}₺` : "Seç"}
+                                {pkg.price > 0 ? `${pkg.price}₺` : t("carDetail.select")}
                               </div>
                               {selectedKmPackage === pkg.id && (
-                                <div className="mt-2 text-xs font-semibold text-primary">✓ Seçildi</div>
+                                <div className="mt-2 text-xs font-semibold text-primary">{t("carDetail.selected")}</div>
                               )}
                             </button>
                           ))}
@@ -875,7 +879,7 @@ const CarDetail = () => {
                   <div className="border-t border-border pt-6 mb-6">
                     <h3 className="font-semibold text-foreground mb-4 text-lg flex items-center gap-2">
                       <UserPlus className="w-5 h-5" />
-                      Ek Sürücü
+                      {t("carDetail.additionalDriver")}
                     </h3>
                     <div className="rounded-xl border border-border p-4 space-y-4">
                       <div className="flex items-start gap-3">
@@ -893,11 +897,14 @@ const CarDetail = () => {
                         />
                         <div className="flex-1">
                           <label htmlFor="additional-driver" className="font-medium cursor-pointer">
-                            Ek sürücü ekle
+                            {t("carDetail.addAdditionalDriver")}
                           </label>
                           <p className="text-sm text-muted-foreground mt-1">
-                            Günlük {ADDITIONAL_DRIVER_DAILY_FEE} ₺ — {rentalDays} gün için{" "}
-                            {(ADDITIONAL_DRIVER_DAILY_FEE * rentalDays).toLocaleString("tr-TR")} ₺
+                            {t("carDetail.additionalDriverFee", {
+                              fee: ADDITIONAL_DRIVER_DAILY_FEE,
+                              days: rentalDays,
+                              total: (ADDITIONAL_DRIVER_DAILY_FEE * rentalDays).toLocaleString(),
+                            })}
                           </p>
                         </div>
                       </div>
@@ -905,11 +912,11 @@ const CarDetail = () => {
                         <div className="grid sm:grid-cols-2 gap-4 pt-2">
                           <div>
                             <label className="text-sm font-medium text-foreground mb-2 block">
-                              Ad Soyad
+                              {t("carDetail.fullName")}
                             </label>
                             <input
                               type="text"
-                              placeholder="Ek sürücünün adı soyadı"
+                              placeholder={t("carDetail.additionalDriverNamePlaceholder")}
                               value={additionalDriverName}
                               onChange={(e) => setAdditionalDriverName(e.target.value)}
                               className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
@@ -917,11 +924,11 @@ const CarDetail = () => {
                           </div>
                           <div>
                             <label className="text-sm font-medium text-foreground mb-2 block">
-                              Ehliyet Numarası
+                              {t("carDetail.licenseNumber")}
                             </label>
                             <input
                               type="text"
-                              placeholder="Ek sürücü ehliyet no"
+                              placeholder={t("carDetail.additionalDriverLicensePlaceholder")}
                               value={additionalDriverLicense}
                               onChange={(e) => setAdditionalDriverLicense(e.target.value.toUpperCase())}
                               className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
@@ -937,17 +944,17 @@ const CarDetail = () => {
                   <div className="border-t border-border pt-6 mb-6">
                     <h3 className="font-semibold text-foreground mb-4 text-lg flex items-center gap-2">
                       <MapPin className="w-5 h-5" />
-                      Alış ve Bırakış Noktası
+                      {t("carDetail.pickupDropoff")}
                     </h3>
   
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm font-medium text-foreground mb-2 block">
-                          Alış Noktası
+                          {t("carDetail.pickupPoint")}
                         </label>
                         <input
                           type="text"
-                          placeholder="Aracın lokasyonu"
+                          placeholder={t("carDetail.locationPlaceholder")}
                           value={pickupAddress}
                           onChange={(e) => setPickupAddress(e.target.value)}
                           className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
@@ -956,11 +963,11 @@ const CarDetail = () => {
   
                       <div>
                         <label className="text-sm font-medium text-foreground mb-2 block">
-                          Bırakış Noktası
+                          {t("carDetail.dropoffPoint")}
                         </label>
                         <input
                           type="text"
-                          placeholder="Aracın lokasyonu"
+                          placeholder={t("carDetail.locationPlaceholder")}
                           value={dropoffAddress}
                           onChange={(e) => setDropoffAddress(e.target.value)}
                           className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
@@ -979,67 +986,66 @@ const CarDetail = () => {
                 <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6 mt-6">
                   <div className="flex items-center gap-2 text-primary mb-2">
                     <Shield className="w-5 h-5" />
-                    <span className="font-semibold">Güvenli Kiralama</span>
+                    <span className="font-semibold">{t("carDetail.safeRental")}</span>
                   </div>
                   <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Kapsamlı sigorta seçenekleri</li>
-                    <li>• Seçili planlarda yakıt desteği</li>
-                    <li>• 7/24 yol yardım hizmeti</li>
-                    <li>• Esnek iptal koşulları</li>
+                    {(t("carDetail.safeRentalItems", { returnObjects: true }) as string[]).map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
                   </ul>
                 </div>
 
                 {pricingBreakdown && (
                   <div className="bg-muted/40 border border-border rounded-xl p-4 mb-6 space-y-2 text-sm">
-                    <p className="font-semibold text-foreground mb-2">Fiyat Özeti</p>
+                    <p className="font-semibold text-foreground mb-2">{t("carDetail.priceSummary")}</p>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Kiralama bedeli</span>
+                      <span className="text-muted-foreground">{t("carDetail.rentalFee")}</span>
                       <span>{pricingBreakdown.rentalBase.toFixed(2)} ₺</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Provizyon</span>
+                      <span className="text-muted-foreground">{t("carDetail.provision")}</span>
                       <span>{pricingBreakdown.provisionFee.toFixed(2)} ₺</span>
                     </div>
                     {pricingBreakdown.insurancePrice > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Sigorta</span>
+                        <span className="text-muted-foreground">{t("carDetail.insuranceFee")}</span>
                         <span>{pricingBreakdown.insurancePrice.toFixed(2)} ₺</span>
                       </div>
                     )}
                     {pricingBreakdown.kmPackagePrice > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">KM paketi</span>
+                        <span className="text-muted-foreground">{t("carDetail.kmPackageFee")}</span>
                         <span>{pricingBreakdown.kmPackagePrice.toFixed(2)} ₺</span>
                       </div>
                     )}
                     {pricingBreakdown.zoneFee > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Farklı bölge ücreti</span>
+                        <span className="text-muted-foreground">{t("carDetail.zoneFee")}</span>
                         <span>{pricingBreakdown.zoneFee.toFixed(2)} ₺</span>
                       </div>
                     )}
                     {pricingBreakdown.additionalDriverFee > 0 && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                          Ek sürücü ({rentalDays} gün × {ADDITIONAL_DRIVER_DAILY_FEE} ₺)
+                          {t("carDetail.additionalDriverLine", { days: rentalDays, fee: ADDITIONAL_DRIVER_DAILY_FEE })}
                         </span>
                         <span>{pricingBreakdown.additionalDriverFee.toFixed(2)} ₺</span>
                       </div>
                     )}
                     {pricingBreakdown.subscriptionDiscount > 0 && (
                       <div className="flex justify-between text-amber-600">
-                        <span>Abonelik indirimi</span>
+                        <span>{t("carDetail.subscriptionDiscount")}</span>
                         <span>-{pricingBreakdown.subscriptionDiscount.toFixed(2)} ₺</span>
                       </div>
                     )}
                     {pricingBreakdown.campaignDiscount > 0 && (
                       <div className="flex justify-between text-green-600">
-                        <span>Kampanya indirimi</span>
+                        <span>{t("carDetail.campaignDiscount")}</span>
                         <span>-{pricingBreakdown.campaignDiscount.toFixed(2)} ₺</span>
                       </div>
                     )}
                     <div className="flex justify-between pt-2 border-t font-bold text-base">
-                      <span>Toplam</span>
+                      <span>{t("carDetail.total")}</span>
                       <span className="text-primary">{pricingBreakdown.totalPrice.toFixed(2)} ₺</span>
                     </div>
                   </div>
@@ -1052,8 +1058,8 @@ const CarDetail = () => {
                   onClick={handleReserve}
                 >
                   {!car.available 
-                    ? "Şu An Müsait Değil" 
-                    : "Rezervasyon Oluştur"}
+                    ? t("carDetail.notAvailableNow") 
+                    : t("carDetail.createReservation")}
                 </Button>
               </div>
             </div>

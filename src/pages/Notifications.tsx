@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Check, Trash2 } from "lucide-react";
+import { Bell, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { useDateLocale } from "@/hooks/useDateLocale";
 
 interface Notification {
   id: string;
@@ -22,6 +23,8 @@ interface Notification {
 }
 
 const Notifications = () => {
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -46,8 +49,8 @@ const Notifications = () => {
       if (error) throw error;
       setNotifications(data || []);
     } catch (error) {
-      console.error("Bildirimler yüklenemedi:", error);
-      toast.error("Bildirimler yüklenemedi");
+      console.error("Notifications load error:", error);
+      toast.error(t("support.notifications.loadError"));
     } finally {
       setLoading(false);
     }
@@ -60,8 +63,8 @@ const Notifications = () => {
       .eq("id", id);
 
     if (!error) {
-      setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, is_read: true } : n)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
     }
   };
@@ -74,22 +77,13 @@ const Notifications = () => {
       .eq("is_read", false);
 
     if (!error) {
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, is_read: true }))
-      );
-      toast.success("Tüm bildirimler okundu olarak işaretlendi");
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      toast.success(t("support.notifications.allMarkedRead"));
     }
   };
 
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      booking: "Rezervasyon",
-      campaign: "Kampanya",
-      system: "Sistem",
-      review: "Değerlendirme",
-    };
-    return labels[type] || type;
-  };
+  const getTypeLabel = (type: string) =>
+    t(`support.notifications.types.${type}`, { defaultValue: type });
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
@@ -101,35 +95,37 @@ const Notifications = () => {
     return colors[type] || "bg-gray-500";
   };
 
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
-      
+
       <main className="pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">Bildirimler</h1>
+              <h1 className="text-4xl font-bold text-foreground mb-2">{t("support.notifications.title")}</h1>
               <p className="text-muted-foreground">
-                {notifications.filter(n => !n.is_read).length} okunmamış bildirim
+                {t("support.notifications.unreadCount", { count: unreadCount })}
               </p>
             </div>
-            {notifications.some(n => !n.is_read) && (
+            {notifications.some((n) => !n.is_read) && (
               <Button onClick={markAllAsRead} variant="outline">
                 <Check className="w-4 h-4 mr-2" />
-                Tümünü Okundu İşaretle
+                {t("support.notifications.markAllRead")}
               </Button>
             )}
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-xl text-muted-foreground">Yükleniyor...</p>
+              <p className="text-xl text-muted-foreground">{t("common.loading")}</p>
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-12">
               <Bell className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <p className="text-xl text-muted-foreground">Henüz bildiriminiz yok</p>
+              <p className="text-xl text-muted-foreground">{t("support.notifications.empty")}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -152,16 +148,12 @@ const Notifications = () => {
                       <p className="text-muted-foreground mb-2">{notification.message}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
-                          {format(new Date(notification.created_at), "d MMMM yyyy, HH:mm", { locale: tr })}
+                          {format(new Date(notification.created_at), "d MMMM yyyy, HH:mm", { locale: dateLocale })}
                         </span>
                         {!notification.is_read && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => markAsRead(notification.id)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => markAsRead(notification.id)}>
                             <Check className="w-4 h-4 mr-1" />
-                            Okundu
+                            {t("support.notifications.markRead")}
                           </Button>
                         )}
                       </div>

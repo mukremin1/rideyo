@@ -1,5 +1,7 @@
 ﻿import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useDateLocale } from "@/hooks/useDateLocale";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,13 +11,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Check, Crown, Star, Zap } from "lucide-react";
+import { format } from "date-fns";
 
 interface SubscriptionPlan {
   tier: "basic" | "premium" | "vip";
-  name: string;
   price: number;
   discount: number;
-  features: string[];
   icon: React.ReactNode;
   color: string;
 }
@@ -28,15 +29,17 @@ interface ActiveSubscription {
   status: string;
 }
 
-const plans: SubscriptionPlan[] = [
-  { tier: "basic", name: "Temel", price: 5000, discount: 5, features: ["%5 indirim tüm kiralamalarınızda", "Standart müşteri desteği", "Aylık kullanım raporları", "Temel sigorta paketi", "Ücretsiz iptal (15 dk önce)"], icon: <Zap className="h-6 w-6" />, color: "bg-blue-500" },
-  { tier: "premium", name: "Premium", price: 7500, discount: 15, features: ["%15 indirim tüm kiralamalarınızda", "Öncelikli müşteri desteği", "Haftalık detaylı raporlar", "Gelişmiş sigorta paketi", "Erken rezervasyon hakkı", "Ücretsiz araç değişikliği", "Ücretsiz iptal (30 dk önce)"], icon: <Star className="h-6 w-6" />, color: "bg-purple-500" },
-  { tier: "vip", name: "VIP", price: 10000, discount: 25, features: ["%25 indirim tüm kiralamalarınızda", "7/24 özel VIP destek", "Günlük detaylı kullanım raporları", "Premium sigorta paketi", "Öncelikli erken rezervasyon", "Ücretsiz trafik ek süresi", "Ücretsiz havalimanı teslimat", "Lüks araç kategorisi erişimi", "Ücretsiz iptal (1 saat önce)"], icon: <Crown className="h-6 w-6" />, color: "bg-amber-500" },
+const PLAN_TIERS: SubscriptionPlan[] = [
+  { tier: "basic", price: 5000, discount: 5, icon: <Zap className="h-6 w-6" />, color: "bg-blue-500" },
+  { tier: "premium", price: 7500, discount: 15, icon: <Star className="h-6 w-6" />, color: "bg-purple-500" },
+  { tier: "vip", price: 10000, discount: 25, icon: <Crown className="h-6 w-6" />, color: "bg-amber-500" },
 ];
 
 export default function Subscription() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const [currentSubscription, setCurrentSubscription] = useState<ActiveSubscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoadingTier, setActionLoadingTier] = useState<string | null>(null);
@@ -59,11 +62,11 @@ export default function Subscription() {
       setCurrentSubscription(data || null);
     } catch (error: unknown) {
       console.error("Error fetching subscription:", error);
-      toast.error("Abonelik bilgileri alınamadı.");
+      toast.error(t("subscription.fetchError"));
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, t]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -76,7 +79,7 @@ export default function Subscription() {
   const handleSubscribe = async (plan: SubscriptionPlan) => {
     if (!user) return;
     if (currentSubscription?.tier === plan.tier) {
-      toast.message("Bu paket zaten aktif.");
+      toast.message(t("subscription.alreadyActive"));
       return;
     }
 
@@ -103,11 +106,11 @@ export default function Subscription() {
       });
       if (error) throw error;
 
-      toast.success(`${plan.name} paketiniz aktif edildi!`);
+      toast.success(t("subscription.activated", { name: t(`subscription.plans.${plan.tier}.name`) }));
       await fetchCurrentSubscription();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-      toast.error("Abonelik işlemi başarısız: " + message);
+      const message = error instanceof Error ? error.message : t("subscription.unknownError");
+      toast.error(t("subscription.subscribeFailed", { message }));
     } finally {
       setActionLoadingTier(null);
     }
@@ -125,11 +128,11 @@ export default function Subscription() {
         .eq("user_id", user.id);
 
       if (error) throw error;
-      toast.success("Aktif abonelik iptal edildi.");
+      toast.success(t("subscription.cancelSuccess"));
       setCurrentSubscription(null);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-      toast.error("Abonelik iptal edilemedi: " + message);
+      const message = error instanceof Error ? error.message : t("subscription.unknownError");
+      toast.error(t("subscription.cancelFailed", { message }));
     } finally {
       setCancelling(false);
     }
@@ -141,50 +144,56 @@ export default function Subscription() {
       <main className="flex-1 container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Aylık Abonelik Paketleri</h1>
-            <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">Size uygun paketi seçin ve tüm kiralamalarınızda indirimlerden yararlanın.</p>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">{t("subscription.title")}</h1>
+            <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">{t("subscription.subtitle")}</p>
             <div className="mt-4 inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-              <Zap className="h-4 w-4" /> Paketler 1 ay geçerlidir
+              <Zap className="h-4 w-4" /> {t("subscription.validOneMonth")}
             </div>
           </div>
 
           {currentSubscription && (
             <Card className="mb-8 border-primary">
-              <CardHeader><CardTitle className="flex items-center gap-2"><Badge variant="default">Aktif Abonelik</Badge></CardTitle></CardHeader>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Badge variant="default">{t("subscription.activeBadge")}</Badge></CardTitle></CardHeader>
               <CardContent className="space-y-2">
-                <p className="text-lg"><strong>{plans.find((p) => p.tier === currentSubscription.tier)?.name}</strong> paketiniz aktif</p>
-                <p className="text-sm text-muted-foreground">Bitiş tarihi: {new Date(currentSubscription.end_date).toLocaleDateString("tr-TR")}</p>
+                <p className="text-lg">{t("subscription.activePlan", { name: t(`subscription.plans.${currentSubscription.tier}.name`) })}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("subscription.endDate", { date: format(new Date(currentSubscription.end_date), "P", { locale: dateLocale }) })}
+                </p>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" onClick={handleCancelSubscription} disabled={cancelling}>{cancelling ? "İptal ediliyor..." : "Aboneliği İptal Et"}</Button>
+                <Button variant="outline" onClick={handleCancelSubscription} disabled={cancelling}>
+                  {cancelling ? t("subscription.cancelling") : t("subscription.cancelSubscription")}
+                </Button>
               </CardFooter>
             </Card>
           )}
 
           {loading ? (
-            <Card className="p-8 text-center"><CardDescription>Abonelik paketleri yükleniyor...</CardDescription></Card>
+            <Card className="p-8 text-center"><CardDescription>{t("subscription.loadingPlans")}</CardDescription></Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {plans.map((plan) => {
+              {PLAN_TIERS.map((plan) => {
                 const isActive = currentSubscription?.tier === plan.tier;
                 const isWorking = actionLoadingTier === plan.tier;
+                const features = t(`subscription.plans.${plan.tier}.features`, { returnObjects: true }) as string[];
+
                 return (
                   <Card key={plan.tier} className={`relative ${isActive ? "border-primary shadow-lg" : ""}`}>
                     <CardHeader>
                       <div className={`${plan.color} w-12 h-12 rounded-lg flex items-center justify-center text-white mb-4`}>{plan.icon}</div>
-                      <CardTitle className="text-xl">{plan.name}</CardTitle>
-                      <CardDescription><span className="text-3xl font-bold text-foreground">₺{plan.price}</span><span className="text-muted-foreground">/ay</span></CardDescription>
+                      <CardTitle className="text-xl">{t(`subscription.plans.${plan.tier}.name`)}</CardTitle>
+                      <CardDescription><span className="text-3xl font-bold text-foreground">₺{plan.price}</span><span className="text-muted-foreground">{t("subscription.perMonth")}</span></CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-3">
-                        {plan.features.map((feature, idx) => (
+                        {features.map((feature, idx) => (
                           <li key={idx} className="flex items-start gap-2"><Check className="h-5 w-5 text-primary shrink-0 mt-0.5" /><span className="text-sm">{feature}</span></li>
                         ))}
                       </ul>
                     </CardContent>
                     <CardFooter>
                       <Button className="w-full" onClick={() => void handleSubscribe(plan)} disabled={isActive || isWorking} variant={isActive ? "outline" : "default"}>
-                        {isActive ? "Aktif Paket" : isWorking ? "İşleniyor..." : "Paketi Seç"}
+                        {isActive ? t("subscription.activePackage") : isWorking ? t("subscription.processing") : t("subscription.selectPackage")}
                       </Button>
                     </CardFooter>
                   </Card>

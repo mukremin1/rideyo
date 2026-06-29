@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -65,6 +66,7 @@ const LocationPickerMap = ({
   onLocationSelect,
   height = "300px",
 }: LocationPickerMapProps) => {
+  const { t, i18n } = useTranslation();
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(
     initialLat && initialLng ? [initialLat, initialLng] : null
   );
@@ -74,11 +76,12 @@ const LocationPickerMap = ({
 
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
+      const lang = i18n.language?.split("-")[0] ?? "tr";
       const url = new URL("https://nominatim.openstreetmap.org/reverse");
       url.searchParams.set("format", "json");
       url.searchParams.set("lat", lat.toString());
       url.searchParams.set("lon", lng.toString());
-      url.searchParams.set("accept-language", "tr");
+      url.searchParams.set("accept-language", lang);
 
       const res = await fetch(url.toString(), {
         headers: { Accept: "application/json" },
@@ -130,7 +133,7 @@ const LocationPickerMap = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground flex items-center gap-1 break-words">
           <MapPin className="w-4 h-4 shrink-0" />
-          Haritada konumu seçmek için tıklayın
+          {t("components.locationPickerMap.clickToSelect")}
         </p>
         <Button
           type="button"
@@ -141,7 +144,7 @@ const LocationPickerMap = ({
           className="w-full sm:w-auto"
         >
           <Crosshair className="w-4 h-4 mr-1" />
-          {isLocating ? "Konum alınıyor..." : "Mevcut Konum"}
+          {isLocating ? t("components.locationPickerMap.locating") : t("components.locationPickerMap.currentLocation")}
         </Button>
       </div>
 
@@ -159,12 +162,12 @@ const LocationPickerMap = ({
 
       {selectedPosition && (
         <div className="p-3 bg-muted/50 rounded-lg space-y-1 overflow-hidden">
-          <p className="text-sm font-medium text-foreground">Seçilen Konum</p>
+          <p className="text-sm font-medium text-foreground">{t("components.locationPickerMap.selectedLocation")}</p>
           <p className="text-xs text-muted-foreground break-words">
             {addressText || `${selectedPosition[0].toFixed(6)}, ${selectedPosition[1].toFixed(6)}`}
           </p>
           <p className="text-xs text-muted-foreground break-words">
-            Koordinatlar: {selectedPosition[0].toFixed(6)}, {selectedPosition[1].toFixed(6)}
+            {t("components.locationPickerMap.coordinates")} {selectedPosition[0].toFixed(6)}, {selectedPosition[1].toFixed(6)}
           </p>
         </div>
       )}

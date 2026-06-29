@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -26,11 +27,12 @@ interface NearbyCarData {
 }
 
 interface NearbyVehiclesProps {
-  maxDistance?: number; // in km
+  maxDistance?: number;
   limit?: number;
 }
 
 const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) => {
+  const { t } = useTranslation();
   const [cars, setCars] = useState<NearbyCarData[]>([]);
   const [loading, setLoading] = useState(true);
   const {
@@ -43,7 +45,7 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
   const navigate = useNavigate();
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Radius of the earth in km
+    const R = 6371;
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
     const a =
@@ -121,13 +123,20 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
     }
   }, [latitude, longitude, locationLoading, maxDistance, limit]);
 
+  const title = (
+    <CardTitle className="flex items-center gap-2">
+      <Navigation className="w-5 h-5 text-primary" />
+      {t("components.nearby.title")}
+    </CardTitle>
+  );
+
   if (locationLoading || loading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Navigation className="w-5 h-5" />
-            Yakındaki Araçlar
+            {t("components.nearby.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -147,7 +156,7 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Navigation className="w-5 h-5" />
-            Yakındaki Araçlar
+            {t("components.nearby.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -156,7 +165,7 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
             <p className="text-muted-foreground mb-4">{locationError}</p>
             <Button onClick={requestPermission} variant="outline">
               <MapPin className="w-4 h-4 mr-2" />
-              Konum İzni Ver
+              {t("components.nearby.grantPermission")}
             </Button>
           </div>
         </CardContent>
@@ -167,18 +176,13 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
   if (cars.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Navigation className="w-5 h-5" />
-            Yakındaki Araçlar
-          </CardTitle>
-        </CardHeader>
+        <CardHeader>{title}</CardHeader>
         <CardContent>
           <div className="text-center py-8">
             <Car className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">Yakınınızda müsait araç bulunamadı. Tüm araçları görüntüleyin.</p>
+            <p className="text-muted-foreground">{t("components.nearby.noCarsNearby")}</p>
             <Button onClick={() => navigate("/cars")} className="mt-4">
-              Tüm Araçlar
+              {t("components.nearby.allCars")}
             </Button>
           </div>
         </CardContent>
@@ -190,12 +194,9 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Navigation className="w-5 h-5 text-primary" />
-            Yakındaki Araçlar
-          </CardTitle>
+          {title}
           <Button variant="ghost" size="sm" onClick={() => navigate("/cars")}>
-            Tümünü Gör →
+            {t("components.nearby.viewAll")}
           </Button>
         </div>
       </CardHeader>
@@ -229,7 +230,9 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-muted-foreground">{car.fuel_type}</span>
-                  <span className="font-bold text-primary text-sm">{car.price_per_hour}₺/saat</span>
+                  <span className="font-bold text-primary text-sm">
+                    {car.price_per_hour}₺{t("components.nearby.perHour")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -241,4 +244,3 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
 };
 
 export default NearbyVehicles;
-

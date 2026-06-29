@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -15,6 +16,7 @@ interface Car {
 }
 
 const GPSTracking = () => {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [cars, setCars] = useState<Car[]>([]);
@@ -50,31 +52,22 @@ const GPSTracking = () => {
       <main className="pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              GPS Takip Sistemi
-            </h1>
-            <p className="text-muted-foreground">
-              Araçlarınızın gerçek zamanlı konumunu takip edin
-            </p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">{t("owner.gpsTracking.title")}</h1>
+            <p className="text-muted-foreground">{t("owner.gpsTracking.subtitle")}</p>
           </div>
 
           <Alert className="mb-6">
             <Info className="w-4 h-4" />
-            <AlertDescription>
-              GPS takip sistemi gerçek zamanlı olarak araç konumlarını gösterir. 
-              GPS cihazı kurulu araçlar listede görünecektir.
-            </AlertDescription>
+            <AlertDescription>{t("owner.gpsTracking.info")}</AlertDescription>
           </Alert>
 
           {authLoading || loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Araçlar yükleniyor...</p>
+              <p className="text-muted-foreground">{t("owner.gpsTracking.loadingCars")}</p>
             </div>
           ) : cars.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                GPS cihazı kurulu araç bulunamadı. Araç eklerken GPS Cihaz ID alanını doldurun.
-              </p>
+              <p className="text-muted-foreground">{t("owner.gpsTracking.noGpsCars")}</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-6">

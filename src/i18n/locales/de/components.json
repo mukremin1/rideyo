@@ -1,0 +1,168 @@
+{
+  "components": {
+    "features": {
+      "badge": "Vorteile",
+      "title": "Warum RideYo?",
+      "subtitle": "Alle Dienste für ein modernes mobiles Miet-Erlebnis auf einer Plattform.",
+      "items": {
+        "fastBooking": {
+          "title": "Schnelle Buchung",
+          "description": "Erstellen Sie in wenigen Schritten eine Reservierung, schließen Sie die Zahlung ab und fahren Sie los."
+        },
+        "flexiblePricing": {
+          "title": "Flexible Preise",
+          "description": "Wählen Sie zwischen Minuten-, Stunden- und Tagesmiete mit Kilometerpaketen."
+        },
+        "fuelSupport": {
+          "title": "Kraftstoffunterstützung",
+          "description": "Bei ausgewählten Mietplänen übernehmen wir die Kraftstoffkosten."
+        },
+        "secureExperience": {
+          "title": "Sicheres Erlebnis",
+          "description": "Fahren Sie sicher mit Identitätsprüfung, Versicherungsoptionen und einer gepflegten Flotte."
+        },
+        "access247": {
+          "title": "24/7-Zugang",
+          "description": "Buchen Sie jederzeit und erreichen Sie unser Support-Team, wann immer Sie es brauchen."
+        },
+        "mobileFirst": {
+          "title": "Mobile First",
+          "description": "Verwalten Sie alles von Ihrem Handy — Karte, Zahlung und Miete in einer App."
+        }
+      }
+    },
+    "about": {
+      "title": "Über RideYo",
+      "description": "RideYo ist eine mobile Plattform, die das Autovermietungserlebnis in der gesamten Türkei digitalisiert. Mit einer zuverlässigen Flotte, transparenten Preisen und einem nutzerorientierten Service sind wir für Sie da.",
+      "stats": {
+        "users": "Registrierte Nutzer",
+        "secure": "Sichere Transaktionen",
+        "support": "Kundensupport",
+        "experience": "Branchenerfahrung"
+      },
+      "advantagesTitle": "Plattformvorteile",
+      "advantages": [
+        "Optionen für verschiedene Bedürfnisse mit einer breiten Fahrzeugflotte",
+        "Transparente Preise ohne versteckte Gebühren",
+        "Umfassende Versicherung und Zusatzfahrer-Optionen",
+        "Schnelle Buchung, digitale Verifizierung und einfache Übergabe"
+      ],
+      "quote": "Wir verbinden Technologie und Service, damit jede Fahrt sicher, einfach und planbar ist.",
+      "quoteAuthor": "— RideYo Team"
+    },
+    "howItWorks": {
+      "badge": "Ablauf",
+      "title": "In 4 Schritten mieten",
+      "subtitle": "Ein einfaches, schnelles und vollständig digitales Miet-Erlebnis.",
+      "steps": {
+        "createAccount": {
+          "title": "Konto erstellen",
+          "description": "Registrieren Sie sich und schließen Sie die Identitäts- und Führerscheinverifizierung ab."
+        },
+        "chooseCar": {
+          "title": "Auto wählen",
+          "description": "Finden Sie das passende Auto auf der Karte oder in der Liste."
+        },
+        "startBooking": {
+          "title": "Buchung starten",
+          "description": "Schließen Sie die Zahlung ab und greifen Sie mit einem digitalen Schlüssel auf das Auto zu."
+        },
+        "driveSafely": {
+          "title": "Sicher fahren",
+          "description": "Nutzen Sie das Auto während Ihrer Mietzeit und geben Sie es anschließend zurück."
+        }
+      }
+    },
+    "reservationSteps": {
+      "title": "Reservierungsprozess",
+      "subtitle": "Erstellen Sie Ihre Reservierung in wenigen Schritten. Der gesamte Prozess wird über die mobile App verwaltet.",
+      "steps": {
+        "carSelection": {
+          "title": "Fahrzeugauswahl",
+          "description": "Filtern Sie nach Preis, Standort und Fahrzeugtyp, um das richtige Fahrzeug zu finden."
+        },
+        "duration": {
+          "title": "Dauer festlegen",
+          "description": "Planen Sie Minuten-, Stunden- oder Tagesmiete nach Ihren Bedürfnissen."
+        },
+        "pickup": {
+          "title": "Abholpunkt",
+          "description": "Wählen Sie Abhol- und Rückgabeorte, um Ihre Route festzulegen."
+        },
+        "insurance": {
+          "title": "Versicherung & Extras",
+          "description": "Konfigurieren Sie Versicherungspakete und optionale Zusatzfahrer."
+        },
+        "payment": {
+          "title": "Sichere Zahlung",
+          "description": "Schließen Sie die Transaktion über eine sichere Zahlungsinfrastruktur mit Ihrer Karte ab."
+        },
+        "confirmation": {
+          "title": "Buchungsbestätigung",
+          "description": "Nach der Genehmigung erscheinen Ihre Reservierungsdetails in Ihrem Konto."
+        }
+      },
+      "viewFleet": "Fahrzeugflotte anzeigen",
+      "identityVerification": "Identitätsverifizierung"
+    },
+    "nearby": {
+      "title": "Fahrzeuge in der Nähe",
+      "grantPermission": "Standortberechtigung erteilen",
+      "noCarsNearby": "Keine verfügbaren Autos in der Nähe. Alle Fahrzeuge anzeigen.",
+      "allCars": "Alle Autos",
+      "viewAll": "Alle anzeigen →",
+      "perHour": "/Stunde"
+    },
+    "carsMap": {
+      "loading": "Karte wird geladen...",
+      "yourLocation": "Ihr Standort",
+      "rent": "Mieten",
+      "perHour": "/Stunde"
+    },
+    "chatbot": {
+      "title": "RideYo-Assistent",
+      "welcome": "Hallo! Willkommen bei RideYo. Wie kann ich Ihnen helfen?",
+      "placeholder": "Nachricht eingeben...",
+      "tooManyRequests": "Zu viele Anfragen. Bitte warten Sie einen Moment.",
+      "serviceUnavailable": "Der Dienst ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.",
+      "streamError": "Stream konnte nicht gestartet werden",
+      "genericError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+    },
+    "offlineIndicator": {
+      "online": "Sie sind wieder online!",
+      "offline": "Keine Internetverbindung — Sie befinden sich im Offline-Modus"
+    },
+    "brandLogo": {
+      "homeAriaLabel": "RideYo Startseite"
+    },
+    "carImageUpload": {
+      "invalidFile": "Bitte wählen Sie eine Bilddatei aus",
+      "fileTooLarge": "Die Dateigröße muss unter 5 MB liegen",
+      "uploadError": "Fehler beim Hochladen des Fotos",
+      "uploadSuccess": "Foto erfolgreich hochgeladen",
+      "altText": "Autofoto",
+      "uploading": "Wird hochgeladen...",
+      "uploadTitle": "Autofoto hochladen",
+      "uploadHint": "PNG, JPG oder WEBP (max. 5 MB)",
+      "selectPhoto": "Foto auswählen"
+    },
+    "locationPickerMap": {
+      "clickToSelect": "Klicken Sie auf die Karte, um einen Standort auszuwählen",
+      "locating": "Standort wird ermittelt...",
+      "currentLocation": "Aktueller Standort",
+      "selectedLocation": "Ausgewählter Standort",
+      "coordinates": "Koordinaten:"
+    },
+    "gpsTracker": {
+      "waitingForData": "Warte auf GPS-Daten...",
+      "online": "Online",
+      "offline": "Offline",
+      "location": "Standort",
+      "speed": "Geschwindigkeit",
+      "battery": "Akku",
+      "lastUpdate": "Letzte Aktualisierung",
+      "viewOnMap": "Auf Karte anzeigen →",
+      "speedUnit": "km/h"
+    }
+  }
+}

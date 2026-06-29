@@ -1,0 +1,168 @@
+{
+  "components": {
+    "features": {
+      "badge": "Avantajlar",
+      "title": "Neden RideYo?",
+      "subtitle": "Modern mobil kiralama deneyimi için ihtiyaç duyduğunuz tüm hizmetler tek platformda.",
+      "items": {
+        "fastBooking": {
+          "title": "Hızlı Rezervasyon",
+          "description": "Birkaç adımda rezervasyon oluşturun, ödemenizi tamamlayın ve yola çıkın."
+        },
+        "flexiblePricing": {
+          "title": "Esnek Fiyatlandırma",
+          "description": "Dakikalık, saatlik ve günlük kiralama ile kilometre paketleri arasından seçim yapın."
+        },
+        "fuelSupport": {
+          "title": "Yakıt Desteği",
+          "description": "Seçili kiralama planlarında yakıt masrafları tarafımızca karşılanır."
+        },
+        "secureExperience": {
+          "title": "Güvenli Deneyim",
+          "description": "Kimlik doğrulama, sigorta seçenekleri ve bakımlı araç filosu ile güvenle sürün."
+        },
+        "access247": {
+          "title": "7/24 Erişim",
+          "description": "İstediğiniz zaman rezervasyon oluşturun, destek ekibimize ulaşın."
+        },
+        "mobileFirst": {
+          "title": "Mobil Öncelikli",
+          "description": "Tüm süreçleri telefonunuzdan yönetin; harita, ödeme ve kiralama tek uygulamada."
+        }
+      }
+    },
+    "about": {
+      "title": "RideYo Hakkında",
+      "description": "RideYo, Türkiye genelinde araç kiralama deneyimini dijitalleştiren bir mobil platformdur. Güvenilir filo, şeffaf fiyatlandırma ve kullanıcı odaklı hizmet anlayışıyla yanınızdayız.",
+      "stats": {
+        "users": "Kayıtlı Kullanıcı",
+        "secure": "Güvenli İşlem",
+        "support": "Müşteri Desteği",
+        "experience": "Sektör Deneyimi"
+      },
+      "advantagesTitle": "Platform Avantajları",
+      "advantages": [
+        "Geniş araç filosu ile farklı ihtiyaçlara uygun seçenekler",
+        "Şeffaf fiyatlandırma; gizli ücret yok",
+        "Kapsamlı sigorta ve ek sürücü seçenekleri",
+        "Hızlı rezervasyon, dijital doğrulama ve kolay teslim"
+      ],
+      "quote": "Her yolculuğun güvenli, kolay ve öngörülebilir olması için teknoloji ve hizmeti bir araya getiriyoruz.",
+      "quoteAuthor": "— RideYo Ekibi"
+    },
+    "howItWorks": {
+      "badge": "Süreç",
+      "title": "4 Adımda Kiralama",
+      "subtitle": "Basit, hızlı ve tamamen dijital bir kiralama deneyimi.",
+      "steps": {
+        "createAccount": {
+          "title": "Hesabınızı Oluşturun",
+          "description": "Kayıt olun ve kimlik ile ehliyet doğrulamanızı tamamlayın."
+        },
+        "chooseCar": {
+          "title": "Aracınızı Seçin",
+          "description": "Harita veya liste üzerinden size en uygun aracı belirleyin."
+        },
+        "startBooking": {
+          "title": "Rezervasyonu Başlatın",
+          "description": "Ödemenizi tamamlayın ve dijital anahtar ile araca erişin."
+        },
+        "driveSafely": {
+          "title": "Güvenle Sürün",
+          "description": "Kiralama süresi boyunca aracı kullanın, işlem bitince teslim edin."
+        }
+      }
+    },
+    "reservationSteps": {
+      "title": "Rezervasyon Süreci",
+      "subtitle": "Birkaç adımda rezervasyonunuzu oluşturun. Tüm süreç mobil uygulama üzerinden yönetilir.",
+      "steps": {
+        "carSelection": {
+          "title": "Araç Seçimi",
+          "description": "Fiyat, konum ve araç tipine göre filtreleyerek size uygun aracı belirleyin."
+        },
+        "duration": {
+          "title": "Süre Belirleme",
+          "description": "Dakikalık, saatlik veya günlük kiralama süresini ihtiyacınıza göre planlayın."
+        },
+        "pickup": {
+          "title": "Teslim Noktası",
+          "description": "Alış ve bırakış konumunu seçerek rotanızı netleştirin."
+        },
+        "insurance": {
+          "title": "Sigorta ve Ek Hizmetler",
+          "description": "Sigorta paketi ve isteğe bağlı ek sürücü seçeneklerini yapılandırın."
+        },
+        "payment": {
+          "title": "Güvenli Ödeme",
+          "description": "Kredi veya banka kartınızla güvenli ödeme altyapısı üzerinden işlemi tamamlayın."
+        },
+        "confirmation": {
+          "title": "Rezervasyon Onayı",
+          "description": "Onay sonrası rezervasyon detaylarınız hesabınızda görüntülenir."
+        }
+      },
+      "viewFleet": "Araç Filosunu Görüntüle",
+      "identityVerification": "Kimlik Doğrulaması"
+    },
+    "nearby": {
+      "title": "Yakındaki Araçlar",
+      "grantPermission": "Konum İzni Ver",
+      "noCarsNearby": "Yakınınızda müsait araç bulunamadı. Tüm araçları görüntüleyin.",
+      "allCars": "Tüm Araçlar",
+      "viewAll": "Tümünü Gör →",
+      "perHour": "/saat"
+    },
+    "carsMap": {
+      "loading": "Harita yükleniyor...",
+      "yourLocation": "Konumunuz",
+      "rent": "Kirala",
+      "perHour": "/saat"
+    },
+    "chatbot": {
+      "title": "RideYo Asistan",
+      "welcome": "Merhaba! RideYo'ya hoş geldiniz. Size nasıl yardımcı olabilirim?",
+      "placeholder": "Mesajınızı yazın...",
+      "tooManyRequests": "Çok fazla istek gönderildi. Lütfen biraz bekleyin.",
+      "serviceUnavailable": "Servis şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
+      "streamError": "Stream başlatılamadı",
+      "genericError": "Bir hata oluştu. Lütfen tekrar deneyin."
+    },
+    "offlineIndicator": {
+      "online": "Tekrar çevrimiçisiniz!",
+      "offline": "İnternet bağlantısı yok - Offline moddasınız"
+    },
+    "brandLogo": {
+      "homeAriaLabel": "RideYo ana sayfa"
+    },
+    "carImageUpload": {
+      "invalidFile": "Lütfen bir resim dosyası seçin",
+      "fileTooLarge": "Dosya boyutu 5MB'dan küçük olmalıdır",
+      "uploadError": "Fotoğraf yüklenirken hata oluştu",
+      "uploadSuccess": "Fotoğraf başarıyla yüklendi",
+      "altText": "Araç fotoğrafı",
+      "uploading": "Yükleniyor...",
+      "uploadTitle": "Araç Fotoğrafı Yükle",
+      "uploadHint": "PNG, JPG veya WEBP (max. 5MB)",
+      "selectPhoto": "Fotoğraf Seç"
+    },
+    "locationPickerMap": {
+      "clickToSelect": "Haritada konumu seçmek için tıklayın",
+      "locating": "Konum alınıyor...",
+      "currentLocation": "Mevcut Konum",
+      "selectedLocation": "Seçilen Konum",
+      "coordinates": "Koordinatlar:"
+    },
+    "gpsTracker": {
+      "waitingForData": "GPS verisi bekleniyor...",
+      "online": "Çevrimiçi",
+      "offline": "Çevrimdışı",
+      "location": "Konum",
+      "speed": "Hız",
+      "battery": "Batarya",
+      "lastUpdate": "Son Güncelleme",
+      "viewOnMap": "Haritada Görüntüle →",
+      "speedUnit": "km/s"
+    }
+  }
+}
