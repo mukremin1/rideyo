@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { isBookingPaid } from "@/lib/paymentStatus";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import VehiclePhotoCapture from "@/components/VehiclePhotoCapture";
 import CarLocationMap from "@/components/CarLocationMap";
@@ -233,7 +234,7 @@ const StartRental = () => {
         return;
       }
 
-      if (data.payment_status !== "paid") {
+      if (!isBookingPaid(data.payment_status)) {
         toast.error("Kiralama başlatmak için ödeme tamamlanmalı.");
         setBookingValidated(false);
         setBookingValidationLoading(false);

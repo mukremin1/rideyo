@@ -24,6 +24,7 @@ import {
 import { format, isPast, isFuture, isToday, parseISO } from "date-fns";
 import { tr } from "date-fns/locale";
 import { toast } from "sonner";
+import { isBookingPaid } from "@/lib/paymentStatus";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -103,19 +104,19 @@ const MyBookings = () => {
   const cancelBooking = async (bookingId: string) => {
     setCancelling(bookingId);
     try {
-      const { error } = await supabase
-        .from("bookings")
-        .update({ payment_status: "cancelled" })
-        .eq("id", bookingId)
-        .eq("user_id", user!.id);
+      const { data, error } = await supabase.functions.invoke("refund-payment", {
+        body: { bookingId, reason: "user_cancelled" },
+      });
 
-      if (error) throw error;
-      
+      if (error || !data?.success) {
+        throw new Error(data?.error || error?.message || "İptal başarısız");
+      }
+
       toast.success("Rezervasyon iptal edildi");
       fetchBookings();
     } catch (error) {
       console.error("İptal hatası:", error);
-      toast.error("Rezervasyon iptal edilirken bir hata oluştu");
+      toast.error(error instanceof Error ? error.message : "Rezervasyon iptal edilirken bir hata oluştu");
     } finally {
       setCancelling(null);
     }
@@ -300,8 +301,9 @@ const MyBookings = () => {
                   </Button>
                 )}
 
-                {booking.payment_status === "paid" &&
-                  !isPast(parseISO(booking.end_time)) && (
+                {isBookingPaid(booking.payment_status) &&
+                  !isPast(parseISO(booking.end_time)) &&
+                  booking.payment_status !== "in_progress" && (
                   <Button
                     size="sm"
                     onClick={() =>

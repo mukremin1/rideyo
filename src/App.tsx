@@ -39,6 +39,8 @@ import OwnerDashboard from "./pages/OwnerDashboard";
 import AvailabilityCalendar from "./pages/AvailabilityCalendar";
 import Install from "./pages/Install";
 import Payment from "./pages/Payment";
+import PaymentCallback from "./pages/PaymentCallback";
+import OwnerPayoutSetup from "./pages/OwnerPayoutSetup";
 import CancellationPolicy from "./pages/CancellationPolicy";
 import MyBookings from "./pages/MyBookings";
 import StartRental from "./pages/StartRental";
@@ -90,6 +92,8 @@ const App = () => (
             <Route path="/availability-calendar" element={<AvailabilityCalendar />} />
             <Route path="/install" element={<Install />} />
             <Route path="/payment" element={<Payment />} />
+            <Route path="/payment/callback" element={<PaymentCallback />} />
+            <Route path="/owner/payout" element={<OwnerPayoutSetup />} />
             <Route path="/cancellation-policy" element={<CancellationPolicy />} />
             <Route path="/my-bookings" element={<MyBookings />} />
             <Route path="/start-rental" element={<StartRental />} />

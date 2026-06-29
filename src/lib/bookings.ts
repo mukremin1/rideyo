@@ -28,6 +28,8 @@ export async function createBookingRecord(
     additional_driver_name: _name,
     additional_driver_license: _license,
     additional_driver_fee: _fee,
+    rental_amount: _rentalAmount,
+    provision_fee: _provisionFee,
     ...corePayload
   } = payload;
 

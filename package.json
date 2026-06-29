@@ -21,7 +21,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "setup": "npm ci --legacy-peer-deps"
+    "setup": "npm ci --legacy-peer-deps",
+    "supabase:deploy:payment": "node scripts/deploy-payment.mjs",
+    "supabase:migrate": "npx supabase db push",
+    "supabase:login": "npx supabase login"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.4",

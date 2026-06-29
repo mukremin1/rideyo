@@ -1,5 +1,6 @@
 ﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getIyzicoConfig, iyzicoPost, isIyzicoSuccess } from "../_shared/iyzico.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -113,6 +114,21 @@ serve(async (req) => {
         if (error) throw error;
 
         if (bookingId) {
+          const { data: booking } = await supabase
+            .from("bookings")
+            .select("id, user_id, provision_status, provision_fee, iyzico_provision_payment_id")
+            .eq("id", bookingId)
+            .maybeSingle();
+
+          if (booking?.provision_status === "held" && booking.iyzico_provision_payment_id) {
+            await releaseProvisionHold(supabase, booking);
+          } else if (booking?.provision_status === "held") {
+            await supabase
+              .from("bookings")
+              .update({ provision_status: "released" })
+              .eq("id", bookingId);
+          }
+
           await supabase.from("bookings").update({ payment_status: "completed" }).eq("id", bookingId);
         }
 
@@ -151,3 +167,50 @@ serve(async (req) => {
     );
   }
 });
+
+async function releaseProvisionHold(
+  supabase: ReturnType<typeof createClient>,
+  booking: {
+    id: string;
+    user_id: string;
+    provision_fee: number | null;
+    iyzico_provision_payment_id: string;
+  },
+) {
+  const iyzico = getIyzicoConfig();
+  const allowDemo = Deno.env.get("PAYMENT_DEMO_MODE") === "true";
+
+  if (iyzico) {
+    const conversationId = `release-${booking.id}-${Date.now()}`;
+    const cancelRes = await iyzicoPost("/payment/cancel", {
+      locale: "tr",
+      conversationId,
+      paymentId: booking.iyzico_provision_payment_id,
+      ip: "127.0.0.1",
+    }, iyzico);
+
+    await supabase.from("payment_transactions").insert({
+      booking_id: booking.id,
+      user_id: booking.user_id,
+      type: "cancel_preauth",
+      status: isIyzicoSuccess(cancelRes) ? "success" : "failed",
+      amount: booking.provision_fee ?? 0,
+      iyzico_conversation_id: conversationId,
+      error_message: isIyzicoSuccess(cancelRes) ? null : cancelRes.errorMessage,
+    });
+  } else if (allowDemo) {
+    await supabase.from("payment_transactions").insert({
+      booking_id: booking.id,
+      user_id: booking.user_id,
+      type: "cancel_preauth",
+      status: "success",
+      amount: booking.provision_fee ?? 0,
+      metadata: { mode: "demo" },
+    });
+  }
+
+  await supabase
+    .from("bookings")
+    .update({ provision_status: "released" })
+    .eq("id", booking.id);
+}

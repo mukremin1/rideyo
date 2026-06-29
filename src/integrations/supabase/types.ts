@@ -24,9 +24,15 @@ export type Database = {
           dropoff_zone_id: string | null
           end_time: string
           id: string
+          iyzico_conversation_id: string | null
+          iyzico_payment_id: string | null
+          iyzico_provision_payment_id: string | null
           payment_status: string | null
           pickup_address: string | null
           pickup_zone_id: string | null
+          provision_fee: number | null
+          provision_status: string | null
+          rental_amount: number | null
           rental_type: string
           start_time: string
           total_price: number
@@ -48,9 +54,15 @@ export type Database = {
           dropoff_zone_id?: string | null
           end_time: string
           id?: string
+          iyzico_conversation_id?: string | null
+          iyzico_payment_id?: string | null
+          iyzico_provision_payment_id?: string | null
           payment_status?: string | null
           pickup_address?: string | null
           pickup_zone_id?: string | null
+          provision_fee?: number | null
+          provision_status?: string | null
+          rental_amount?: number | null
           rental_type: string
           start_time: string
           total_price: number
@@ -72,9 +84,15 @@ export type Database = {
           dropoff_zone_id?: string | null
           end_time?: string
           id?: string
+          iyzico_conversation_id?: string | null
+          iyzico_payment_id?: string | null
+          iyzico_provision_payment_id?: string | null
           payment_status?: string | null
           pickup_address?: string | null
           pickup_zone_id?: string | null
+          provision_fee?: number | null
+          provision_status?: string | null
+          rental_amount?: number | null
           rental_type?: string
           start_time?: string
           total_price?: number
@@ -393,12 +411,124 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_payout_profiles: {
+        Row: {
+          address: string
+          contact_name: string
+          contact_surname: string
+          created_at: string | null
+          email: string
+          gsm_number: string
+          iban: string
+          id: string
+          identity_number: string
+          legal_company_title: string | null
+          status: string
+          sub_merchant_external_id: string | null
+          sub_merchant_key: string | null
+          tax_office: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address: string
+          contact_name: string
+          contact_surname: string
+          created_at?: string | null
+          email: string
+          gsm_number: string
+          iban: string
+          id?: string
+          identity_number: string
+          legal_company_title?: string | null
+          status?: string
+          sub_merchant_external_id?: string | null
+          sub_merchant_key?: string | null
+          tax_office?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string
+          contact_name?: string
+          contact_surname?: string
+          created_at?: string | null
+          email?: string
+          gsm_number?: string
+          iban?: string
+          id?: string
+          identity_number?: string
+          legal_company_title?: string | null
+          status?: string
+          sub_merchant_external_id?: string | null
+          sub_merchant_key?: string | null
+          tax_office?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string | null
+          currency: string
+          error_message: string | null
+          id: string
+          iyzico_conversation_id: string | null
+          iyzico_payment_id: string | null
+          metadata: Json | null
+          owner_id: string | null
+          owner_payout_amount: number | null
+          platform_commission: number | null
+          status: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string | null
+          currency?: string
+          error_message?: string | null
+          id?: string
+          iyzico_conversation_id?: string | null
+          iyzico_payment_id?: string | null
+          metadata?: Json | null
+          owner_id?: string | null
+          owner_payout_amount?: number | null
+          platform_commission?: number | null
+          status?: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string | null
+          currency?: string
+          error_message?: string | null
+          id?: string
+          iyzico_conversation_id?: string | null
+          iyzico_payment_id?: string | null
+          metadata?: Json | null
+          owner_id?: string | null
+          owner_payout_amount?: number | null
+          platform_commission?: number | null
+          status?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string | null
           full_name: string | null
           id: string
+          iyzico_card_user_key: string | null
           phone: string | null
           updated_at: string | null
         }
@@ -407,6 +537,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id: string
+          iyzico_card_user_key?: string | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -415,6 +546,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
+          iyzico_card_user_key?: string | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -468,6 +600,8 @@ export type Database = {
           expiry_year: number
           id: string
           is_default: boolean | null
+          iyzico_card_token: string | null
+          iyzico_card_user_key: string | null
           last_four_digits: string
           updated_at: string | null
           user_id: string
@@ -481,6 +615,8 @@ export type Database = {
           expiry_year: number
           id?: string
           is_default?: boolean | null
+          iyzico_card_token?: string | null
+          iyzico_card_user_key?: string | null
           last_four_digits: string
           updated_at?: string | null
           user_id: string
@@ -494,6 +630,8 @@ export type Database = {
           expiry_year?: number
           id?: string
           is_default?: boolean | null
+          iyzico_card_token?: string | null
+          iyzico_card_user_key?: string | null
           last_four_digits?: string
           updated_at?: string | null
           user_id?: string

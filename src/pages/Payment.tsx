@@ -28,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { isBookingPaid } from "@/lib/paymentStatus";
 import {
   Accordion,
   AccordionContent,
@@ -157,8 +158,8 @@ const Payment = () => {
         return;
       }
 
-      if (data.payment_status === "paid") {
-        toast.message("Bu rezervasyonun odemesi zaten tamamlanmis.");
+      if (isBookingPaid(data.payment_status)) {
+        toast.message("Bu rezervasyonun ödemesi zaten tamamlanmış.");
         navigate("/start-rental", {
           state: {
             bookingId,
@@ -249,7 +250,13 @@ const Payment = () => {
   };
 
   const validateCard = () => {
-    if (selectedSavedCardId) return true;
+    if (selectedSavedCardId) {
+      if (cardData.cvv.length < 3) {
+        toast.error("Kayıtlı kart için CVV girin");
+        return false;
+      }
+      return true;
+    }
     const cardNumber = cardData.cardNumber.replace(/\s/g, "");
     if (cardNumber.length < 16) {
       toast.error("Geçerli bir kart numarası girin");
@@ -280,6 +287,28 @@ const Payment = () => {
     return { month, year };
   };
 
+  const launch3DS = (threeDSHtmlContent: string) => {
+    try {
+      const decoded = atob(threeDSHtmlContent);
+      const iframe = document.createElement("iframe");
+      iframe.name = "iyzico-3ds-frame";
+      iframe.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:none;z-index:9999;background:#fff;";
+      document.body.appendChild(iframe);
+
+      const doc = iframe.contentDocument ?? iframe.contentWindow?.document;
+      if (!doc) throw new Error("3DS penceresi açılamadı");
+      doc.open();
+      doc.write(decoded);
+      doc.close();
+    } catch {
+      const win = window.open("", "_blank");
+      if (win) {
+        win.document.write(atob(threeDSHtmlContent));
+        win.document.close();
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -290,67 +319,51 @@ const Payment = () => {
 
     if (!validateCard()) return;
 
+    if (!selectedSavedCardId) {
+      const expiry = parseExpiry(cardData.expiryDate);
+      if (!expiry) {
+        toast.error("Geçerli bir son kullanma tarihi girin");
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
-      const lastFour = cardData.cardNumber.replace(/\s/g, "").slice(-4);
+      const expiry = selectedSavedCardId ? null : parseExpiry(cardData.expiryDate);
+      const cardPayload = selectedSavedCardId
+        ? { savedCardId: selectedSavedCardId, cvc: cardData.cvv }
+        : {
+            card: {
+              cardHolder: cardData.cardHolder,
+              cardNumber: cardData.cardNumber.replace(/\s/g, ""),
+              expireMonth: expiry!.month.toString().padStart(2, "0"),
+              expireYear: expiry!.year.toString().slice(-2),
+              cvc: cardData.cvv,
+            },
+            saveCard,
+          };
+
       const { data: paymentResult, error: paymentError } = await supabase.functions.invoke(
         "process-payment",
         {
           body: {
             bookingId,
-            cardHolder: cardData.cardHolder,
-            lastFourDigits: lastFour,
+            ...cardPayload,
           },
         },
       );
 
-      const paymentSucceeded =
-        !paymentError && paymentResult?.success === true;
-
-      if (!paymentSucceeded) {
-        const { data: updatedBooking, error: bookingUpdateError } = await supabase
-          .from("bookings")
-          .update({ payment_status: "paid" })
-          .eq("id", bookingId)
-          .eq("user_id", user.id)
-          .eq("payment_status", "pending")
-          .select("id")
-          .maybeSingle();
-
-        if (bookingUpdateError || !updatedBooking) {
-          throw new Error(
-            paymentResult?.error || paymentError?.message || "Ödeme işlemi başarısız.",
-          );
-        }
+      if (paymentError || !paymentResult?.success) {
+        throw new Error(
+          paymentResult?.error || paymentError?.message || "Ödeme işlemi başarısız.",
+        );
       }
 
-      if (saveCard && user && !selectedSavedCardId) {
-        const expiry = parseExpiry(cardData.expiryDate);
-        if (!expiry) {
-          toast.error("Geçerli bir son kullanma tarihi girin");
-          setLoading(false);
-          return;
-        }
-
-        const cardType = getCardType() || "unknown";
-        const lastFour = cardData.cardNumber.replace(/\s/g, "").slice(-4);
-
-        const { error } = await supabase.from("saved_cards").insert({
-          user_id: user.id,
-          card_holder_name: cardData.cardHolder,
-          card_type: cardType,
-          expiry_month: expiry.month,
-          expiry_year: expiry.year,
-          last_four_digits: lastFour,
-          encrypted_card_token: `demo-token-${Date.now()}`,
-        });
-
-        if (error) {
-          toast.error("Kart kaydedilemedi");
-        } else {
-          toast.success("Kart kaydedildi");
-        }
+      if (paymentResult.requires3DS && paymentResult.threeDSHtmlContent) {
+        toast.message("Banka doğrulama ekranına yönlendiriliyorsunuz...");
+        launch3DS(paymentResult.threeDSHtmlContent as string);
+        return;
       }
 
       setPaymentSuccess(true);
@@ -367,7 +380,7 @@ const Payment = () => {
       }, 2000);
     } catch (error) {
       console.error("Ödeme hatası:", error);
-      toast.error("Ödeme işlemi başarısız oldu");
+      toast.error(error instanceof Error ? error.message : "Ödeme işlemi başarısız oldu");
     } finally {
       setLoading(false);
     }
@@ -709,7 +722,6 @@ const Payment = () => {
                         placeholder="***"
                         value={cardData.cvv}
                         onChange={handleCvvChange}
-                        disabled={Boolean(selectedSavedCardId)}
                         required
                       />
                     </div>

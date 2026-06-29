@@ -79,7 +79,7 @@ const AvailabilityCalendar = () => {
       .from("bookings")
       .select("id, start_time, end_time, total_price, rental_type, user_id, payment_status")
       .eq("car_id", carId)
-      .in("payment_status", ["paid", "pending"])
+      .in("payment_status", ["completed", "in_progress", "paid", "pending"])
       .gte("end_time", new Date().toISOString())
       .order("start_time");
 

@@ -403,6 +403,8 @@ const CarDetail = () => {
         dropoff_address: selectedPricing === "day" ? (dropoffAddress || null) : null,
         different_zone_fee: pricing.zoneFee,
         payment_status: "pending",
+        rental_amount: pricing.totalPrice - pricing.provisionFee,
+        provision_fee: pricing.provisionFee,
         additional_driver_enabled: selectedPricing === "day" && additionalDriverEnabled,
         additional_driver_name:
           selectedPricing === "day" && additionalDriverEnabled

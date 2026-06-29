@@ -18,6 +18,7 @@ import BottomNav from "@/components/BottomNav";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { isBookingPaid } from "@/lib/paymentStatus";
 import { format, isWithinInterval, parseISO } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -102,7 +103,7 @@ const OwnerDashboard = () => {
         .in("car_id", carIds)
         .order("created_at", { ascending: false });
 
-      const paidBookings = (bookings ?? []).filter((b) => b.payment_status === "paid");
+      const paidBookings = (bookings ?? []).filter((b) => isBookingPaid(b.payment_status));
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -255,12 +256,20 @@ const OwnerDashboard = () => {
               <h1 className="text-4xl font-bold mb-2">Araç Sahibi Paneli</h1>
               <p className="text-muted-foreground">Araçlarınızı ve kazançlarınızı yönetin</p>
             </div>
-            <Link to="/add-car">
-              <Button size="lg">
-                <Car className="w-4 h-4 mr-2" />
-                Araç Ekle
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link to="/owner/payout">
+                <Button variant="outline" size="lg">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Hakediş Ayarları
+                </Button>
+              </Link>
+              <Link to="/add-car">
+                <Button size="lg">
+                  <Car className="w-4 h-4 mr-2" />
+                  Araç Ekle
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
