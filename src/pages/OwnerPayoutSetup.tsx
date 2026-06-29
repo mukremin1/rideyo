@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/serverApi";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Wallet, CheckCircle2, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -72,12 +73,24 @@ const OwnerPayoutSetup = () => {
 
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("register-submerchant", {
-        body: form,
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Oturum bulunamadı");
+      }
+
+      const { data, error } = await invokeEdgeFunction(
+        "register-submerchant",
+        form,
+        session.access_token,
+        (name, options) =>
+          supabase.functions.invoke(name, options).then((r) => ({
+            data: r.data as Record<string, unknown> | null,
+            error: r.error,
+          })),
+      );
 
       if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || "Kayıt başarısız");
+        throw new Error((data?.error as string) || error?.message || "Kayıt başarısız");
       }
 
       toast.success("Ödeme profiliniz kaydedildi");

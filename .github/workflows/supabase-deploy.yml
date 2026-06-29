@@ -38,5 +38,6 @@ jobs:
           supabase functions deploy refund-payment --no-verify-jwt
           supabase functions deploy register-submerchant --no-verify-jwt
           supabase functions deploy vehicle-control --no-verify-jwt
+          supabase functions deploy verify-license --no-verify-jwt
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

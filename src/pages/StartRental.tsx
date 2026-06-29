@@ -24,6 +24,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isBookingPaid } from "@/lib/paymentStatus";
+import { createSupabaseInvoker, invokeVehicleControl } from "@/lib/serverApi";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import VehiclePhotoCapture from "@/components/VehiclePhotoCapture";
 import CarLocationMap from "@/components/CarLocationMap";
@@ -39,6 +40,10 @@ interface VehicleControlResponse {
   message?: string;
   error?: string;
 }
+
+const supabaseInvoke = createSupabaseInvoker((name, options) =>
+  supabase.functions.invoke(name, options),
+);
 
 const StartRental = () => {
   const navigate = useNavigate();
@@ -72,6 +77,16 @@ const StartRental = () => {
   const AUTO_UNLOCK_DISTANCE_METERS = 30;
   const AUTO_UNLOCK_RESET_DISTANCE_METERS = 60;
   const AUTO_UNLOCK_INTERVAL_MS = 15000;
+
+  const callVehicleControl = async (body: Record<string, unknown>): Promise<VehicleControlResponse> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error("Oturum bulunamadı");
+    }
+    const { data, error } = await invokeVehicleControl(body, session.access_token, supabaseInvoke);
+    if (error) throw error;
+    return (data ?? {}) as VehicleControlResponse;
+  };
 
   const toRadians = (value: number) => (value * Math.PI) / 180;
   const calculateDistanceKm = (a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) => {
@@ -309,18 +324,14 @@ const StartRental = () => {
     setUnlocking(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('vehicle-control', {
-        body: {
-          action: 'unlock',
-          carId: state.carId,
-          bookingId: state.bookingId,
-          userId: user.id,
-          latitude: userLocation?.lat,
-          longitude: userLocation?.lng,
-        }
+      const data = await callVehicleControl({
+        action: "unlock",
+        carId: state.carId,
+        bookingId: state.bookingId,
+        userId: user.id,
+        latitude: userLocation?.lat,
+        longitude: userLocation?.lng,
       });
-
-      if (error) throw error;
 
       if (data.success) {
         toast.success(data.message);
@@ -341,20 +352,16 @@ const StartRental = () => {
     setLocking(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('vehicle-control', {
-        body: {
-          action: 'lock',
-          carId: state.carId,
-          bookingId: state.bookingId,
-          userId: user.id,
-          latitude: userLocation?.lat,
-          longitude: userLocation?.lng,
-        }
+      const data = await callVehicleControl({
+        action: "lock",
+        carId: state.carId,
+        bookingId: state.bookingId,
+        userId: user.id,
+        latitude: userLocation?.lat,
+        longitude: userLocation?.lng,
       });
 
-      if (error) throw error;
-
-      const response = (data ?? {}) as VehicleControlResponse;
+      const response = data;
       if (response.success) {
         toast.success(response.message ?? "Araç kilitlendi.");
       } else {
@@ -400,21 +407,17 @@ const StartRental = () => {
       }
 
       // Kiralamayı başlat
-      const { data, error } = await supabase.functions.invoke('vehicle-control', {
-        body: {
-          action: 'start_rental',
-          carId: state.carId,
-          bookingId: state.bookingId,
-          userId: user.id,
-          latitude: userLocation?.lat,
-          longitude: userLocation?.lng,
-          notes: `Konum: ${carLocation}`,
-        }
+      const data = await callVehicleControl({
+        action: "start_rental",
+        carId: state.carId,
+        bookingId: state.bookingId,
+        userId: user.id,
+        latitude: userLocation?.lat,
+        longitude: userLocation?.lng,
+        notes: `Konum: ${carLocation}`,
       });
 
-      if (error) throw error;
-
-      const response = (data ?? {}) as VehicleControlResponse;
+      const response = data;
       if (response.success) {
         toast.success("Kiralama başarıyla başlatıldı!");
         sendRentalNotification("start", state.carName);
@@ -458,21 +461,17 @@ const StartRental = () => {
       }
 
       // Kiralamayı bitir
-      const { data, error } = await supabase.functions.invoke('vehicle-control', {
-        body: {
-          action: 'end_rental',
-          carId: state.carId,
-          bookingId: state.bookingId,
-          userId: user.id,
-          latitude: userLocation?.lat,
-          longitude: userLocation?.lng,
-          notes: `Anahtar torpidoya bırakıldı. Konum: ${carLocation}`,
-        }
+      const data = await callVehicleControl({
+        action: "end_rental",
+        carId: state.carId,
+        bookingId: state.bookingId,
+        userId: user.id,
+        latitude: userLocation?.lat,
+        longitude: userLocation?.lng,
+        notes: `Anahtar torpidoya bırakıldı. Konum: ${carLocation}`,
       });
 
-      if (error) throw error;
-
-      const response = (data ?? {}) as VehicleControlResponse;
+      const response = data;
       if (response.success) {
         toast.success("Kiralama başarıyla bitirildi! Kapılar kilitlendi.");
         setRentalEnded(true);

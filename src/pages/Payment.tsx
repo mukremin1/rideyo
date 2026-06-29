@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { isBookingPaid } from "@/lib/paymentStatus";
+import { invokeEdgeFunction, createSupabaseInvoker } from "@/lib/serverApi";
 import {
   Accordion,
   AccordionContent,
@@ -344,14 +345,23 @@ const Payment = () => {
             saveCard,
           };
 
-      const { data: paymentResult, error: paymentError } = await supabase.functions.invoke(
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Oturum bulunamadı. Tekrar giriş yapın.");
+      }
+
+      const { data: paymentResult, error: paymentError } = await invokeEdgeFunction(
         "process-payment",
         {
-          body: {
-            bookingId,
-            ...cardPayload,
-          },
+          bookingId,
+          ...cardPayload,
         },
+        session.access_token,
+        (name, options) =>
+          supabase.functions.invoke(name, options).then((r) => ({
+            data: r.data as Record<string, unknown> | null,
+            error: r.error,
+          })),
       );
 
       if (paymentError || !paymentResult?.success) {

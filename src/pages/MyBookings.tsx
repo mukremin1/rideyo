@@ -25,6 +25,7 @@ import { format, isPast, isFuture, isToday, parseISO } from "date-fns";
 import { tr } from "date-fns/locale";
 import { toast } from "sonner";
 import { isBookingPaid } from "@/lib/paymentStatus";
+import { invokeEdgeFunction } from "@/lib/serverApi";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -104,9 +105,21 @@ const MyBookings = () => {
   const cancelBooking = async (bookingId: string) => {
     setCancelling(bookingId);
     try {
-      const { data, error } = await supabase.functions.invoke("refund-payment", {
-        body: { bookingId, reason: "user_cancelled" },
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Oturum bulunamadı");
+      }
+
+      const { data, error } = await invokeEdgeFunction(
+        "refund-payment",
+        { bookingId, reason: "user_cancelled" },
+        session.access_token,
+        (name, options) =>
+          supabase.functions.invoke(name, options).then((r) => ({
+            data: r.data as Record<string, unknown> | null,
+            error: r.error,
+          })),
+      );
 
       if (error || !data?.success) {
         throw new Error(data?.error || error?.message || "İptal başarısız");

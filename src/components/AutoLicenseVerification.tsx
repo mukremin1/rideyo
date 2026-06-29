@@ -18,13 +18,13 @@ import {
   yymmddToIso,
 } from "@/lib/identityVerification";
 import { DEFAULT_DRIVER_SCORE } from "@/lib/driverScore";
-import { persistDriverLicenseRecord } from "@/lib/driverHistory";
 import {
   buildLicenseFailureResult,
-  buildLicenseSuccessResult,
   evaluateLicenseNumber,
   type LicenseVerificationResult,
 } from "@/lib/licenseVerification";
+import { createSupabaseInvoker, invokeVerifyLicense } from "@/lib/serverApi";
+import { supabase } from "@/integrations/supabase/client";
 
 type FlowStep = "nfc" | "liveness" | "license";
 
@@ -36,6 +36,10 @@ const resolveInitialStep = (meta: ReturnType<typeof readStoredIdentity>): FlowSt
   return "nfc";
 };
 const ActiveLivenessCheckDialog = lazy(() => import("./ActiveLivenessCheckDialog"));
+
+const supabaseInvoke = createSupabaseInvoker((name, options) =>
+  supabase.functions.invoke(name, options),
+);
 
 interface AutoLicenseVerificationProps {
   userId: string;
@@ -244,22 +248,6 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
     setLivenessDialogOpen(true);
   };
 
-  const persistLicenseRecord = async (): Promise<boolean> => {
-    const result = await persistDriverLicenseRecord(userId, licenseNumber, {
-      nationalId: cardData?.nationalId,
-      surname: cardData?.surname,
-      givenNames: cardData?.givenNames,
-    });
-    if (!result.ok) {
-      toast({
-        title: "Ehliyet kaydı kaydedilemedi",
-        description: result.error ?? "Lütfen tekrar deneyin.",
-        variant: "destructive",
-      });
-    }
-    return result.ok;
-  };
-
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -293,12 +281,42 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
         return;
       }
 
-      const normalized = buildLicenseSuccessResult(localCheck.message);
-      const saved = await persistLicenseRecord();
-      if (!saved) {
-        setVerificationStep("idle");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Oturum bulunamadı");
+      }
+
+      const { data: verifyData, error: verifyError } = await invokeVerifyLicense(
+        {
+          licenseNumber,
+          userId,
+          nationalId: cardData?.nationalId,
+          surname: cardData?.surname,
+          givenNames: cardData?.givenNames,
+        },
+        session.access_token,
+        supabaseInvoke,
+      );
+
+      if (verifyError) throw verifyError;
+
+      if (!verifyData?.success || verifyData?.canRent === false) {
+        const failure = buildLicenseFailureResult(
+          (verifyData?.error as string) || (verifyData?.message as string) || "Ehliyet doğrulanamadı",
+          (verifyData?.reason as string) || "verification_failed",
+        );
+        setResult(failure);
+        setVerificationStep("complete");
         return;
       }
+
+      const normalized: LicenseVerificationResult = {
+        success: true,
+        canRent: true,
+        message: (verifyData.message as string) || localCheck.message,
+        data: verifyData.data as LicenseVerificationResult["data"],
+      };
+
       setResult(normalized);
       setVerificationStep("complete");
       onVerified(true, "low", cardData?.nationalId);

@@ -56,6 +56,7 @@ const functions = [
   "refund-payment",
   "register-submerchant",
   "vehicle-control",
+  "verify-license",
 ];
 
 for (const fn of functions) {
