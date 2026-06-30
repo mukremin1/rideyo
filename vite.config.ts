@@ -6,15 +6,13 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Web deploy uses sub-path; Capacitor needs relative paths in production.
+  // Capacitor needs relative paths; web deploy (GitHub Pages / ride-yo.com) uses root.
   base:
     mode === "development"
       ? "/"
       : process.env.CAPACITOR
         ? "./"
-        : process.env.VERCEL
-          ? "/"
-          : "/tiktak-turkiye-rent/",
+        : "/",
   server: {
     host: "::",
     port: 8080,

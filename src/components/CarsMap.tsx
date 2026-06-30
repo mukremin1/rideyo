@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { MapPin, Fuel } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { resolveCoordinatesFromLocation, type LatLngTuple } from "@/lib/locationGeocoding";
+import { cn } from "@/lib/utils";
 
 // Fix for default marker icon
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -25,19 +26,20 @@ const DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // Custom car icon
-const carIcon = L.divIcon({
-  className: "car-marker",
-  html: `<div style="background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent))); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 3px solid white;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+const createCarIcon = (selected = false) =>
+  L.divIcon({
+    className: "car-marker",
+    html: `<div style="background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent))); width: ${selected ? 44 : 36}px; height: ${selected ? 44 : 36}px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 ${selected ? 6 : 4}px ${selected ? 16 : 12}px rgba(0,0,0,0.35); border: ${selected ? 4 : 3}px solid ${selected ? "hsl(var(--primary))" : "white"}; transform: ${selected ? "scale(1.08)" : "none"};">
+    <svg width="${selected ? 22 : 20}" height="${selected ? 22 : 20}" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
       <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
       <circle cx="7" cy="17" r="2"/>
       <path d="M9 17h6"/>
       <circle cx="17" cy="17" r="2"/>
     </svg>
   </div>`,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-});
+    iconSize: [selected ? 44 : 36, selected ? 44 : 36],
+    iconAnchor: [selected ? 22 : 18, selected ? 22 : 18],
+  });
 
 // User location icon
 const userIcon = L.divIcon({
@@ -63,6 +65,8 @@ interface CarsMapProps {
   userLocation?: { latitude: number; longitude: number } | null;
   showUserLocation?: boolean;
   height?: string;
+  className?: string;
+  selectedCarId?: string | null;
   onCarSelect?: (carId: string) => void;
 }
 
@@ -74,7 +78,14 @@ const MapController = ({ center }: { center: [number, number] }) => {
   return null;
 };
 
-const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCarSelect }: CarsMapProps) => {
+const CarsMap = ({
+  userLocation,
+  showUserLocation = true,
+  height = "400px",
+  className,
+  selectedCarId,
+  onCarSelect,
+}: CarsMapProps) => {
   const { t } = useTranslation();
   const [cars, setCars] = useState<CarLocation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,8 +159,11 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
   }, [cars, derivedCoords]);
 
   const handleCarClick = (carId: string) => {
-    if (onCarSelect) onCarSelect(carId);
-    else navigate(`/car/${carId}`);
+    if (onCarSelect) {
+      onCarSelect(carId);
+      return;
+    }
+    navigate(`/car/${carId}`);
   };
 
   if (loading) {
@@ -161,7 +175,7 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
   }
 
   return (
-    <div className="relative z-0 rounded-lg overflow-hidden border border-border" style={{ height }}>
+    <div className={cn("relative z-0 overflow-hidden rounded-lg border border-border", className)} style={{ height }}>
       <MapContainer center={mapCenter} zoom={userLocation ? 13 : 6} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -189,7 +203,14 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
         )}
 
         {markers.map(({ car, position }) => (
-          <Marker key={car.id} position={position} icon={carIcon}>
+          <Marker
+            key={car.id}
+            position={position}
+            icon={createCarIcon(selectedCarId === car.id)}
+            eventHandlers={{
+              click: () => handleCarClick(car.id),
+            }}
+          >
             <Popup maxWidth={260} minWidth={180}>
               <Card className="border-0 shadow-none p-0 w-[min(72vw,220px)] sm:w-[220px]">
                 <div className="space-y-2">
@@ -212,7 +233,7 @@ const CarsMap = ({ userLocation, showUserLocation = true, height = "400px", onCa
 
                   <div className="pt-2 border-t flex items-center justify-between">
                     <span className="font-bold text-primary">{car.price_per_hour}₺{t("components.carsMap.perHour")}</span>
-                    <Button size="sm" onClick={() => handleCarClick(car.id)} className="text-xs h-7">
+                    <Button size="sm" onClick={() => navigate(`/car/${car.id}`)} className="text-xs h-7">
                       {t("components.carsMap.rent")}
                     </Button>
                   </div>

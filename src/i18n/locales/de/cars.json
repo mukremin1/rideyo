@@ -12,7 +12,12 @@
     },
     "loadError": "Autos konnten nicht geladen werden",
     "noCars": "Es wurden noch keine Autos hinzugefügt",
-    "noResults": "Keine Autos entsprechen Ihrer Suche"
+    "noResults": "Keine Autos entsprechen Ihrer Suche",
+    "rentalFilter": {
+      "minute": "Fahrzeuge für Minutenmiete",
+      "hour": "Fahrzeuge für Stundenmiete",
+      "day": "Fahrzeuge für Tagesmiete"
+    }
   },
   "carDetail": {
     "notFoundTitle": "Auto nicht gefunden",

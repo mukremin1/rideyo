@@ -12,7 +12,12 @@
     },
     "loadError": "Could not load cars",
     "noCars": "No cars have been added yet",
-    "noResults": "No cars match your search"
+    "noResults": "No cars match your search",
+    "rentalFilter": {
+      "minute": "Cars for minute-based rental",
+      "hour": "Cars for hourly rental",
+      "day": "Cars for daily rental"
+    }
   },
   "carDetail": {
     "notFoundTitle": "Car Not Found",

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { GeolocationProvider } from "@/contexts/GeolocationContext";
 import Chatbot from "@/components/Chatbot";
 import BottomNav from "@/components/BottomNav";
 import OfflineIndicator from "@/components/OfflineIndicator";
@@ -56,8 +57,13 @@ const App = () => (
       <Sonner />
       <OfflineIndicator />
       <Chatbot />
-      <BrowserRouter>
+      <BrowserRouter
+        basename={
+          import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "")
+        }
+      >
         <AuthProvider>
+          <GeolocationProvider>
           <NfcLoginVerificationPrompt />
           <Routes>
             <Route path="/" element={<Index />} />
@@ -102,6 +108,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNav />
+          </GeolocationProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

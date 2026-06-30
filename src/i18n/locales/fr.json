@@ -19,15 +19,30 @@
     "backHome": "Retour à l'accueil"
   },
   "home": {
-    "promoBanner": "Économisez jusqu'à 25 % avec les abonnements",
+    "promoEyebrow": "Avantage membre",
+    "promoBanner": "Jusqu'à 25 % de réduction avec les abonnements",
     "enableNotifications": "Activer les notifications", "viewPlans": "Voir les offres",
-    "mapTitle": "Explorer sur la carte", "mapDesc": "Voir les véhicules disponibles près de vous.",
+    "mapEyebrow": "Position en direct", "mapTitle": "Carte des véhicules en direct", "mapDesc": "Voir les véhicules disponibles près de vous.",
     "enableLocation": "Activer la localisation", "hideMap": "Masquer la carte", "showMap": "Afficher la carte",
     "heroBadge": "Location de voiture sûre, transparente et flexible",
     "heroTitle1": "Louez la voiture qu'il vous faut", "heroTitle2": "en quelques minutes",
     "heroDesc": "Location à la minute, à l'heure ou à la journée. Vérification d'identité, tarifs transparents et support 24h/24.",
     "rentCar": "Louer une voiture", "browseFleet": "Voir la flotte", "listYourCar": "Proposer votre véhicule",
-    "stat247": "Disponible 24h/24", "statCities": "Actif dans plusieurs villes", "statSecure": "Paiement sécurisé"
+    "stat247": "Disponible 24h/24", "statCities": "Actif dans plusieurs villes", "statSecure": "Paiement sécurisé",
+    "mapNearYou": "Votre position", "mapAllCars": "Tous les véhicules", "locating": "Localisation...",
+    "noLocation": "Autorisation de localisation requise", "nearbyCount": "{{count}} véhicules à proximité",
+    "noCarsNearby": "Aucun véhicule disponible à proximité", "locateMe": "Me localiser",
+    "viewAllCars": "Tous les véhicules", "sheetTitle": "Véhicules à proximité",
+    "sheetHint": "Sélectionnez un véhicule sur la carte ou dans la liste",     "rentNow": "Louer maintenant",
+    "rentalTypesEyebrow": "Modèles de location",
+    "rentalTypesTitle": "Choisissez votre modèle de location",
+    "rentalTypesSubtitle": "Choisissez minute, heure, jour ou abonnement mensuel",
+    "rentalTypes": {
+      "minute": { "title": "Minute", "desc": "Courts trajets, usage instantané" },
+      "hour": { "title": "Heure", "desc": "Durée flexible, en ville" },
+      "day": { "title": "Jour", "desc": "Journée complète, économique" },
+      "month": { "title": "Mois", "desc": "Abonnements et réductions" }
+    }
   },
   "auth": {
     "title": "Bienvenue", "signInTab": "Connexion", "signUpTab": "Inscription",

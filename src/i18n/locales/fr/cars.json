@@ -12,7 +12,12 @@
     },
     "loadError": "Impossible de charger les véhicules",
     "noCars": "Aucun véhicule n'a encore été ajouté",
-    "noResults": "Aucun véhicule ne correspond à votre recherche"
+    "noResults": "Aucun véhicule ne correspond à votre recherche",
+    "rentalFilter": {
+      "minute": "Véhicules pour location à la minute",
+      "hour": "Véhicules pour location à l'heure",
+      "day": "Véhicules pour location à la journée"
+    }
   },
   "carDetail": {
     "notFoundTitle": "Véhicule introuvable",

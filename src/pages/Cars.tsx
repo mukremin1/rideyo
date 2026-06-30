@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
@@ -15,6 +16,8 @@ import carSuv from "@/assets/car-suv.jpg";
 
 const Cars = () => {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const rentalFilter = searchParams.get("rental");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [cars, setCars] = useState<CarType[]>([]);
@@ -105,6 +108,11 @@ const Cars = () => {
             <p className="text-xl text-muted-foreground">
               {t("cars.subtitle")}
             </p>
+            {rentalFilter && ["minute", "hour", "day"].includes(rentalFilter) && (
+              <div className="mt-4 inline-flex rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+                {t(`cars.rentalFilter.${rentalFilter}` as "cars.rentalFilter.minute")}
+              </div>
+            )}
           </div>
 
           <div className="bg-card border border-border rounded-2xl p-6 mb-8">
@@ -153,7 +161,11 @@ const Cars = () => {
             <>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCars.map((car) => (
-                  <CarCard key={car.id} car={car} />
+                  <CarCard
+                    key={car.id}
+                    car={car}
+                    rentalType={rentalFilter && ["minute", "hour", "day"].includes(rentalFilter) ? rentalFilter : undefined}
+                  />
                 ))}
               </div>
 

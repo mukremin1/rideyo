@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { supabase } from "@/integrations/supabase/client";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import { useGeolocation } from "@/contexts/GeolocationContext";
+import { useNearbyCars } from "@/hooks/useNearbyCars";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -11,30 +10,27 @@ import { useNavigate } from "react-router-dom";
 import carCompact from "@/assets/car-compact.jpg";
 import carSedan from "@/assets/car-sedan.jpg";
 import carSuv from "@/assets/car-suv.jpg";
-import { resolveCoordinatesFromLocation } from "@/lib/locationGeocoding";
-
-interface NearbyCarData {
-  id: string;
-  name: string;
-  type: string;
-  location: string;
-  latitude: number | null;
-  longitude: number | null;
-  price_per_hour: number;
-  fuel_type: string;
-  image_url: string | null;
-  distance?: number;
-}
 
 interface NearbyVehiclesProps {
   maxDistance?: number;
   limit?: number;
+  skipLocationPrompt?: boolean;
 }
 
-const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) => {
+const getCarImage = (type: string, imageUrl: string | null): string => {
+  if (imageUrl) return imageUrl;
+  switch (type) {
+    case "sedan":
+      return carSedan;
+    case "suv":
+      return carSuv;
+    default:
+      return carCompact;
+  }
+};
+
+const NearbyVehicles = ({ maxDistance = 50, limit = 6, skipLocationPrompt = false }: NearbyVehiclesProps) => {
   const { t } = useTranslation();
-  const [cars, setCars] = useState<NearbyCarData[]>([]);
-  const [loading, setLoading] = useState(true);
   const {
     latitude,
     longitude,
@@ -42,89 +38,11 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
     error: locationError,
     requestPermission,
   } = useGeolocation();
+  const { cars, loading } = useNearbyCars(latitude, longitude, locationLoading, { maxDistance, limit });
   const navigate = useNavigate();
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371;
-    const dLat = deg2rad(lat2 - lat1);
-    const dLon = deg2rad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
-  const deg2rad = (deg: number): number => deg * (Math.PI / 180);
-
-  const getCarImage = (type: string, imageUrl: string | null): string => {
-    if (imageUrl) return imageUrl;
-    switch (type) {
-      case "sedan":
-        return carSedan;
-      case "suv":
-        return carSuv;
-      default:
-        return carCompact;
-    }
-  };
-
-  useEffect(() => {
-    const fetchCars = async () => {
-      const { data, error } = await supabase
-        .from("cars")
-        .select("id, name, type, location, latitude, longitude, price_per_hour, fuel_type, image_url")
-        .eq("available", true);
-
-      if (error) {
-        console.error("Error fetching cars:", error);
-        setLoading(false);
-        return;
-      }
-
-      if (data && latitude !== null && longitude !== null) {
-        const carsWithDistance = await Promise.all(
-          data.map(async (car) => {
-            let carLat = car.latitude;
-            let carLon = car.longitude;
-
-            if (!carLat || !carLon) {
-              const coords = await resolveCoordinatesFromLocation(car.location);
-              if (coords) {
-                [carLat, carLon] = coords;
-              }
-            }
-
-            if (carLat && carLon) {
-              const distance = calculateDistance(latitude, longitude, carLat, carLon);
-              return { ...car, distance };
-            }
-
-            return { ...car, distance: undefined };
-          })
-        );
-
-        setCars(
-          carsWithDistance
-            .filter((c) => c.distance !== undefined && (c.distance as number) <= maxDistance)
-            .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0))
-            .slice(0, limit)
-        );
-      } else if (data) {
-        setCars(data.slice(0, limit));
-      }
-
-      setLoading(false);
-    };
-
-    if (!locationLoading) {
-      fetchCars();
-    }
-  }, [latitude, longitude, locationLoading, maxDistance, limit]);
-
   const title = (
-    <CardTitle className="flex items-center gap-2">
+    <CardTitle className="flex items-center gap-2 text-lg font-semibold tracking-tight">
       <Navigation className="w-5 h-5 text-primary" />
       {t("components.nearby.title")}
     </CardTitle>
@@ -150,7 +68,7 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
     );
   }
 
-  if (locationError) {
+  if (locationError && !skipLocationPrompt) {
     return (
       <Card>
         <CardHeader>
@@ -191,7 +109,7 @@ const NearbyVehicles = ({ maxDistance = 50, limit = 6 }: NearbyVehiclesProps) =>
   }
 
   return (
-    <Card>
+    <Card className="surface-card-elevated border-border/60">
       <CardHeader>
         <div className="flex items-center justify-between">
           {title}

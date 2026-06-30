@@ -12,7 +12,12 @@
     },
     "loadError": "Araçlar yüklenemedi",
     "noCars": "Henüz eklenmiş araç bulunmuyor",
-    "noResults": "Aramanıza uygun araç bulunamadı"
+    "noResults": "Aramanıza uygun araç bulunamadı",
+    "rentalFilter": {
+      "minute": "Dakikalık kiralama için araçlar",
+      "hour": "Saatlik kiralama için araçlar",
+      "day": "Günlük kiralama için araçlar"
+    }
   },
   "carDetail": {
     "notFoundTitle": "Araç Bulunamadı",

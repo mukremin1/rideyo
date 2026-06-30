@@ -22,21 +22,21 @@ const Hero = () => {
 
       <div className="container relative z-10 mx-auto px-4 py-16 sm:px-6 lg:px-8 sm:py-20">
         <div className="max-w-2xl">
-          <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2">
+          <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-primary/15 bg-background/80 px-4 py-2 backdrop-blur-sm">
             <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
-            <span className="text-xs font-semibold leading-tight text-primary sm:text-sm">
+            <span className="text-xs font-semibold tracking-wide text-primary sm:text-sm">
               {t("home.heroBadge")}
             </span>
           </div>
 
-          <h1 className="mb-6 text-4xl font-bold leading-tight text-foreground sm:text-6xl lg:text-7xl">
+          <h1 className="mb-6 text-4xl font-semibold leading-[1.08] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
             {t("home.heroTitle1")}
-            <span className="mt-1 block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="mt-2 block bg-gradient-to-r from-primary to-accent bg-clip-text font-semibold text-transparent">
               {t("home.heroTitle2")}
             </span>
           </h1>
 
-          <p className="mb-8 text-lg leading-relaxed text-muted-foreground sm:text-xl">
+          <p className="mb-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {t("home.heroDesc")}
           </p>
 
@@ -67,30 +67,30 @@ const Hero = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
-            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 p-4 backdrop-blur-sm">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/80 p-4 backdrop-blur-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
                 <Clock className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-lg font-bold text-foreground">7/24</div>
+                <div className="text-lg font-semibold tabular-nums tracking-tight text-foreground">7/24</div>
                 <div className="text-sm text-muted-foreground">{t("home.stat247")}</div>
               </div>
             </div>
-            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 p-4 backdrop-blur-sm">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/80 p-4 backdrop-blur-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
                 <MapPin className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-lg font-bold text-foreground">20+</div>
+                <div className="text-lg font-semibold tabular-nums tracking-tight text-foreground">20+</div>
                 <div className="text-sm text-muted-foreground">{t("home.statCities")}</div>
               </div>
             </div>
-            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 p-4 backdrop-blur-sm">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/80 p-4 backdrop-blur-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
                 <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-lg font-bold text-foreground">SSL</div>
+                <div className="text-lg font-semibold tracking-tight text-foreground">SSL</div>
                 <div className="text-sm text-muted-foreground">{t("home.statSecure")}</div>
               </div>
             </div>

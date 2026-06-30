@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 interface CarCardProps {
   car: CarType;
+  rentalType?: string;
 }
 
 interface Campaign {
@@ -18,7 +19,7 @@ interface Campaign {
   name: string;
 }
 
-const CarCard = ({ car }: CarCardProps) => {
+const CarCard = ({ car, rentalType }: CarCardProps) => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -173,7 +174,10 @@ const CarCard = ({ car }: CarCardProps) => {
             </div>
           </div>
 
-          <Link to={`/car/${car.id}`} className="w-full block">
+          <Link
+            to={rentalType ? `/car/${car.id}?rental=${rentalType}` : `/car/${car.id}`}
+            className="w-full block"
+          >
             <Button 
               className="w-full" 
               disabled={!car.available}

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import AboutSection from "@/components/AboutSection";
@@ -6,12 +5,12 @@ import ReservationSteps from "@/components/ReservationSteps";
 import HowItWorks from "@/components/HowItWorks";
 import Features from "@/components/Features";
 import Footer from "@/components/Footer";
-import CarsMap from "@/components/CarsMap";
+import HomeRentalTypes from "@/components/HomeRentalTypes";
+import HomeMapSection from "@/components/HomeMapSection";
 import NearbyVehicles from "@/components/NearbyVehicles";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Crown, MapPin, Bell } from "lucide-react";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import { Crown, Bell } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useTranslation } from "react-i18next";
 
@@ -19,41 +18,39 @@ const Index = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const {
-    latitude,
-    longitude,
-    loading: locationLoading,
-    requestPermission: requestLocationPermission,
-  } = useGeolocation();
-  const {
     permission: notifPermission,
     requestPermission: requestNotifPermission,
     isSupported: notifSupported,
   } = usePushNotifications();
-  const [showMap, setShowMap] = useState(true);
-
-  const userLocation = latitude && longitude ? { latitude, longitude } : null;
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 overflow-x-hidden pt-[calc(env(safe-area-inset-top)+4.5rem)] md:pt-[calc(env(safe-area-inset-top)+5rem)]">
       <Navbar />
 
-      <div className="overflow-x-hidden bg-gradient-to-r from-primary via-primary/95 to-accent py-2 px-3 text-primary-foreground sm:px-4 md:py-2.5">
-        <div className="container mx-auto grid grid-cols-1 items-center gap-2 md:grid-cols-[minmax(0,1fr)_auto]">
-          <div className="flex min-w-0 items-center gap-2 text-left">
-            <Crown className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-            <span className="min-w-0 break-words text-[13px] font-medium leading-tight sm:text-sm">
-              {t("home.promoBanner")}
-            </span>
+      <div className="overflow-x-hidden border-b border-primary/10 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(18_90%_46%))] px-4 py-3 text-primary-foreground sm:px-6">
+        <div className="container mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex min-w-0 items-start gap-3 text-left">
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
+              <Crown className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
+                {t("home.promoEyebrow")}
+              </p>
+              <p className="mt-0.5 text-sm font-medium leading-snug tracking-tight sm:text-[0.9375rem]">
+                {t("home.promoBanner")}
+              </p>
+            </div>
           </div>
-          <div className="grid w-full grid-cols-1 items-stretch gap-2 sm:grid-cols-2 md:flex md:w-auto">
+          <div className="flex flex-wrap items-stretch gap-2 md:shrink-0">
             {notifSupported && notifPermission !== "granted" && (
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={requestNotifPermission}
-                className="h-8 w-full whitespace-nowrap px-3 text-[11px] sm:h-9 sm:text-xs md:w-auto md:text-sm"
+                className="h-9 flex-1 rounded-lg border-0 bg-white/95 px-4 text-xs font-semibold text-foreground shadow-sm hover:bg-white sm:flex-none sm:text-sm"
               >
-                <Bell className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Bell className="mr-1.5 h-3.5 w-3.5" />
                 {t("home.enableNotifications")}
               </Button>
             )}
@@ -61,7 +58,7 @@ const Index = () => {
               size="sm"
               variant="secondary"
               onClick={() => navigate("/packages")}
-              className="h-8 w-full whitespace-nowrap px-3 text-[11px] sm:h-9 sm:text-xs md:w-auto md:text-sm"
+              className="h-9 flex-1 rounded-lg border border-white/25 bg-white/10 px-4 text-xs font-semibold text-white backdrop-blur-sm hover:bg-white/20 sm:flex-none sm:text-sm"
             >
               {t("home.viewPlans")}
             </Button>
@@ -69,51 +66,18 @@ const Index = () => {
         </div>
       </div>
 
-      <Hero />
+      <HomeRentalTypes />
+      <HomeMapSection />
 
-      <section className="py-12 px-4 bg-muted/30 overflow-x-hidden">
+      <section className="relative z-10 hidden py-8 px-4 bg-background md:block md:py-12">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-            <div className="min-w-0">
-              <h2 className="mb-2 flex items-center gap-2 break-words text-2xl font-bold text-foreground sm:text-3xl">
-                <MapPin className="h-7 w-7 shrink-0 text-primary sm:h-8 sm:w-8" />
-                {t("home.mapTitle")}
-              </h2>
-              <p className="break-words text-muted-foreground">
-                {t("home.mapDesc")}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-              {!userLocation && !locationLoading && (
-                <Button variant="outline" onClick={requestLocationPermission} className="w-full sm:w-auto whitespace-normal">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  {t("home.enableLocation")}
-                </Button>
-              )}
-              <Button
-                variant={showMap ? "default" : "outline"}
-                onClick={() => setShowMap(!showMap)}
-                className="w-full sm:w-auto whitespace-normal"
-              >
-                {showMap ? t("home.hideMap") : t("home.showMap")}
-              </Button>
-            </div>
-          </div>
-
-          {showMap && (
-            <div className="relative z-0 mt-2 md:mt-4 mb-8 md:mb-10">
-              <CarsMap userLocation={userLocation} showUserLocation={true} height="min(500px, 62vh)" />
-            </div>
-          )}
+          <NearbyVehicles maxDistance={100} limit={6} skipLocationPrompt />
         </div>
       </section>
 
-      <section className="relative z-10 py-12 px-4 bg-background">
-        <div className="container mx-auto">
-          <NearbyVehicles maxDistance={100} limit={6} />
-        </div>
-      </section>
-
+      <div className="hidden md:block">
+        <Hero />
+      </div>
       <AboutSection />
       <ReservationSteps />
       <HowItWorks />
@@ -124,4 +88,3 @@ const Index = () => {
 };
 
 export default Index;
-

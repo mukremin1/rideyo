@@ -1,4 +1,4 @@
-﻿import { useParams, Link, useNavigate } from "react-router-dom";
+﻿import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
@@ -57,6 +57,7 @@ interface ServiceZone {
 const CarDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -89,6 +90,13 @@ const CarDetail = () => {
   ];
   const selectedKmPackageData = kmPackages.find((pkg) => pkg.id === selectedKmPackage) || null;
   const kmPackagePrice = selectedKmPackageData?.price ?? 0;
+
+  useEffect(() => {
+    const rental = searchParams.get("rental");
+    if (rental === "minute" || rental === "hour" || rental === "day") {
+      setSelectedPricing(rental);
+    }
+  }, [searchParams]);
 
   const normalizeText = (value: string) => value.toLocaleLowerCase("tr");
 
