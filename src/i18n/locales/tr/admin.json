@@ -54,7 +54,7 @@
     "discountPercent": "İndirim Yüzdesi (%)",
     "startDate": "Başlangıç Tarihi",
     "endDate": "Bitiş Tarihi",
-    "carTypesLabel": "Araç Tipleri (boş bırakırsanız tüm araçlar)",
+    "carTypesLabel": "Araç tipleri (boş = tümü)",
     "active": "Aktif",
     "inactive": "Pasif",
     "update": "Güncelle",

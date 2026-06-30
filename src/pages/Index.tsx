@@ -27,40 +27,40 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-16 md:pb-0 overflow-x-hidden pt-[calc(env(safe-area-inset-top)+4.5rem)] md:pt-[calc(env(safe-area-inset-top)+5rem)]">
       <Navbar />
 
-      <div className="overflow-x-hidden border-b border-primary/10 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(18_90%_46%))] px-4 py-3 text-primary-foreground sm:px-6">
-        <div className="container mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex min-w-0 items-start gap-3 text-left">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
-              <Crown className="h-4 w-4" />
+      <div className="overflow-x-hidden border-b border-primary/10 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(18_90%_46%))] px-3 py-2.5 text-primary-foreground sm:px-6 sm:py-3">
+        <div className="container mx-auto flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm sm:h-8 sm:w-8">
+              <Crown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-white/80 sm:text-[11px] sm:tracking-[0.12em]">
                 {t("home.promoEyebrow")}
               </p>
-              <p className="mt-0.5 text-sm font-medium leading-snug tracking-tight sm:text-[0.9375rem]">
+              <p className="mt-0.5 text-xs font-medium leading-snug text-balance sm:text-sm sm:leading-snug">
                 {t("home.promoBanner")}
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-stretch gap-2 md:shrink-0">
+          <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
             {notifSupported && notifPermission !== "granted" && (
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={requestNotifPermission}
-                className="h-9 flex-1 rounded-lg border-0 bg-white/95 px-4 text-xs font-semibold text-foreground shadow-sm hover:bg-white sm:flex-none sm:text-sm"
+                className="h-8 min-w-0 flex-1 rounded-lg border-0 bg-white/95 px-2.5 text-[11px] font-semibold text-foreground shadow-sm hover:bg-white sm:h-9 sm:flex-none sm:px-4 sm:text-sm"
               >
-                <Bell className="mr-1.5 h-3.5 w-3.5" />
-                {t("home.enableNotifications")}
+                <Bell className="mr-1 h-3 w-3 shrink-0 sm:mr-1.5 sm:h-3.5 sm:w-3.5" />
+                <span className="truncate">{t("home.enableNotifications")}</span>
               </Button>
             )}
             <Button
               size="sm"
               variant="secondary"
               onClick={() => navigate("/packages")}
-              className="h-9 flex-1 rounded-lg border border-white/25 bg-white/10 px-4 text-xs font-semibold text-white backdrop-blur-sm hover:bg-white/20 sm:flex-none sm:text-sm"
+              className="h-8 min-w-0 flex-1 rounded-lg border border-white/25 bg-white/10 px-2.5 text-[11px] font-semibold text-white backdrop-blur-sm hover:bg-white/20 sm:h-9 sm:flex-none sm:px-4 sm:text-sm"
             >
-              {t("home.viewPlans")}
+              <span className="truncate">{t("home.viewPlans")}</span>
             </Button>
           </div>
         </div>

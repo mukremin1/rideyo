@@ -106,7 +106,7 @@
     "notAvailableNow": "Şu An Müsait Değil",
     "createReservation": "Rezervasyon Oluştur",
     "subscriptionBanner": "🎉 {{tier}} üyesi olarak %{{percent}} indirim kazanıyorsunuz!",
-    "campaignBanner": "🏷️ {{name}} — %{{percent}} kampanya indirimi uygulanacak",
+    "campaignBanner": "{{name}} — %{{percent}} indirim",
     "lockSuccessLocked": "Araç Kilitlendi",
     "lockSuccessUnlocked": "Araç Kilidi Açıldı",
     "lockDescLocked": "{{name}} kilitlendi",

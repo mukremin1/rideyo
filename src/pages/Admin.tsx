@@ -220,18 +220,18 @@ const Admin = () => {
             </div>
           </div>
 
-          <Tabs defaultValue="rentals" className="space-y-8">
-            <TabsList>
-              <TabsTrigger value="rentals" className="gap-2">
-                <ClipboardList className="w-4 h-4" />
+          <Tabs defaultValue="rentals" className="space-y-6 sm:space-y-8">
+            <TabsList className="grid h-auto w-full grid-cols-3 gap-1 p-1">
+              <TabsTrigger value="rentals" className="gap-1 px-1.5 py-2 text-[11px] leading-tight whitespace-normal sm:gap-2 sm:px-3 sm:text-sm">
+                <ClipboardList className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.rentals")}
               </TabsTrigger>
-              <TabsTrigger value="fleet" className="gap-2">
-                <Car className="w-4 h-4" />
+              <TabsTrigger value="fleet" className="gap-1 px-1.5 py-2 text-[11px] leading-tight whitespace-normal sm:gap-2 sm:px-3 sm:text-sm">
+                <Car className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.fleet")}
               </TabsTrigger>
-              <TabsTrigger value="campaigns" className="gap-2">
-                <Megaphone className="w-4 h-4" />
+              <TabsTrigger value="campaigns" className="gap-1 px-1.5 py-2 text-[11px] leading-tight whitespace-normal sm:gap-2 sm:px-3 sm:text-sm">
+                <Megaphone className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.campaigns")}
               </TabsTrigger>
             </TabsList>
@@ -244,24 +244,27 @@ const Admin = () => {
               <AdminFleetSection />
             </TabsContent>
 
-            <TabsContent value="campaigns" className="space-y-8">
+            <TabsContent value="campaigns" className="space-y-6">
           <div className="flex justify-end">
-            <Button onClick={() => {
+            <Button
+              size="sm"
+              className="h-9 text-xs sm:h-10 sm:text-sm"
+              onClick={() => {
               setShowForm(true);
               setEditingCampaign(null);
               resetForm();
             }}>
-              <Plus className="w-4 h-4 mr-2" />
-              {t("admin.newCampaign")}
+              <Plus className="w-4 h-4 mr-1.5 shrink-0" />
+              <span className="truncate">{t("admin.newCampaign")}</span>
             </Button>
           </div>
 
           {showForm && (
-            <Card className="p-6 mb-8">
-              <h2 className="text-2xl font-bold mb-6">
+            <Card className="p-4 sm:p-6 mb-6">
+              <h2 className="text-lg font-bold mb-4 sm:text-2xl sm:mb-6">
                 {editingCampaign ? t("admin.editCampaign") : t("admin.createCampaign")}
               </h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div>
                   <Label>{t("admin.campaignName")}</Label>
                   <Input
@@ -292,7 +295,7 @@ const Admin = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <Label>{t("admin.startDate")}</Label>
                     <Popover>
@@ -333,12 +336,14 @@ const Admin = () => {
                 </div>
 
                 <div>
-                  <Label className="mb-3 block">{t("admin.carTypesLabel")}</Label>
-                  <div className="flex gap-2">
+                  <Label className="mb-2 block text-sm">{t("admin.carTypesLabel")}</Label>
+                  <div className="flex flex-wrap gap-2">
                     {["compact", "sedan", "suv"].map((type) => (
                       <Button
                         key={type}
                         type="button"
+                        size="sm"
+                        className="text-xs sm:text-sm"
                         variant={formData.car_types.includes(type) ? "default" : "outline"}
                         onClick={() => handleCarTypeToggle(type)}
                       >
@@ -348,15 +353,15 @@ const Admin = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Switch
                     checked={formData.is_active}
                     onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                   />
-                  <Label>{t("admin.active")}</Label>
+                  <Label className="text-sm">{t("admin.active")}</Label>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button type="submit">
                     {editingCampaign ? t("admin.update") : t("admin.create")}
                   </Button>
@@ -376,30 +381,43 @@ const Admin = () => {
             </Card>
           )}
 
-          <div className="grid gap-4">
+          <div className="grid gap-3 sm:gap-4">
             {campaigns.map((campaign) => (
-              <Card key={campaign.id} className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-bold">{campaign.name}</h3>
+              <Card key={campaign.id} className="p-4 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <h3 className="text-base font-bold break-words sm:text-xl">{campaign.name}</h3>
                       {campaign.is_active ? (
-                        <Badge>{t("admin.active")}</Badge>
+                        <Badge className="shrink-0 text-[10px] sm:text-xs">{t("admin.active")}</Badge>
                       ) : (
-                        <Badge variant="secondary">{t("admin.inactive")}</Badge>
+                        <Badge variant="secondary" className="shrink-0 text-[10px] sm:text-xs">{t("admin.inactive")}</Badge>
                       )}
-                      <Badge variant="outline">{t("admin.discountBadge", { percent: campaign.discount_percentage })}</Badge>
+                      <Badge variant="outline" className="shrink-0 text-[10px] sm:text-xs">
+                        {t("admin.discountBadge", { percent: campaign.discount_percentage })}
+                      </Badge>
                     </div>
-                    <p className="text-muted-foreground mb-3">{campaign.description}</p>
-                    <div className="flex gap-4 text-sm text-muted-foreground">
-                      <span>{t("admin.startLabel")} {format(new Date(campaign.start_date), "dd/MM/yyyy")}</span>
-                      <span>{t("admin.endLabel")} {format(new Date(campaign.end_date), "dd/MM/yyyy")}</span>
+                    {campaign.description && (
+                      <p className="mb-3 text-sm text-muted-foreground break-words leading-relaxed">
+                        {campaign.description}
+                      </p>
+                    )}
+                    <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1 sm:text-sm">
+                      <span className="break-words">
+                        {t("admin.startLabel")} {format(new Date(campaign.start_date), "dd/MM/yyyy")}
+                      </span>
+                      <span className="break-words">
+                        {t("admin.endLabel")} {format(new Date(campaign.end_date), "dd/MM/yyyy")}
+                      </span>
                       {campaign.car_types && (
-                        <span>{t("admin.carsLabel")} {campaign.car_types.join(", ")}</span>
+                        <span className="break-words">
+                          {t("admin.carsLabel")}{" "}
+                          {campaign.car_types.map((type) => t(`admin.carTypes.${type}`)).join(", ")}
+                        </span>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex shrink-0 gap-2 self-end sm:self-start">
                     <Button
                       variant="outline"
                       size="sm"

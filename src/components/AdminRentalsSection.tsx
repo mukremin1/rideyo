@@ -319,11 +319,19 @@ const AdminRentalsSection = () => {
         </Card>
       ) : (
         <Tabs defaultValue="active">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">{t("admin.rentals.tabAll")} ({counts.all})</TabsTrigger>
-            <TabsTrigger value="active">{t("admin.rentals.tabActive")} ({counts.active})</TabsTrigger>
-            <TabsTrigger value="upcoming">{t("admin.rentals.tabUpcoming")} ({counts.upcoming})</TabsTrigger>
-            <TabsTrigger value="past">{t("admin.rentals.tabPast")} ({counts.past})</TabsTrigger>
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:grid-cols-4">
+            <TabsTrigger value="all" className="px-1 py-2 text-[10px] leading-tight whitespace-normal sm:text-xs">
+              {t("admin.rentals.tabAll")} ({counts.all})
+            </TabsTrigger>
+            <TabsTrigger value="active" className="px-1 py-2 text-[10px] leading-tight whitespace-normal sm:text-xs">
+              {t("admin.rentals.tabActive")} ({counts.active})
+            </TabsTrigger>
+            <TabsTrigger value="upcoming" className="px-1 py-2 text-[10px] leading-tight whitespace-normal sm:text-xs">
+              {t("admin.rentals.tabUpcoming")} ({counts.upcoming})
+            </TabsTrigger>
+            <TabsTrigger value="past" className="px-1 py-2 text-[10px] leading-tight whitespace-normal sm:text-xs">
+              {t("admin.rentals.tabPast")} ({counts.past})
+            </TabsTrigger>
           </TabsList>
           {(["all", "active", "upcoming", "past"] as const).map((tab) => (
             <TabsContent key={tab} value={tab} className="space-y-4 mt-4">

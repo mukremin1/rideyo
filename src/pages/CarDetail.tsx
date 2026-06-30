@@ -511,8 +511,8 @@ const CarDetail = () => {
           )}
 
           {campaign && (
-            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-              <p className="text-sm font-medium text-green-700 dark:text-green-300">
+            <div className="mb-6 rounded-xl border border-green-500/20 bg-green-500/10 p-3 sm:p-4">
+              <p className="text-xs font-medium leading-snug text-green-700 break-words sm:text-sm dark:text-green-300">
                 🏷️ {t("carDetail.campaignBanner", { name: campaign.name, percent: campaign.discount_percentage })}
               </p>
             </div>
