@@ -38,17 +38,31 @@ serve(async (req) => {
     const body: RefundRequest = await req.json();
     if (!body.bookingId) return json({ error: "Rezervasyon ID gerekli" }, 400);
 
+    const { data: adminRole } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    const isAdmin = !!adminRole;
+
     const { data: booking, error: bookingError } = await adminClient
       .from("bookings")
       .select(`
-        id, user_id, payment_status, total_price, rental_amount, provision_fee,
+        id, user_id, car_id, payment_status, total_price, rental_amount, provision_fee,
         provision_status, iyzico_payment_id, iyzico_provision_payment_id
       `)
       .eq("id", body.bookingId)
-      .eq("user_id", user.id)
       .maybeSingle();
 
     if (bookingError || !booking) return json({ error: "Rezervasyon bulunamadı" }, 404);
+
+    if (!isAdmin && booking.user_id !== user.id) {
+      return json({ error: "Bu rezervasyonu iptal etme yetkiniz yok" }, 403);
+    }
+
+    const cancelReason = body.reason ?? (isAdmin ? "admin_cancelled" : "user_cancelled");
 
     if (booking.payment_status === "cancelled" || booking.payment_status === "refunded") {
       return json({ success: true, alreadyRefunded: true });
@@ -95,7 +109,7 @@ serve(async (req) => {
         amount: refundAmount,
         iyzico_conversation_id: conversationId,
         error_message: isIyzicoSuccess(refundRes) ? null : refundRes.errorMessage,
-        metadata: { reason: body.reason },
+        metadata: { reason: cancelReason },
       });
 
       if (!isIyzicoSuccess(refundRes)) {

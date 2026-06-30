@@ -13,13 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminFleetSection from "@/components/AdminFleetSection";
+import AdminRentalsSection from "@/components/AdminRentalsSection";
 
 interface Campaign {
   id: string;
@@ -219,8 +220,12 @@ const Admin = () => {
             </div>
           </div>
 
-          <Tabs defaultValue="fleet" className="space-y-8">
+          <Tabs defaultValue="rentals" className="space-y-8">
             <TabsList>
+              <TabsTrigger value="rentals" className="gap-2">
+                <ClipboardList className="w-4 h-4" />
+                {t("admin.tabs.rentals")}
+              </TabsTrigger>
               <TabsTrigger value="fleet" className="gap-2">
                 <Car className="w-4 h-4" />
                 {t("admin.tabs.fleet")}
@@ -230,6 +235,10 @@ const Admin = () => {
                 {t("admin.tabs.campaigns")}
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="rentals">
+              <AdminRentalsSection />
+            </TabsContent>
 
             <TabsContent value="fleet">
               <AdminFleetSection />
