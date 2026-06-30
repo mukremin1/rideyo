@@ -33,13 +33,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build and verify
         run: npm run build
         env:
           CI: false
-
-      - name: SPA fallback for GitHub Pages
-        run: cp dist/index.html dist/404.html
 
       - name: Upload artifact for GitHub Pages
         # v3 gerekli (v2 veya v1 eski/uyumsuz olabilir)

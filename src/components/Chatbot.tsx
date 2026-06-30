@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
+import { getSupabaseAnonKey, getSupabaseFunctionsUrl } from "@/lib/appConfig";
 
 type Message = {
   role: "user" | "assistant";
@@ -18,7 +19,7 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+  const CHAT_URL = getSupabaseFunctionsUrl("chat");
 
   useEffect(() => {
     setMessages([{ role: "assistant", content: t("components.chatbot.welcome") }]);
@@ -40,7 +41,7 @@ const Chatbot = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${getSupabaseAnonKey()}`,
         },
         body: JSON.stringify({ messages: newMessages }),
       });

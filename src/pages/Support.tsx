@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Send, Bot, User as UserIcon, Loader2, MessageSquare, Phone } from "lucide-react";
 import { toast } from "sonner";
+import { getSupabaseAnonKey, getSupabaseFunctionsUrl } from "@/lib/appConfig";
 
 const WHATSAPP_NUMBER = "+905395263293";
 
@@ -59,13 +60,11 @@ const Support = () => {
     };
 
     try {
-      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support`;
-
-      const response = await fetch(CHAT_URL, {
+      const response = await fetch(getSupabaseFunctionsUrl("ai-support"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${getSupabaseAnonKey()}`,
         },
         body: JSON.stringify({ messages: [...messages, userMessage] }),
       });

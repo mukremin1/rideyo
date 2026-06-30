@@ -7,6 +7,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadEnv } from "./load-env.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const projectRef = "pehemxfydtwgpcasftyq";
@@ -56,6 +57,24 @@ if (existsSync(envPath)) {
   }
 } else {
   fail(".env", "dosya bulunamadı", "npm run env:init → .env.example'dan oluştur, Supabase anahtarlarını doldur");
+}
+
+// 2b. Production env (GitHub Pages / web deploy)
+const prodEnvPath = resolve(root, ".env.production");
+if (existsSync(prodEnvPath)) {
+  const prodEnv = loadEnv("production");
+  if (prodEnv.VITE_SUPABASE_URL?.includes(".supabase.co")) {
+    pass(".env.production", "VITE_SUPABASE_URL ok");
+  } else {
+    fail(".env.production", "VITE_SUPABASE_URL eksik veya geçersiz");
+  }
+  if (prodEnv.VITE_SUPABASE_PUBLISHABLE_KEY && prodEnv.VITE_SUPABASE_PUBLISHABLE_KEY.length > 20) {
+    pass(".env.production", "anon key ok");
+  } else {
+    fail(".env.production", "VITE_SUPABASE_PUBLISHABLE_KEY eksik");
+  }
+} else {
+  fail(".env.production", "dosya bulunamadı", "Web deploy için .env.production gerekli");
 }
 
 // 3. Migration file
