@@ -13,11 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AdminFleetSection from "@/components/AdminFleetSection";
 
 interface Campaign {
   id: string;
@@ -215,6 +217,26 @@ const Admin = () => {
               <h1 className="text-4xl font-bold text-foreground mb-2">{t("admin.title")}</h1>
               <p className="text-muted-foreground">{t("admin.subtitle")}</p>
             </div>
+          </div>
+
+          <Tabs defaultValue="fleet" className="space-y-8">
+            <TabsList>
+              <TabsTrigger value="fleet" className="gap-2">
+                <Car className="w-4 h-4" />
+                {t("admin.tabs.fleet")}
+              </TabsTrigger>
+              <TabsTrigger value="campaigns" className="gap-2">
+                <Megaphone className="w-4 h-4" />
+                {t("admin.tabs.campaigns")}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="fleet">
+              <AdminFleetSection />
+            </TabsContent>
+
+            <TabsContent value="campaigns" className="space-y-8">
+          <div className="flex justify-end">
             <Button onClick={() => {
               setShowForm(true);
               setEditingCampaign(null);
@@ -394,6 +416,8 @@ const Admin = () => {
               <p className="text-muted-foreground">{t("admin.empty")}</p>
             </div>
           )}
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 

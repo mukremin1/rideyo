@@ -2,7 +2,24 @@
   "admin": {
     "noAccess": "Bu sayfaya erişim yetkiniz yok",
     "title": "Admin Panel",
-    "subtitle": "Kampanya ve sistem yönetimi",
+    "subtitle": "Kampanya ve filo yönetimi",
+    "tabs": {
+      "fleet": "Araç Filosu",
+      "campaigns": "Kampanyalar"
+    },
+    "fleet": {
+      "title": "Araç Filosu",
+      "subtitle": "Tüm araçları görüntüleyin, kiralamayı açıp kapatın veya yeni araç ekleyin.",
+      "addCar": "Araç Ekle",
+      "empty": "Henüz kayıtlı araç yok.",
+      "rentalOpen": "Kiralamaya açık",
+      "rentalClosed": "Kiralamaya kapalı",
+      "rentalToggle": "Kiralama",
+      "rentalOpened": "Araç kiralamaya açıldı",
+      "rentalClosedToast": "Araç kiralamaya kapatıldı",
+      "toggleError": "Kiralama durumu güncellenemedi",
+      "loadError": "Araç listesi yüklenemedi"
+    },
     "newCampaign": "Yeni Kampanya",
     "editCampaign": "Kampanya Düzenle",
     "createCampaign": "Yeni Kampanya Oluştur",

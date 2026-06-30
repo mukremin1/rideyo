@@ -2,7 +2,24 @@
   "admin": {
     "noAccess": "You don't have access to this page",
     "title": "Admin Panel",
-    "subtitle": "Campaign and system management",
+    "subtitle": "Campaign and fleet management",
+    "tabs": {
+      "fleet": "Fleet",
+      "campaigns": "Campaigns"
+    },
+    "fleet": {
+      "title": "Vehicle Fleet",
+      "subtitle": "View all vehicles, open or close rentals, or add a new car.",
+      "addCar": "Add Vehicle",
+      "empty": "No vehicles registered yet.",
+      "rentalOpen": "Open for rental",
+      "rentalClosed": "Closed for rental",
+      "rentalToggle": "Rental",
+      "rentalOpened": "Vehicle opened for rental",
+      "rentalClosedToast": "Vehicle closed for rental",
+      "toggleError": "Could not update rental status",
+      "loadError": "Could not load vehicle list"
+    },
     "newCampaign": "New Campaign",
     "editCampaign": "Edit Campaign",
     "createCampaign": "Create New Campaign",

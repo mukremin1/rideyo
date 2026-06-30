@@ -329,6 +329,10 @@ const Navbar = () => {
                           <Shield className="mr-2 h-4 w-4" />
                           {t("nav.adminPanel")}
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/add-car")}>
+                          <Plus className="mr-2 h-4 w-4" />
+                          {t("nav.addCar")}
+                        </DropdownMenuItem>
                       </>
                     )}
 

@@ -6,6 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 
 import Navbar from "@/components/Navbar";
 
@@ -64,6 +65,7 @@ const extractCityFromLocation = (location: string, otherLabel: string): string =
 const AddCar = () => {
   const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin, isCarOwner, loading: rolesLoading } = useUserRoles();
 
   const carSchema = useMemo(
     () =>
@@ -95,10 +97,6 @@ const AddCar = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-
-  const [isCarOwner, setIsCarOwner] = useState<boolean | null>(null);
-
-  const [checkingRole, setCheckingRole] = useState(true);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [ownerDeclarationAccepted, setOwnerDeclarationAccepted] = useState(false);
@@ -145,61 +143,10 @@ const AddCar = () => {
 
 
   useEffect(() => {
-
-    const checkCarOwnerRole = async () => {
-
-      if (!user) {
-
-        setCheckingRole(false);
-
-        return;
-
-      }
-
-
-
-      try {
-
-        const { data, error } = await supabase
-
-          .from("user_roles")
-
-          .select("role")
-
-          .eq("user_id", user.id)
-
-          .eq("role", "car_owner")
-
-          .maybeSingle();
-
-
-
-        if (error) {
-          console.error("Rol kontrol hatası:", error);
-          setIsCarOwner(false);
-        } else {
-          setIsCarOwner(!!data);
-        }
-      } catch (error) {
-        console.error("Rol kontrol hatası:", error);
-        setIsCarOwner(false);
-      } finally {
-        setCheckingRole(false);
-      }
-
-    };
-
-
-
-    if (!authLoading) {
-
-      checkCarOwnerRole();
-
+    if (!authLoading && !user) {
+      navigate("/auth");
     }
-
-  }, [user, authLoading]);
-
-
+  }, [authLoading, user, navigate]);
 
   const becomeCarOwner = async () => {
 
@@ -224,15 +171,11 @@ const AddCar = () => {
       if (error) {
 
         if (error.code === "23505") {
-
-          setIsCarOwner(true);
-
           toast.success(t("owner.addCar.alreadyOwner"));
         } else {
           throw error;
         }
       } else {
-        setIsCarOwner(true);
         toast.success(t("owner.addCar.ownerRegistered"));
       }
     } catch (error) {
@@ -369,7 +312,7 @@ const AddCar = () => {
 
       toast.success(t("owner.addCar.toast.addSuccess"));
 
-      navigate("/my-cars");
+      navigate(isAdmin ? "/admin" : "/my-cars");
 
     } catch (error) {
 
@@ -429,7 +372,7 @@ const AddCar = () => {
 
 
 
-  if (authLoading || checkingRole) {
+  if (authLoading || rolesLoading) {
 
     return (
 
@@ -509,7 +452,7 @@ const AddCar = () => {
 
 
 
-  if (!isCarOwner) {
+  if (!isCarOwner && !isAdmin) {
 
     return (
 
