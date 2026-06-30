@@ -27,6 +27,7 @@
     "supabase:deploy:payment": "node scripts/deploy-payment.mjs",
     "deploy:check": "node scripts/deploy-checklist.mjs",
     "supabase:migrate": "npx supabase db push",
+    "admin:grant": "node scripts/grant-admin.mjs",
     "supabase:login": "npx supabase login",
     "server:dev": "tsx server/index.ts",
     "dev:full": "concurrently -n web,api -c blue,green \"npm run dev\" \"npm run server:dev\""

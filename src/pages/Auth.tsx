@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Car, User, KeyRound } from "lucide-react";
 import { z } from "zod";
+import { getAuthRedirectUrl } from "@/lib/authRedirect";
 
 const createSignInSchema = (t: TFunction) =>
   z.object({
@@ -46,6 +47,8 @@ const Auth = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [userType, setUserType] = useState<UserType>("renter");
   const [loading, setLoading] = useState(false);
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
   const navigate = useNavigate();
 
   const signInSchema = useMemo(() => createSignInSchema(t), [t]);
@@ -77,7 +80,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = getAuthRedirectUrl("/");
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -162,6 +165,7 @@ const Auth = () => {
           toast.error(t("auth.toast.invalidCredentials"));
         } else if (error.message.toLowerCase().includes("email not confirmed")) {
           toast.error(t("auth.toast.emailNotConfirmed"));
+          setShowResendVerification(true);
         } else {
           toast.error(error.message);
         }
@@ -177,6 +181,33 @@ const Auth = () => {
       toast.error(t("auth.toast.genericError"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email.trim()) {
+      toast.error(t("auth.toast.resendEmailRequired"));
+      return;
+    }
+
+    setResendingVerification(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: getAuthRedirectUrl("/") },
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.success(t("auth.toast.resendVerificationSuccess"));
+    } catch {
+      toast.error(t("auth.toast.genericError"));
+    } finally {
+      setResendingVerification(false);
     }
   };
 
@@ -226,6 +257,20 @@ const Auth = () => {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? t("auth.signIn.submitting") : t("auth.signIn.submit")}
                 </Button>
+
+                {showResendVerification && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={resendingVerification}
+                    onClick={handleResendVerification}
+                  >
+                    {resendingVerification
+                      ? t("auth.signIn.resendingVerification")
+                      : t("auth.signIn.resendVerification")}
+                  </Button>
+                )}
               </form>
             </TabsContent>
 
