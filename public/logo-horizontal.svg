@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 72" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="8" y1="8" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FB6020"/>
+      <stop offset="1" stop-color="#0EA5C6"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="16" y1="12" x2="48" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="64" height="64" rx="16" fill="url(#bg)"/>
+  <rect x="4" y="4" width="64" height="64" rx="16" fill="url(#shine)"/>
+  <g transform="translate(15 22) scale(0.084)">
+    <path
+      fill="#FFFFFF"
+      d="M24 132c0-10 8-18 18-18h228c10 0 18 8 18 18v44H24v-44zm18-52c0-13 11-24 24-24h168c13 0 24 11 24 24v28H42V80zm36 108a22 22 0 1 0 0 44 22 22 0 0 0 0-44zm204 0a22 22 0 1 0 0 44 22 22 0 0 0 0-44z"
+    />
+    <path
+      fill="#FFFFFF"
+      fill-opacity="0.92"
+      d="M84 60h36l28 40h116l28-40h36l-40 56H124L84 60z"
+    />
+  </g>
+  <text
+    x="84"
+    y="49"
+    font-family="Plus Jakarta Sans, system-ui, -apple-system, Segoe UI, sans-serif"
+    font-size="34"
+    font-weight="700"
+    letter-spacing="-0.03em"
+  >
+    <tspan fill="#111827">Ride</tspan><tspan fill="#0EA5C6">Yo</tspan>
+  </text>
+</svg>
