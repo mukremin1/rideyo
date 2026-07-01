@@ -8,7 +8,6 @@ type BrandLogoProps = {
   className?: string;
   size?: "sm" | "md" | "lg";
   linkTo?: string;
-  showWordmark?: boolean;
 };
 
 const sizeMap = {
@@ -21,15 +20,13 @@ export const BrandLogo = ({
   className,
   size = "md",
   linkTo = "/",
-  showWordmark = true,
 }: BrandLogoProps) => {
   const { t } = useTranslation();
 
   const content = (
     <img
       src={logoSrc}
-      alt={showWordmark ? "RideYo" : ""}
-      aria-hidden={!showWordmark}
+      alt="RideYo"
       className={cn(sizeMap[size], "w-auto shrink-0 object-contain object-left", className)}
       loading="eager"
       decoding="sync"
