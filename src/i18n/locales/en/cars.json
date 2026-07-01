@@ -139,7 +139,8 @@
     "notAvailable": "Not Available",
     "loginForFavorite": "Please sign in to add favorites",
     "removedFromFavorites": "Removed from favorites",
-    "addedToFavorites": "Added to favorites"
+    "addedToFavorites": "Added to favorites",
+    "campaignBadge": "{{percent}}% off"
   },
   "favorites": {
     "title": "My Favorites",

@@ -139,7 +139,8 @@
     "notAvailable": "Müsait Değil",
     "loginForFavorite": "Favori eklemek için giriş yapmalısınız",
     "removedFromFavorites": "Favorilerden çıkarıldı",
-    "addedToFavorites": "Favorilere eklendi"
+    "addedToFavorites": "Favorilere eklendi",
+    "campaignBadge": "%{{percent}} indirim"
   },
   "favorites": {
     "title": "Favorilerim",

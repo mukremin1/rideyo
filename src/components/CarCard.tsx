@@ -106,9 +106,11 @@ const CarCard = ({ car, rentalType }: CarCardProps) => {
           <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
         </Button>
         {campaign && (
-          <Badge className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate bg-amber-500 text-white gap-1 text-[10px] sm:text-xs">
-            <Tag className="w-3 h-3 shrink-0" />
-            %{campaign.discount_percentage} {campaign.name}
+          <Badge className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] gap-1 bg-amber-500 text-white text-xs">
+            <Tag className="h-3 w-3 shrink-0" />
+            <span className="truncate">
+              {t("carCard.campaignBadge", { percent: campaign.discount_percentage })}
+            </span>
           </Badge>
         )}
         {car.available ? (

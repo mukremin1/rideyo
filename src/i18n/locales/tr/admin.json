@@ -55,6 +55,7 @@
     "startDate": "Başlangıç Tarihi",
     "endDate": "Bitiş Tarihi",
     "carTypesLabel": "Araç tipleri (boş = tümü)",
+    "allCarTypes": "Tüm araç tipleri",
     "active": "Aktif",
     "inactive": "Pasif",
     "update": "Güncelle",
@@ -66,6 +67,10 @@
     "carsLabel": "Araçlar:",
     "deleteConfirm": "Bu kampanyayı silmek istediğinizden emin misiniz?",
     "empty": "Henüz kampanya oluşturulmamış",
+    "campaignsSection": {
+      "title": "Kampanya Yönetimi",
+      "subtitle": "İndirim kampanyalarını oluşturun, düzenleyin ve takip edin."
+    },
     "toast": {
       "updateError": "Kampanya güncellenemedi",
       "updateSuccess": "Kampanya güncellendi",

@@ -221,16 +221,16 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="rentals" className="space-y-6 sm:space-y-8">
-            <TabsList className="grid h-auto w-full grid-cols-3 gap-1 p-1">
-              <TabsTrigger value="rentals" className="gap-1 px-1.5 py-2 text-[11px] leading-tight whitespace-normal sm:gap-2 sm:px-3 sm:text-sm">
+            <TabsList className="flex h-auto w-full gap-1 overflow-x-auto p-1 sm:grid sm:grid-cols-3 sm:overflow-visible">
+              <TabsTrigger value="rentals" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
                 <ClipboardList className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.rentals")}
               </TabsTrigger>
-              <TabsTrigger value="fleet" className="gap-1 px-1.5 py-2 text-[11px] leading-tight whitespace-normal sm:gap-2 sm:px-3 sm:text-sm">
+              <TabsTrigger value="fleet" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
                 <Car className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.fleet")}
               </TabsTrigger>
-              <TabsTrigger value="campaigns" className="gap-1 px-1.5 py-2 text-[11px] leading-tight whitespace-normal sm:gap-2 sm:px-3 sm:text-sm">
+              <TabsTrigger value="campaigns" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
                 <Megaphone className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.campaigns")}
               </TabsTrigger>
@@ -245,17 +245,23 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">
-          <div className="flex justify-end">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <h2 className="text-xl font-bold sm:text-2xl">{t("admin.campaignsSection.title")}</h2>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                {t("admin.campaignsSection.subtitle")}
+              </p>
+            </div>
             <Button
               size="sm"
-              className="h-9 text-xs sm:h-10 sm:text-sm"
+              className="h-9 shrink-0 self-start text-sm sm:h-10"
               onClick={() => {
               setShowForm(true);
               setEditingCampaign(null);
               resetForm();
             }}>
-              <Plus className="w-4 h-4 mr-1.5 shrink-0" />
-              <span className="truncate">{t("admin.newCampaign")}</span>
+              <Plus className="mr-1.5 h-4 w-4 shrink-0" />
+              {t("admin.newCampaign")}
             </Button>
           </div>
 
@@ -381,58 +387,82 @@ const Admin = () => {
             </Card>
           )}
 
-          <div className="grid gap-3 sm:gap-4">
+          <div className="grid gap-4">
             {campaigns.map((campaign) => (
-              <Card key={campaign.id} className="p-4 sm:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                      <h3 className="text-base font-bold break-words sm:text-xl">{campaign.name}</h3>
-                      {campaign.is_active ? (
-                        <Badge className="shrink-0 text-[10px] sm:text-xs">{t("admin.active")}</Badge>
-                      ) : (
-                        <Badge variant="secondary" className="shrink-0 text-[10px] sm:text-xs">{t("admin.inactive")}</Badge>
-                      )}
-                      <Badge variant="outline" className="shrink-0 text-[10px] sm:text-xs">
-                        {t("admin.discountBadge", { percent: campaign.discount_percentage })}
-                      </Badge>
+              <Card key={campaign.id} className="overflow-hidden">
+                <div className="flex flex-col gap-4 p-4 sm:p-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-3">
+                      <h3 className="text-lg font-bold leading-snug break-words sm:text-xl">
+                        {campaign.name}
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {campaign.is_active ? (
+                          <Badge className="text-xs">{t("admin.active")}</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">{t("admin.inactive")}</Badge>
+                        )}
+                        <Badge variant="outline" className="text-xs">
+                          {t("admin.discountBadge", { percent: campaign.discount_percentage })}
+                        </Badge>
+                      </div>
                     </div>
-                    {campaign.description && (
-                      <p className="mb-3 text-sm text-muted-foreground break-words leading-relaxed">
-                        {campaign.description}
-                      </p>
-                    )}
-                    <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1 sm:text-sm">
-                      <span className="break-words">
-                        {t("admin.startLabel")} {format(new Date(campaign.start_date), "dd/MM/yyyy")}
-                      </span>
-                      <span className="break-words">
-                        {t("admin.endLabel")} {format(new Date(campaign.end_date), "dd/MM/yyyy")}
-                      </span>
-                      {campaign.car_types && (
-                        <span className="break-words">
-                          {t("admin.carsLabel")}{" "}
-                          {campaign.car_types.map((type) => t(`admin.carTypes.${type}`)).join(", ")}
-                        </span>
-                      )}
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-9 w-9"
+                        onClick={() => handleEdit(campaign)}
+                        aria-label={t("admin.editCampaign")}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="h-9 w-9"
+                        onClick={() => handleDelete(campaign.id)}
+                        aria-label={t("admin.deleteConfirm")}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex shrink-0 gap-2 self-end sm:self-start">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(campaign)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(campaign.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+
+                  {campaign.description && (
+                    <p className="text-sm leading-relaxed text-muted-foreground break-words">
+                      {campaign.description}
+                    </p>
+                  )}
+
+                  <dl className="grid grid-cols-1 gap-3 border-t border-border/60 pt-4 text-sm sm:grid-cols-3">
+                    <div className="min-w-0">
+                      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {t("admin.startDate")}
+                      </dt>
+                      <dd className="mt-1 font-medium">
+                        {format(new Date(campaign.start_date), "dd.MM.yyyy")}
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {t("admin.endDate")}
+                      </dt>
+                      <dd className="mt-1 font-medium">
+                        {format(new Date(campaign.end_date), "dd.MM.yyyy")}
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {t("admin.carTypesLabel")}
+                      </dt>
+                      <dd className="mt-1 font-medium break-words">
+                        {campaign.car_types?.length
+                          ? campaign.car_types.map((type) => t(`admin.carTypes.${type}`)).join(", ")
+                          : t("admin.allCarTypes")}
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
               </Card>
             ))}
