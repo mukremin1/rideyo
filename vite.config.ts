@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["robots.txt", "logo.png", "logo-mark.png", "logo-512x512.png", "icon-512x512.png", "icon-192x192.png", "apple-touch-icon.png", "manifest.webmanifest"],
+      includeAssets: ["robots.txt", "favicon.ico", "favicon-32x32.png", "logo.png", "logo-mark.png", "logo-512x512.png", "icon-512x512.png", "icon-192x192.png", "apple-touch-icon.png", "manifest.webmanifest"],
       manifest: {
         name: "RideYo - Araç Kiralama",
         short_name: "RideYo",

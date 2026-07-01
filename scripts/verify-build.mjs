@@ -51,14 +51,22 @@ for (const file of jsFiles) {
   }
 }
 
-const mainBundle = jsFiles.find((f) => f.startsWith("index-") && !f.includes("Liveness"));
-if (mainBundle) {
-  const bundle = fs.readFileSync(path.join(assetsDir, mainBundle), "utf8");
+const scriptFile = path.basename(scriptSrc);
+if (scriptFile && fs.existsSync(path.join(assetsDir, scriptFile))) {
+  const bundle = fs.readFileSync(path.join(assetsDir, scriptFile), "utf8");
   if (!bundle.includes(expectedUrl)) {
-    errors.push(`${mainBundle} does not embed ${expectedUrl}`);
+    errors.push(`${scriptFile} does not embed ${expectedUrl}`);
   }
 } else {
-  errors.push("main index bundle not found");
+  errors.push(`entry script bundle not found: ${scriptFile || "(missing)"}`);
+}
+
+if (html.includes("lovable.dev")) {
+  errors.push("dist/index.html still references lovable.dev");
+}
+
+if (!html.includes("favicon.ico")) {
+  errors.push("dist/index.html missing favicon link");
 }
 
 if (errors.length) {

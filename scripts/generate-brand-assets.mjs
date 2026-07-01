@@ -50,6 +50,8 @@ async function main() {
   await writeAppIcon(path.join(publicDir, "icon-512x512.png"), 512);
   await writeAppIcon(path.join(publicDir, "icon-192x192.png"), 192);
   await writeAppIcon(path.join(publicDir, "apple-touch-icon.png"), 180);
+  await writeAppIcon(path.join(publicDir, "favicon-32x32.png"), 32);
+  await writeAppIcon(path.join(publicDir, "favicon.ico"), 32);
 
   const splash = await createSplashBuffer(sourceLogo, 2732, 2732);
   await sharp(splash).toFile(path.join(assetsDir, "splash.png"));

@@ -54,9 +54,9 @@
   },
   "home": {
     "promoEyebrow": "Üyelik avantajı",
-    "promoBanner": "Abonelikle %25'e varan indirim",
-    "enableNotifications": "Bildirimleri Aç",
-    "viewPlans": "Planları Görüntüle",
+    "promoBanner": "Abonelikle %25 indirim",
+    "enableNotifications": "Bildirimler",
+    "viewPlans": "Planlar",
     "mapEyebrow": "Canlı konum",
     "mapTitle": "Canlı araç haritası",
     "mapDesc": "Konumunuza en yakın müsait araçları anlık olarak görüntüleyin.",
