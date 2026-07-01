@@ -36,7 +36,7 @@ export const BrandLogo = ({
   const sizes = sizeMap[size];
 
   const content = (
-    <span className={cn("inline-flex items-center gap-2", className)}>
+    <span className={cn("inline-flex shrink-0 items-center gap-2", className)}>
       <img
         src={markSrc}
         alt=""

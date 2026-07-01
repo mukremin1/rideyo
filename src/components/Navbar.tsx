@@ -120,8 +120,12 @@ const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-[3.75rem] items-center justify-between gap-3 py-2">
           <div className="flex min-w-0 items-center gap-2">
-            <BrandLogo size="md" className="hidden sm:block" />
-            <BrandLogo size="sm" className="sm:hidden" />
+            <div className="hidden sm:flex">
+              <BrandLogo size="md" />
+            </div>
+            <div className="flex sm:hidden">
+              <BrandLogo size="sm" />
+            </div>
 
             <div className="hidden xl:flex items-center gap-1 ml-6">
               {navLinks.map((link) =>
@@ -151,9 +155,9 @@ const Navbar = () => {
             {user ? (
               <>
                 <Link to="/my-bookings" className="hidden lg:inline-flex">
-                  <Button variant="ghost" size="sm" className="font-medium">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {t("nav.myBookings")}
+                  <Button variant="ghost" size="sm" className="max-w-[9.5rem] font-medium xl:max-w-none">
+                    <Calendar className="mr-2 h-4 w-4 shrink-0" />
+                    <span className="truncate">{t("nav.myBookings")}</span>
                   </Button>
                 </Link>
                 <Link to="/favorites" className="hidden md:inline-flex">
