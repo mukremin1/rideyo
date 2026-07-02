@@ -74,8 +74,10 @@ const Auth = () => {
   }, []);
 
   const notifyVerificationSent = useCallback(
-    (method: "edge" | "resend" | "magic_link") => {
-      if (method === "magic_link") {
+    (method: "edge" | "resend" | "magic_link", uncertain?: boolean) => {
+      if (uncertain) {
+        toast.warning(t("auth.toast.verificationUncertain"));
+      } else if (method === "magic_link") {
         toast.success(t("auth.toast.magicLinkSent"));
       } else {
         toast.success(t("auth.toast.resendVerificationSuccess"));
@@ -89,7 +91,11 @@ const Auth = () => {
     async (targetEmail: string, options?: { silent?: boolean }) => {
       const result = await sendVerificationEmail(targetEmail);
       if (result.ok) {
-        if (!options?.silent) notifyVerificationSent(result.method);
+        if (!options?.silent || result.uncertain) {
+          notifyVerificationSent(result.method, result.uncertain);
+        } else {
+          startResendCooldown();
+        }
         return true;
       }
 
@@ -97,12 +103,14 @@ const Auth = () => {
         toast.error(t("auth.toast.emailAlreadyConfirmed"));
       } else if (result.code === "not_found") {
         toast.error(t("auth.toast.verificationUserNotFound"));
+      } else if (result.code === "edge_not_deployed") {
+        toast.error(t("auth.toast.verificationServiceUnavailable"));
       } else {
         toast.error(result.message || t("auth.toast.verificationSendFailed"));
       }
       return false;
     },
-    [notifyVerificationSent, t],
+    [notifyVerificationSent, startResendCooldown, t],
   );
 
   const signInSchema = useMemo(() => createSignInSchema(t), [t]);
@@ -447,6 +455,9 @@ const Auth = () => {
                   ? t("auth.resendVerification.waitSeconds", { seconds: resendCooldown })
                   : t("auth.resendVerification.submit")}
             </Button>
+            <p className="text-xs text-muted-foreground leading-relaxed rounded-md border bg-muted/40 p-3">
+              {t("auth.resendVerification.troubleshoot")}
+            </p>
           </div>
         </Card>
       </div>

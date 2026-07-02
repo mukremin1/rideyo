@@ -27,6 +27,45 @@ async function findUserByEmail(
   return null;
 }
 
+async function sendWithResend(params: {
+  apiKey: string;
+  from: string;
+  to: string;
+  actionLink: string;
+}) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${params.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: params.from,
+      to: [params.to],
+      subject: "RideYo — E-posta adresinizi doğrulayın",
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px">
+          <h2 style="color:#FB6020;margin:0 0 16px">RideYo</h2>
+          <p>Hesabınızı kullanmaya başlamak için e-posta adresinizi doğrulayın.</p>
+          <p style="margin:24px 0">
+            <a href="${params.actionLink}" style="background:#FB6020;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block">
+              E-postamı doğrula
+            </a>
+          </p>
+          <p style="color:#666;font-size:13px">Buton çalışmazsa bu bağlantıyı tarayıcıya yapıştırın:<br>${params.actionLink}</p>
+        </div>
+      `,
+    }),
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(
+      (body as { message?: string }).message || `Resend HTTP ${response.status}`,
+    );
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -71,6 +110,34 @@ serve(async (req) => {
         ? redirectTo
         : Deno.env.get("APP_URL") || "https://www.ride-yo.com/";
 
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    const resendFrom = Deno.env.get("RESEND_FROM") || "RideYo <onboarding@resend.dev>";
+
+    if (resendApiKey) {
+      const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+        type: "magiclink",
+        email: user.email!,
+        options: { redirectTo: emailRedirectTo },
+      });
+
+      if (linkError || !linkData?.properties?.action_link) {
+        return json({
+          ok: false,
+          code: "link_failed",
+          message: linkError?.message || "Doğrulama bağlantısı oluşturulamadı.",
+        }, 502);
+      }
+
+      await sendWithResend({
+        apiKey: resendApiKey,
+        from: resendFrom,
+        to: user.email!,
+        actionLink: linkData.properties.action_link,
+      });
+
+      return json({ ok: true, code: "sent", method: "resend_api" });
+    }
+
     const resendResponse = await fetch(`${supabaseUrl}/auth/v1/resend`, {
       method: "POST",
       headers: {
@@ -85,44 +152,28 @@ serve(async (req) => {
       }),
     });
 
-    const resendBody = await resendResponse.json().catch(() => ({}));
-
     if (resendResponse.ok) {
-      return json({ ok: true, code: "sent", method: "signup" });
+      return json({
+        ok: true,
+        code: "sent",
+        method: "supabase",
+        warning: "RESEND_API_KEY tanımlı değil; Supabase varsayılan mail servisi kullanıldı.",
+      });
     }
 
-    const otpResponse = await fetch(`${supabaseUrl}/auth/v1/otp`, {
-      method: "POST",
-      headers: {
-        apikey: serviceKey,
-        Authorization: `Bearer ${serviceKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: user.email,
-        create_user: false,
-        data: {},
-        gotrue_meta_security: {},
-        options: { email_redirect_to: emailRedirectTo },
-      }),
-    });
-
-    const otpBody = await otpResponse.json().catch(() => ({}));
-
-    if (otpResponse.ok) {
-      return json({ ok: true, code: "sent", method: "magic_link" });
-    }
-
+    const resendBody = await resendResponse.json().catch(() => ({}));
     const message =
-      (otpBody as { msg?: string }).msg ||
-      (otpBody as { error_description?: string }).error_description ||
       (resendBody as { msg?: string }).msg ||
       (resendBody as { error_description?: string }).error_description ||
-      "E-posta gönderilemedi. Supabase e-posta ayarlarını kontrol edin.";
+      "E-posta gönderilemedi. Supabase SMTP veya RESEND_API_KEY ayarlayın.";
 
     return json({ ok: false, code: "send_failed", message }, 502);
   } catch (error) {
     console.error("[resend-verification]", error);
-    return json({ ok: false, code: "server_error", message: "Beklenmeyen sunucu hatası." }, 500);
+    return json({
+      ok: false,
+      code: "server_error",
+      message: error instanceof Error ? error.message : "Beklenmeyen sunucu hatası.",
+    }, 500);
   }
 });

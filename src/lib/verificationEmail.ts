@@ -2,13 +2,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAuthRedirectUrl } from "@/lib/authRedirect";
 
 export type VerificationSendResult =
-  | { ok: true; method: "edge" | "resend" | "magic_link" }
+  | { ok: true; method: "edge" | "resend" | "magic_link"; uncertain?: boolean }
   | { ok: false; code: string; message: string };
 
 type EdgeResponse = {
   ok?: boolean;
   code?: string;
   message?: string;
+  method?: string;
+  warning?: string;
 };
 
 /** Send signup verification email (edge function → resend → magic link fallback). */
@@ -25,8 +27,24 @@ export async function sendVerificationEmail(email: string): Promise<Verification
       body: { email: normalized, redirectTo },
     });
 
-    if (!error && data?.ok) {
-      return { ok: true, method: "edge" };
+    if (error) {
+      const msg = error.message?.toLowerCase() ?? "";
+      if (msg.includes("not found") || msg.includes("404") || msg.includes("non-2xx")) {
+        return {
+          ok: false,
+          code: "edge_not_deployed",
+          message:
+            "Doğrulama mail servisi henüz aktif değil. Supabase panelinden e-posta doğrulamayı kapatın veya SMTP/Resend ayarlayın.",
+        };
+      }
+    }
+
+    if (data?.ok) {
+      return {
+        ok: true,
+        method: "edge",
+        uncertain: Boolean(data.warning),
+      };
     }
 
     if (data?.code === "already_confirmed") {
@@ -36,8 +54,17 @@ export async function sendVerificationEmail(email: string): Promise<Verification
     if (data?.code === "not_found") {
       return { ok: false, code: "not_found", message: data.message ?? "Bu e-posta ile kayıt bulunamadı." };
     }
+
+    if (data?.code === "send_failed" || data?.code === "link_failed") {
+      return { ok: false, code: data.code, message: data.message ?? "E-posta gönderilemedi." };
+    }
   } catch {
-    // Edge function may not be deployed yet — fall through to client auth APIs.
+    return {
+      ok: false,
+      code: "edge_not_deployed",
+      message:
+        "Doğrulama mail servisi henüz aktif değil. Supabase panelinden e-posta doğrulamayı kapatın veya SMTP/Resend ayarlayın.",
+    };
   }
 
   const { error: resendError } = await supabase.auth.resend({
@@ -47,7 +74,11 @@ export async function sendVerificationEmail(email: string): Promise<Verification
   });
 
   if (!resendError) {
-    return { ok: true, method: "resend" };
+    return {
+      ok: true,
+      method: "resend",
+      uncertain: true,
+    };
   }
 
   const { error: otpError } = await supabase.auth.signInWithOtp({
@@ -59,7 +90,11 @@ export async function sendVerificationEmail(email: string): Promise<Verification
   });
 
   if (!otpError) {
-    return { ok: true, method: "magic_link" };
+    return {
+      ok: true,
+      method: "magic_link",
+      uncertain: true,
+    };
   }
 
   return {
