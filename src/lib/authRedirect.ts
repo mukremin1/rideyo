@@ -2,6 +2,10 @@ import { Capacitor } from "@capacitor/core";
 
 const DEFAULT_SITE_URL = "https://www.ride-yo.com";
 
+function isLocalOrigin(origin: string): boolean {
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+}
+
 /** Redirect URL for Supabase email confirmation and password reset links. */
 export function getAuthRedirectUrl(path = "/"): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -10,14 +14,16 @@ export function getAuthRedirectUrl(path = "/"): string {
       ? import.meta.env.VITE_SITE_URL.trim().replace(/\/$/, "")
       : "";
 
+  const origin = window.location.origin.replace(/\/$/, "");
+
   let base: string;
-  if (Capacitor.isNativePlatform()) {
-    // Mobile WebView origin is https://localhost — email links must open the live site.
+  if (Capacitor.isNativePlatform() || isLocalOrigin(origin)) {
+    // Capacitor WebView and local dev must not put localhost in confirmation emails.
     base = envSite || DEFAULT_SITE_URL;
   } else if (import.meta.env.DEV) {
-    base = window.location.origin.replace(/\/$/, "");
+    base = origin;
   } else {
-    base = envSite || window.location.origin.replace(/\/$/, "");
+    base = envSite || origin;
   }
 
   return `${base}${normalizedPath}`;
