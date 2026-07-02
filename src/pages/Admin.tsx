@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car, ClipboardList } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car, ClipboardList, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminFleetSection from "@/components/AdminFleetSection";
 import AdminRentalsSection from "@/components/AdminRentalsSection";
+import AdminPayoutsSection from "@/components/AdminPayoutsSection";
 
 interface Campaign {
   id: string;
@@ -221,10 +222,14 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="rentals" className="space-y-6 sm:space-y-8">
-            <TabsList className="flex h-auto w-full gap-1 overflow-x-auto p-1 sm:grid sm:grid-cols-3 sm:overflow-visible">
+            <TabsList className="flex h-auto w-full gap-1 overflow-x-auto p-1 sm:grid sm:grid-cols-4 sm:overflow-visible">
               <TabsTrigger value="rentals" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
                 <ClipboardList className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.rentals")}
+              </TabsTrigger>
+              <TabsTrigger value="payouts" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
+                <Wallet className="hidden h-4 w-4 shrink-0 sm:block" />
+                {t("admin.tabs.payouts")}
               </TabsTrigger>
               <TabsTrigger value="fleet" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
                 <Car className="hidden h-4 w-4 shrink-0 sm:block" />
@@ -238,6 +243,10 @@ const Admin = () => {
 
             <TabsContent value="rentals">
               <AdminRentalsSection />
+            </TabsContent>
+
+            <TabsContent value="payouts">
+              <AdminPayoutsSection />
             </TabsContent>
 
             <TabsContent value="fleet">

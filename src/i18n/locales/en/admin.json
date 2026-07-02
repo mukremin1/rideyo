@@ -5,8 +5,30 @@
     "subtitle": "Campaign and fleet management",
     "tabs": {
       "rentals": "Rentals",
+      "payouts": "Payouts",
       "fleet": "Fleet",
       "campaigns": "Campaigns"
+    },
+    "payouts": {
+      "title": "Manual Payouts",
+      "subtitle": "After bank transfer to car owners, mark each payout as paid. Auto transfer is disabled.",
+      "refresh": "Refresh",
+      "empty": "No records in this tab.",
+      "loadError": "Could not load payout list",
+      "tabPending": "Pending",
+      "tabPaid": "Paid",
+      "statusPending": "Pending",
+      "statusPaid": "Paid",
+      "unknownOwner": "Car owner",
+      "noIban": "No IBAN on file",
+      "iban": "IBAN",
+      "gross": "Gross",
+      "commission": "Commission",
+      "ownerShare": "Owner share",
+      "markPaid": "Mark as paid",
+      "marking": "Saving…",
+      "markPaidSuccess": "Payout marked as paid",
+      "markPaidError": "Could not update record"
     },
     "rentals": {
       "title": "Rental Management",

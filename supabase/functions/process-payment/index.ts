@@ -8,6 +8,7 @@ import {
   iyzicoPost,
   isIyzicoSuccess,
   platformCommissionRate,
+  isAutoOwnerPayoutEnabled,
 } from "../_shared/iyzico.ts";
 
 const corsHeaders = {
@@ -186,7 +187,8 @@ serve(async (req) => {
       price: formatPrice(chargeAmount),
     }];
 
-    if (ownerPayout?.sub_merchant_key) {
+    // Manual hakediş by default — full payment to platform; admin transfers to owner IBAN later.
+    if (isAutoOwnerPayoutEnabled() && ownerPayout?.sub_merchant_key) {
       basketItems[0].subMerchantKey = ownerPayout.sub_merchant_key;
       basketItems[0].subMerchantPrice = formatPrice(ownerShare);
     }
@@ -243,6 +245,7 @@ serve(async (req) => {
       amount: chargeAmount,
       platform_commission: platformCommission,
       owner_payout_amount: ownerShare,
+      owner_payout_status: ownerShare > 0 ? "pending" : "not_applicable",
       iyzico_conversation_id: conversationId,
       metadata: { provisionFee, saveCard: saveCardAfter },
     });
@@ -310,6 +313,10 @@ async function handleDemoPayment(
 
   if (error || !updated) return json({ error: "Ödeme durumu güncellenemedi" }, 500);
 
+  const commissionRate = platformCommissionRate();
+  const ownerShare = chargeAmount * (1 - commissionRate);
+  const platformCommission = chargeAmount - ownerShare;
+
   await adminClient.from("payment_transactions").insert({
     booking_id: row.id,
     user_id: row.user_id,
@@ -317,6 +324,9 @@ async function handleDemoPayment(
     type: "charge",
     status: "success",
     amount: chargeAmount,
+    platform_commission: platformCommission,
+    owner_payout_amount: ownerShare,
+    owner_payout_status: ownerShare > 0 ? "pending" : "not_applicable",
     metadata: { mode: "demo", provisionFee },
   });
 

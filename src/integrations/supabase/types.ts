@@ -481,6 +481,7 @@ export type Database = {
           metadata: Json | null
           owner_id: string | null
           owner_payout_amount: number | null
+          owner_payout_status: string | null
           platform_commission: number | null
           status: string
           type: string

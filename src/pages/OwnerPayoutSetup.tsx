@@ -125,7 +125,7 @@ const OwnerPayoutSetup = () => {
     );
   }
 
-  const isActive = profile?.status === "active";
+  const isSaved = Boolean(profile?.iban);
 
   return (
     <div className="min-h-screen bg-background">
@@ -141,7 +141,7 @@ const OwnerPayoutSetup = () => {
           </p>
         </div>
 
-        {isActive && profile && (
+        {isSaved && profile && (
           <Card className="mb-6 border-green-200 bg-green-50/50 dark:bg-green-950/20">
             <CardContent className="pt-6 flex items-start gap-3">
               <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
@@ -156,7 +156,7 @@ const OwnerPayoutSetup = () => {
           </Card>
         )}
 
-        {!isActive && (
+        {!isSaved && (
           <Card className="mb-6 border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
             <CardContent className="pt-6 flex items-start gap-3">
               <AlertCircle className="w-6 h-6 text-amber-600 shrink-0" />
@@ -169,7 +169,7 @@ const OwnerPayoutSetup = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{isActive ? t("ownerPayout.updateInfo") : t("ownerPayout.payoutInfo")}</CardTitle>
+            <CardTitle>{isSaved ? t("ownerPayout.updateInfo") : t("ownerPayout.payoutInfo")}</CardTitle>
             <CardDescription>
               {t("ownerPayout.formDesc")}
             </CardDescription>
@@ -277,7 +277,7 @@ const OwnerPayoutSetup = () => {
                     {t("ownerPayout.saving")}
                   </span>
                 ) : (
-                  isActive ? t("ownerPayout.update") : t("ownerPayout.saveAndActivate")
+                  isSaved ? t("ownerPayout.update") : t("ownerPayout.saveAndActivate")
                 )}
               </Button>
             </form>

@@ -5,8 +5,30 @@
     "subtitle": "Kampanya ve filo yönetimi",
     "tabs": {
       "rentals": "Kiralamalar",
+      "payouts": "Hakediş",
       "fleet": "Araç Filosu",
       "campaigns": "Kampanyalar"
+    },
+    "payouts": {
+      "title": "Manuel Hakediş",
+      "subtitle": "Araç sahiplerine banka havalesi yaptıktan sonra ödendi olarak işaretleyin. Otomatik aktarım kapalıdır.",
+      "refresh": "Yenile",
+      "empty": "Bu sekmede kayıt yok.",
+      "loadError": "Hakediş listesi yüklenemedi",
+      "tabPending": "Bekleyen",
+      "tabPaid": "Ödendi",
+      "statusPending": "Bekliyor",
+      "statusPaid": "Ödendi",
+      "unknownOwner": "Araç sahibi",
+      "noIban": "IBAN kayıtlı değil",
+      "iban": "IBAN",
+      "gross": "Brüt",
+      "commission": "Komisyon",
+      "ownerShare": "Sahibe ödenecek",
+      "markPaid": "Hakediş ödendi",
+      "marking": "Kaydediliyor…",
+      "markPaidSuccess": "Hakediş ödendi olarak işaretlendi",
+      "markPaidError": "Kayıt güncellenemedi"
     },
     "rentals": {
       "title": "Kiralama Yönetimi",

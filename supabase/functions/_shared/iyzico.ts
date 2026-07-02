@@ -116,3 +116,8 @@ export function platformCommissionRate(): number {
   const rate = raw ? parseFloat(raw) : 0.15;
   return Number.isFinite(rate) && rate >= 0 && rate <= 1 ? rate : 0.15;
 }
+
+/** When false (default), owner share is paid manually by admin — no iyzico sub-merchant split. */
+export function isAutoOwnerPayoutEnabled(): boolean {
+  return Deno.env.get("AUTO_OWNER_PAYOUT") === "true";
+}

@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
-import { getIyzicoConfig, iyzicoPost, isIyzicoSuccess } from "../_shared/iyzico.ts";
+import { getIyzicoConfig, iyzicoPost, isIyzicoSuccess, isAutoOwnerPayoutEnabled } from "../_shared/iyzico.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,11 +60,12 @@ serve(async (req) => {
     const externalId = `owner-${user.id}`;
     const iyzico = getIyzicoConfig();
     const blockDemo = Deno.env.get("PAYMENT_DEMO_MODE") === "false";
+    const manualPayout = !isAutoOwnerPayoutEnabled();
 
     let subMerchantKey: string | null = null;
-    let status: "pending" | "active" | "rejected" = "pending";
+    let status: "pending" | "active" | "rejected" = manualPayout ? "pending" : "pending";
 
-    if (iyzico) {
+    if (!manualPayout && iyzico) {
       const conversationId = `submerchant-${user.id}-${Date.now()}`;
       const res = await iyzicoPost("/onboarding/submerchant", {
         locale: "tr",
@@ -93,10 +94,10 @@ serve(async (req) => {
       } else {
         return json({ error: res.errorMessage ?? "Alt üye işyeri kaydı başarısız" }, 400);
       }
-    } else if (!blockDemo) {
+    } else if (!manualPayout && !blockDemo) {
       subMerchantKey = `demo-sm-${user.id.slice(0, 8)}`;
       status = "active";
-    } else {
+    } else if (!manualPayout && blockDemo) {
       return json({ error: "iyzico yapılandırması eksik" }, 503);
     }
 
@@ -122,7 +123,13 @@ serve(async (req) => {
 
     if (upsertError) return json({ error: "Profil kaydedilemedi" }, 500);
 
-    return json({ success: true, profile, subMerchantKey, status });
+    return json({
+      success: true,
+      profile,
+      subMerchantKey,
+      status,
+      manualPayout,
+    });
   } catch (error) {
     console.error("register-submerchant error:", error);
     return json({ error: "Kayıt işlemi başarısız" }, 500);
