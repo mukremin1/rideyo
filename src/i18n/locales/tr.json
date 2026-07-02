@@ -57,6 +57,7 @@
       "ilcePlaceholder": "İlçe seçin",
       "mahallePlaceholder": "Mahalle seçin",
       "loading": "Yükleniyor…",
+      "loadError": "Liste yüklenemedi",
       "pickIlFirst": "Önce il seçin",
       "pickIlceFirst": "Önce ilçe seçin"
     },

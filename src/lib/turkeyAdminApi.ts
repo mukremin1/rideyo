@@ -1,6 +1,6 @@
 import { TURKEY_CITIES } from "@/lib/turkeyCities";
 
-const API_BASE = "https://turkiyeapi.dev/api/v1";
+const API_BASE = "https://api.turkiyeapi.dev/v1";
 
 export type TurkeyProvince = {
   id: number;
@@ -61,6 +61,14 @@ export async function fetchTurkeyDistricts(provinceName: string): Promise<Turkey
   if (districtsCache.has(key)) return districtsCache.get(key)!;
 
   try {
+    const provinces = await fetchTurkeyProvinces();
+    const province = provinces.find(
+      (p) => p.name.toLocaleLowerCase("tr") === key,
+    );
+    const query = province
+      ? `provinceId=${province.id}`
+      : `province=${encodeURIComponent(provinceName)}`;
+
     const json = await fetchJson<
       ApiList<{
         id: number;
@@ -68,7 +76,7 @@ export async function fetchTurkeyDistricts(provinceName: string): Promise<Turkey
         province: string;
         neighborhoods?: { id: number; name: string }[];
       }>
-    >(`${API_BASE}/districts?province=${encodeURIComponent(provinceName)}`);
+    >(`${API_BASE}/districts?${query}`);
 
     const districts: TurkeyDistrict[] = json.data.map((d) => ({
       id: d.id,

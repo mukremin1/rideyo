@@ -57,6 +57,7 @@
       "ilcePlaceholder": "Select district",
       "mahallePlaceholder": "Select neighborhood",
       "loading": "Loading…",
+      "loadError": "Could not load list",
       "pickIlFirst": "Select province first",
       "pickIlceFirst": "Select district first"
     },

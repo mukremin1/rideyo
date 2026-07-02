@@ -63,6 +63,8 @@ const TurkeyRegionSelects = ({
   const [loadingProvinces, setLoadingProvinces] = useState(true);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
   const [loadingNeighborhoods, setLoadingNeighborhoods] = useState(false);
+  const [districtsError, setDistrictsError] = useState(false);
+  const [neighborhoodsError, setNeighborhoodsError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,18 +93,24 @@ const TurkeyRegionSelects = ({
       setDistricts([]);
       setNeighborhoods([]);
       setLoadingDistricts(false);
+      setDistrictsError(false);
       return;
     }
     let cancelled = false;
     setLoadingDistricts(true);
+    setDistrictsError(false);
     void fetchTurkeyDistricts(value.il)
       .then((rows) => {
         if (cancelled) return;
         const names = rows.map((d) => d.name).sort((a, b) => a.localeCompare(b, "tr"));
         setDistricts(filterDistrictNames(names, allowedRegions, value.il));
+        setDistrictsError(names.length === 0);
       })
       .catch(() => {
-        if (!cancelled) setDistricts([]);
+        if (!cancelled) {
+          setDistricts([]);
+          setDistrictsError(true);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoadingDistricts(false);
@@ -120,6 +128,7 @@ const TurkeyRegionSelects = ({
     }
     let cancelled = false;
     setLoadingNeighborhoods(true);
+    setNeighborhoodsError(false);
     void fetchTurkeyNeighborhoods(value.il, value.ilce)
       .then((rows) => {
         if (cancelled) return;
@@ -127,9 +136,13 @@ const TurkeyRegionSelects = ({
         setNeighborhoods(
           filterNeighborhoodNames(names, allowedRegions, value.il, value.ilce),
         );
+        setNeighborhoodsError(names.length === 0);
       })
       .catch(() => {
-        if (!cancelled) setNeighborhoods([]);
+        if (!cancelled) {
+          setNeighborhoods([]);
+          setNeighborhoodsError(true);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoadingNeighborhoods(false);
@@ -146,12 +159,16 @@ const TurkeyRegionSelects = ({
     ? t("common.region.pickIlFirst")
     : loadingDistricts
       ? t("common.region.loading")
-      : t("common.region.ilcePlaceholder");
+      : districtsError
+        ? t("common.region.loadError")
+        : t("common.region.ilcePlaceholder");
   const mahallePlaceholder = !value.ilce
     ? t("common.region.pickIlceFirst")
     : loadingNeighborhoods
       ? t("common.region.loading")
-      : t("common.region.mahallePlaceholder");
+      : neighborhoodsError
+        ? t("common.region.loadError")
+        : t("common.region.mahallePlaceholder");
 
   const onIlChange = (il: string) => {
     onChange({ il, ilce: "", mahalle: "" });
