@@ -21,6 +21,7 @@ const AuthEmailCallback = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const handled = useRef(false);
+  const showSpinner = window.location.pathname.startsWith("/auth/callback");
 
   useEffect(() => {
     if (handled.current || !hasAuthCallbackParams()) return;
@@ -34,12 +35,14 @@ const AuthEmailCallback = () => {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
           toast.error(error.message);
+          navigate("/auth", { replace: true });
           return;
         }
       } else {
         const { error } = await supabase.auth.getSession();
         if (error) {
           toast.error(error.message);
+          navigate("/auth", { replace: true });
           return;
         }
       }
@@ -50,14 +53,20 @@ const AuthEmailCallback = () => {
         navigate("/", { replace: true });
       }
 
-      const cleanPath = window.location.pathname || "/";
+      const cleanPath = window.location.pathname.startsWith("/auth/callback") ? "/" : (window.location.pathname || "/");
       window.history.replaceState({}, document.title, cleanPath);
     };
 
     void complete();
   }, [navigate, t]);
 
-  return null;
+  if (!showSpinner || !hasAuthCallbackParams()) return null;
+
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center p-6 text-muted-foreground">
+      {t("auth.emailCallback.processing", "E-posta doğrulanıyor…")}
+    </div>
+  );
 };
 
 export default AuthEmailCallback;

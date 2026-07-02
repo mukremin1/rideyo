@@ -48,7 +48,6 @@ import MyBookings from "./pages/MyBookings";
 import StartRental from "./pages/StartRental";
 import IdentityVerification from "./pages/IdentityVerification";
 import NotFound from "./pages/NotFound";
-import AuthEmailCallback from "@/components/AuthEmailCallback";
 import { getRouterBasename } from "@/lib/routerBasename";
 
 const queryClient = new QueryClient();

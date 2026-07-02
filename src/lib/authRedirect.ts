@@ -1,31 +1,19 @@
-import { Capacitor } from "@capacitor/core";
-
 const DEFAULT_SITE_URL = "https://www.ride-yo.com";
+const AUTH_CALLBACK_PATH = "/auth/callback";
 
-function isLocalOrigin(origin: string): boolean {
-  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+function isLocalHost(url: string): boolean {
+  return /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?/i.test(url);
 }
 
 /** Redirect URL for Supabase email confirmation and password reset links. */
-export function getAuthRedirectUrl(path = "/"): string {
+export function getAuthRedirectUrl(path = AUTH_CALLBACK_PATH): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const envSite =
     typeof import.meta.env.VITE_SITE_URL === "string"
       ? import.meta.env.VITE_SITE_URL.trim().replace(/\/$/, "")
       : "";
 
-  const origin = window.location.origin.replace(/\/$/, "");
-
-  let base: string;
-  if (Capacitor.isNativePlatform() || isLocalOrigin(origin)) {
-    // Capacitor WebView and local dev must not put localhost in confirmation emails.
-    base = envSite || DEFAULT_SITE_URL;
-  } else if (import.meta.env.DEV) {
-    base = origin;
-  } else {
-    base = envSite || origin;
-  }
-
+  const base = envSite && !isLocalHost(envSite) ? envSite : DEFAULT_SITE_URL;
   return `${base}${normalizedPath}`;
 }
 

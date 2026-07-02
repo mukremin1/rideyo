@@ -27,6 +27,36 @@ async function findUserByEmail(
   return null;
 }
 
+const PRODUCTION_SITE_URL = "https://www.ride-yo.com";
+
+function isLocalHost(url: string): boolean {
+  return /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?/i.test(url);
+}
+
+function resolveEmailRedirectTo(redirectTo: unknown): string {
+  const appUrlRaw = (Deno.env.get("APP_URL") || PRODUCTION_SITE_URL).trim().replace(/\/$/, "");
+  const safeBase = isLocalHost(appUrlRaw) ? PRODUCTION_SITE_URL : appUrlRaw;
+
+  if (typeof redirectTo === "string" && redirectTo.startsWith("http") && !isLocalHost(redirectTo)) {
+    return redirectTo;
+  }
+
+  return `${safeBase}/auth/callback`;
+}
+
+function sanitizeActionLink(actionLink: string, redirectTo: string): string {
+  try {
+    const url = new URL(actionLink);
+    const currentRedirect = url.searchParams.get("redirect_to");
+    if (!currentRedirect || isLocalHost(decodeURIComponent(currentRedirect))) {
+      url.searchParams.set("redirect_to", redirectTo);
+    }
+    return url.toString();
+  } catch {
+    return actionLink;
+  }
+}
+
 async function sendWithResend(params: {
   apiKey: string;
   from: string;
@@ -105,17 +135,14 @@ serve(async (req) => {
       });
     }
 
-    const emailRedirectTo =
-      typeof redirectTo === "string" && redirectTo.startsWith("http")
-        ? redirectTo
-        : Deno.env.get("APP_URL") || "https://www.ride-yo.com/";
+    const emailRedirectTo = resolveEmailRedirectTo(redirectTo);
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const resendFrom = Deno.env.get("RESEND_FROM") || "RideYo <onboarding@resend.dev>";
 
     if (resendApiKey) {
       const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-        type: "magiclink",
+        type: "signup",
         email: user.email!,
         options: { redirectTo: emailRedirectTo },
       });
@@ -128,11 +155,13 @@ serve(async (req) => {
         }, 502);
       }
 
+      const actionLink = sanitizeActionLink(linkData.properties.action_link, emailRedirectTo);
+
       await sendWithResend({
         apiKey: resendApiKey,
         from: resendFrom,
         to: user.email!,
-        actionLink: linkData.properties.action_link,
+        actionLink,
       });
 
       return json({ ok: true, code: "sent", method: "resend_api" });
