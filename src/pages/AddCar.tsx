@@ -45,24 +45,11 @@ import {
 
 
 
-const turkeyCities = [
-  "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Aksaray", "Amasya", "Ankara", "Antalya", "Ardahan", "Artvin",
-  "Aydın", "Balıkesir", "Bartın", "Batman", "Bayburt", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur",
-  "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Düzce", "Edirne", "Elazığ", "Erzincan",
-  "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Iğdır", "Isparta", "İstanbul",
-  "İzmir", "Kahramanmaraş", "Karabük", "Karaman", "Kars", "Kastamonu", "Kayseri", "Kilis", "Kırıkkale", "Kırklareli",
-  "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Mardin", "Mersin", "Muğla", "Muş",
-  "Nevşehir", "Niğde", "Ordu", "Osmaniye", "Rize", "Sakarya", "Samsun", "Şanlıurfa", "Siirt", "Sinop",
-  "Sivas", "Şırnak", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Uşak", "Van", "Yalova", "Yozgat", "Zonguldak",
-];
-
-
-
-// Function to extract city from location text
+import { TURKEY_CITIES } from "@/lib/turkeyCities";
 
 const extractCityFromLocation = (location: string, otherLabel: string): string => {
   const lowerLocation = location.toLocaleLowerCase("tr");
-  const match = turkeyCities.find((city) =>
+  const match = TURKEY_CITIES.find((city) =>
     lowerLocation.includes(city.toLocaleLowerCase("tr"))
   );
   return match || otherLabel;
@@ -158,9 +145,9 @@ const AddCar = () => {
 
   const strictRegions = allowedRegions.some((r) => r.is_active);
   const selectableCities = useMemo(() => {
-    if (!strictRegions) return turkeyCities;
+    if (!strictRegions) return [...TURKEY_CITIES];
     const allowed = getAllowedIlNames(allowedRegions);
-    return allowed.length > 0 ? allowed : turkeyCities;
+    return allowed.length > 0 ? allowed : [...TURKEY_CITIES];
   }, [allowedRegions, strictRegions]);
 
 

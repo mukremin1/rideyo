@@ -7,7 +7,7 @@
       "rentals": "Kiralamalar",
       "payouts": "Hakediş",
       "fleet": "Araç Filosu",
-      "regions": "Bölgeler",
+      "regions": "Bölge Seçimi",
       "campaigns": "Kampanyalar"
     },
     "payouts": {
@@ -96,7 +96,7 @@
     },
     "regions": {
       "title": "Hizmet Bölgeleri",
-      "subtitle": "Araçların bırakılabileceği il, ilçe, mahalle ve bölgeleri tanımlayın. Onaylı olmayan alanlara araç eklenemez.",
+      "subtitle": "İl, ilçe ve mahalle seçerek araç bırakılabilecek alanları belirleyin. Aktif olmayan bölgelere araç eklenemez ve bırakılamaz.",
       "refresh": "Yenile",
       "loading": "Bölgeler yükleniyor…",
       "empty": "Henüz bölge tanımlanmadı.",
@@ -131,6 +131,20 @@
       "statsActive": "Aktif bölge",
       "hasPolygon": "Poligon",
       "hint": "İl açıkken altında ilçe yoksa tüm il izinlidir. İlçe açıkken altında mahalle yoksa tüm ilçe izinlidir. Bölge seviyesinde GeoJSON poligon ile hassas alan tanımlayabilirsiniz.",
+      "tabSelection": "İl / İlçe / Mahalle",
+      "tabCustomZones": "Özel Bölge (Harita)",
+      "selectProvince": "İl seçin",
+      "searchAreas": "Ara",
+      "searchPlaceholder": "İlçe veya mahalle ara…",
+      "provinceHint": "İl aktifken ve altında ilçe seçilmemişse tüm ilçeler açıktır.",
+      "enableAllDistricts": "Tüm ilçeleri aç",
+      "disableAllDistricts": "Tüm ilçeleri kapat",
+      "enableAllNeighborhoods": "Tüm mahalleleri aç",
+      "loadingDistricts": "İlçeler yükleniyor…",
+      "loadingNeighborhoods": "Mahalleler yükleniyor…",
+      "noNeighborhoods": "Mahalle bulunamadı.",
+      "geoLoadError": "İl/ilçe listesi yüklenemedi",
+      "bolgeHint": "Seçili ile bağlı özel harita bölgesi (kampüs, AVM çevresi vb.)",
       "levels": {
         "il": "İl",
         "ilce": "İlçe",
