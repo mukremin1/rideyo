@@ -57,8 +57,15 @@ const Auth = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [activeTab, setActiveTab] = useState("signin");
   const [emailVerifiedBanner, setEmailVerifiedBanner] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+  const [showSignUpPrompt, setShowSignUpPrompt] = useState(false);
+  const [forgotCooldown, setForgotCooldown] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const isResetMode = searchParams.get("reset") === "1";
 
   useEffect(() => {
     if (searchParams.get("verified") !== "1") return;
@@ -79,6 +86,41 @@ const Auth = () => {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [resendCooldown]);
+
+  useEffect(() => {
+    if (forgotCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setForgotCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [forgotCooldown]);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setActiveTab("signin");
+        setShowForgotPassword(false);
+        const next = new URLSearchParams(searchParams);
+        next.set("reset", "1");
+        setSearchParams(next, { replace: true });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (!isResetMode) return;
+
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        toast.error(t("auth.toast.resetLinkExpired"));
+        const next = new URLSearchParams(searchParams);
+        next.delete("reset");
+        setSearchParams(next, { replace: true });
+        setShowForgotPassword(true);
+      }
+    });
+  }, [isResetMode, searchParams, setSearchParams, t]);
 
   useEffect(() => {
     if (email.trim() && !resendEmail.trim()) {
@@ -159,7 +201,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = getAuthRedirectUrl("/");
+      const redirectUrl = getAuthRedirectUrl("/auth/callback");
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -233,6 +275,7 @@ const Auth = () => {
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
           toast.error(t("auth.toast.invalidCredentials"));
+          setShowSignUpPrompt(true);
         } else if (error.message.toLowerCase().includes("email not confirmed")) {
           setResendEmail(email.trim());
           toast.error(t("auth.toast.emailNotConfirmed"));
@@ -251,6 +294,76 @@ const Auth = () => {
       toast.error(t("auth.toast.genericError"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const trimmed = email.trim();
+    if (!trimmed) {
+      toast.error(t("auth.toast.resendEmailRequired"));
+      return;
+    }
+
+    if (forgotCooldown > 0) {
+      toast.message(t("auth.forgotPassword.waitSeconds", { seconds: forgotCooldown }));
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmed, {
+        redirectTo: getAuthRedirectUrl("/auth/callback"),
+      });
+
+      if (error) {
+        toast.error(getAuthErrorMessage(error, t));
+        return;
+      }
+
+      toast.success(t("auth.toast.resetEmailSent"));
+      setForgotCooldown(RESEND_COOLDOWN_SEC);
+      setShowForgotPassword(false);
+    } catch {
+      toast.error(t("auth.toast.genericError"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newPassword.length < 6) {
+      toast.error(t("auth.validation.passwordMin"));
+      return;
+    }
+    if (newPassword !== newPasswordConfirm) {
+      toast.error(t("auth.validation.passwordMismatch"));
+      return;
+    }
+
+    setResettingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast.error(getAuthErrorMessage(error, t));
+        return;
+      }
+
+      await supabase.auth.signOut();
+      toast.success(t("auth.toast.passwordResetSuccess"));
+      setNewPassword("");
+      setNewPasswordConfirm("");
+      const next = new URLSearchParams(searchParams);
+      next.delete("reset");
+      setSearchParams(next, { replace: true });
+      setActiveTab("signin");
+    } catch {
+      toast.error(t("auth.toast.genericError"));
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -294,13 +407,82 @@ const Auth = () => {
             </Alert>
           )}
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {isResetMode ? (
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="mb-2">
+                <h2 className="text-lg font-semibold">{t("auth.resetPassword.title")}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{t("auth.resetPassword.subtitle")}</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">{t("auth.fields.password")}</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder={t("auth.placeholders.password")}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password-confirm">{t("auth.fields.confirmPassword")}</Label>
+                <Input
+                  id="new-password-confirm"
+                  type="password"
+                  placeholder={t("auth.placeholders.password")}
+                  value={newPasswordConfirm}
+                  onChange={(e) => setNewPasswordConfirm(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={resettingPassword}>
+                {resettingPassword ? t("auth.resetPassword.submitting") : t("auth.resetPassword.submit")}
+              </Button>
+            </form>
+          ) : (
+          <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setShowSignUpPrompt(false); setShowForgotPassword(false); }} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin">{t("auth.tabs.signIn")}</TabsTrigger>
               <TabsTrigger value="signup">{t("auth.tabs.signUp")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
+              {showForgotPassword ? (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div>
+                    <h2 className="text-lg font-semibold">{t("auth.forgotPassword.title")}</h2>
+                    <p className="text-sm text-muted-foreground mt-1">{t("auth.forgotPassword.subtitle")}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">{t("auth.fields.email")}</Label>
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      placeholder={t("auth.placeholders.email")}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading || forgotCooldown > 0}>
+                    {loading
+                      ? t("auth.forgotPassword.submitting")
+                      : forgotCooldown > 0
+                        ? t("auth.forgotPassword.waitSeconds", { seconds: forgotCooldown })
+                        : t("auth.forgotPassword.submit")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setShowForgotPassword(false)}
+                  >
+                    {t("auth.forgotPassword.backToSignIn")}
+                  </Button>
+                </form>
+              ) : (
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">{t("auth.fields.email")}</Label>
@@ -315,7 +497,19 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">{t("auth.fields.password")}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="signin-password">{t("auth.fields.password")}</Label>
+                    <button
+                      type="button"
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => {
+                        setShowForgotPassword(true);
+                        setShowSignUpPrompt(false);
+                      }}
+                    >
+                      {t("auth.forgotPassword.link")}
+                    </button>
+                  </div>
                   <Input
                     id="signin-password"
                     type="password"
@@ -326,10 +520,42 @@ const Auth = () => {
                   />
                 </div>
 
+                {showSignUpPrompt && (
+                  <Alert className="border-amber-500/40 bg-amber-50/80 dark:bg-amber-950/20">
+                    <AlertDescription className="text-sm space-y-3">
+                      <p>{t("auth.signIn.notRegisteredHint")}</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          setActiveTab("signup");
+                          setShowSignUpPrompt(false);
+                        }}
+                      >
+                        {t("auth.signIn.goToSignUp")}
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? t("auth.signIn.submitting") : t("auth.signIn.submit")}
                 </Button>
+
+                <p className="text-center text-sm text-muted-foreground">
+                  {t("auth.signIn.noAccount")}{" "}
+                  <button
+                    type="button"
+                    className="text-primary font-medium hover:underline"
+                    onClick={() => setActiveTab("signup")}
+                  >
+                    {t("auth.signIn.goToSignUp")}
+                  </button>
+                </p>
               </form>
+              )}
             </TabsContent>
 
             <TabsContent value="signup">
@@ -450,7 +676,9 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          )}
 
+          {!isResetMode && (
           <div className="mt-6 border-t pt-6 space-y-3">
             <div>
               <p className="text-sm font-medium text-foreground">{t("auth.resendVerification.title")}</p>
@@ -485,6 +713,7 @@ const Auth = () => {
               {t("auth.resendVerification.troubleshoot")}
             </p>
           </div>
+          )}
         </Card>
       </div>
     </div>

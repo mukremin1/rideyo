@@ -24,6 +24,12 @@ function isEmailVerificationCallback(): boolean {
   return window.location.search.includes("code=") || window.location.search.includes("token_hash=");
 }
 
+function isPasswordRecoveryCallback(): boolean {
+  const hash = window.location.hash;
+  const search = window.location.search;
+  return hash.includes("type=recovery") || search.includes("type=recovery");
+}
+
 /** Completes email verification / magic-link callbacks and cleans the URL. */
 const AuthEmailCallback = () => {
   const navigate = useNavigate();
@@ -56,6 +62,11 @@ const AuthEmailCallback = () => {
       }
 
       const { data: { session } } = await supabase.auth.getSession();
+      if (session && isPasswordRecoveryCallback()) {
+        navigate("/auth?reset=1", { replace: true });
+        return;
+      }
+
       if (session && isEmailVerificationCallback()) {
         await supabase.auth.signOut();
         navigate("/auth?verified=1", { replace: true });
