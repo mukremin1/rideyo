@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Car, User, KeyRound } from "lucide-react";
 import { z } from "zod";
-import { getAuthRedirectUrl } from "@/lib/authRedirect";
+import { getAuthRedirectUrl, getAuthErrorMessage } from "@/lib/authRedirect";
 
 const createSignInSchema = (t: TFunction) =>
   z.object({
@@ -48,6 +48,7 @@ const Auth = () => {
   const [userType, setUserType] = useState<UserType>("renter");
   const [loading, setLoading] = useState(false);
   const [showResendVerification, setShowResendVerification] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
   const [resendingVerification, setResendingVerification] = useState(false);
   const navigate = useNavigate();
 
@@ -96,32 +97,14 @@ const Auth = () => {
       });
 
       if (error) {
+        toast.error(getAuthErrorMessage(error, t));
         if (error.message.toLowerCase().includes("already registered")) {
-          toast.error(t("auth.toast.emailAlreadyRegistered"));
-        } else {
-          toast.error(error.message);
+          setShowResendVerification(true);
         }
         return;
       }
 
       if (data.user && data.session) {
-        const { error: profileError } = await supabase.from("profiles").insert({
-          id: data.user.id,
-          full_name: fullName,
-          phone: phone || null,
-        });
-        if (profileError) {
-          console.error("Profil olusturma hatasi:", profileError);
-        }
-
-        const { error: roleError } = await supabase.from("user_roles").insert({
-          user_id: data.user.id,
-          role: userType === "car_owner" ? "car_owner" : "user",
-        });
-        if (roleError) {
-          console.error("Rol ekleme hatasi:", roleError);
-        }
-
         const successMessage =
           userType === "car_owner"
             ? t("auth.toast.signUpSuccessCarOwner")
@@ -129,7 +112,9 @@ const Auth = () => {
 
         toast.success(successMessage);
         navigate("/");
-      } else {
+      } else if (data.user) {
+        setPendingVerificationEmail(email.trim());
+        setShowResendVerification(true);
         toast.success(t("auth.toast.signUpVerifyEmail"));
       }
     } catch (error) {
@@ -167,7 +152,7 @@ const Auth = () => {
           toast.error(t("auth.toast.emailNotConfirmed"));
           setShowResendVerification(true);
         } else {
-          toast.error(error.message);
+          toast.error(getAuthErrorMessage(error, t));
         }
         return;
       }
@@ -185,7 +170,8 @@ const Auth = () => {
   };
 
   const handleResendVerification = async () => {
-    if (!email.trim()) {
+    const targetEmail = (pendingVerificationEmail || email).trim();
+    if (!targetEmail) {
       toast.error(t("auth.toast.resendEmailRequired"));
       return;
     }
@@ -194,12 +180,12 @@ const Auth = () => {
     try {
       const { error } = await supabase.auth.resend({
         type: "signup",
-        email: email.trim(),
+        email: targetEmail,
         options: { emailRedirectTo: getAuthRedirectUrl("/") },
       });
 
       if (error) {
-        toast.error(error.message);
+        toast.error(getAuthErrorMessage(error, t));
         return;
       }
 
@@ -383,6 +369,20 @@ const Auth = () => {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? t("auth.signUp.submitting") : t("auth.signUp.submit")}
                 </Button>
+
+                {showResendVerification && pendingVerificationEmail && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={resendingVerification}
+                    onClick={handleResendVerification}
+                  >
+                    {resendingVerification
+                      ? t("auth.signIn.resendingVerification")
+                      : t("auth.signIn.resendVerification")}
+                  </Button>
+                )}
 
                 {userType === "car_owner" && (
                   <p className="text-xs text-muted-foreground text-center mt-2">

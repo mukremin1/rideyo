@@ -9,6 +9,7 @@ import Chatbot from "@/components/Chatbot";
 import BottomNav from "@/components/BottomNav";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import NfcLoginVerificationPrompt from "@/components/NfcLoginVerificationPrompt";
+import AuthEmailCallback from "@/components/AuthEmailCallback";
 import Index from "./pages/Index";
 import Cars from "./pages/Cars";
 import CarDetail from "./pages/CarDetail";
@@ -47,6 +48,8 @@ import MyBookings from "./pages/MyBookings";
 import StartRental from "./pages/StartRental";
 import IdentityVerification from "./pages/IdentityVerification";
 import NotFound from "./pages/NotFound";
+import AuthEmailCallback from "@/components/AuthEmailCallback";
+import { getRouterBasename } from "@/lib/routerBasename";
 
 const queryClient = new QueryClient();
 
@@ -57,13 +60,10 @@ const App = () => (
       <Sonner />
       <OfflineIndicator />
       <Chatbot />
-      <BrowserRouter
-        basename={
-          import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "")
-        }
-      >
+      <BrowserRouter basename={getRouterBasename()}>
         <AuthProvider>
           <GeolocationProvider>
+          <AuthEmailCallback />
           <NfcLoginVerificationPrompt />
           <Routes>
             <Route path="/" element={<Index />} />
