@@ -16,6 +16,14 @@ function hasAuthCallbackParams(): boolean {
   );
 }
 
+function isEmailVerificationCallback(): boolean {
+  const hash = window.location.hash;
+  if (hash.includes("type=signup")) return true;
+  if (hash.includes("type=recovery")) return false;
+  if (hash.includes("type=magiclink")) return false;
+  return window.location.search.includes("code=") || window.location.search.includes("token_hash=");
+}
+
 /** Completes email verification / magic-link callbacks and cleans the URL. */
 const AuthEmailCallback = () => {
   const navigate = useNavigate();
@@ -48,13 +56,18 @@ const AuthEmailCallback = () => {
       }
 
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        toast.success(t("auth.toast.emailConfirmed"));
-        navigate("/", { replace: true });
+      if (session && isEmailVerificationCallback()) {
+        await supabase.auth.signOut();
+        navigate("/auth?verified=1", { replace: true });
+        return;
       }
 
-      const cleanPath = window.location.pathname.startsWith("/auth/callback") ? "/" : (window.location.pathname || "/");
-      window.history.replaceState({}, document.title, cleanPath);
+      if (session) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      navigate("/auth", { replace: true });
     };
 
     void complete();

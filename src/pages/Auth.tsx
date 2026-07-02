@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState, useEffect, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
 import type { TFunction } from "i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,7 +55,22 @@ const Auth = () => {
   const [resendEmail, setResendEmail] = useState("");
   const [resendingVerification, setResendingVerification] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [activeTab, setActiveTab] = useState("signin");
+  const [emailVerifiedBanner, setEmailVerifiedBanner] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (searchParams.get("verified") !== "1") return;
+
+    setEmailVerifiedBanner(true);
+    setActiveTab("signin");
+    toast.success(t("auth.toast.emailConfirmed"));
+
+    const next = new URLSearchParams(searchParams);
+    next.delete("verified");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, t]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -268,7 +285,16 @@ const Auth = () => {
         </Link>
 
         <Card className="p-8">
-          <Tabs defaultValue="signin" className="w-full">
+          {emailVerifiedBanner && (
+            <Alert className="mb-6 border-emerald-500/40 bg-emerald-50 text-emerald-950 dark:bg-emerald-950/30 dark:text-emerald-50">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <AlertDescription className="text-sm font-medium">
+                {t("auth.emailVerifiedBanner")}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin">{t("auth.tabs.signIn")}</TabsTrigger>
               <TabsTrigger value="signup">{t("auth.tabs.signUp")}</TabsTrigger>
