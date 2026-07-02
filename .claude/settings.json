@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"c:\\\\Users\\\\mukre\\\\Desktop\\\\rideyo\\\\supabase\\\\functions\" /b)",
+      "Bash(dir \"c:\\\\Users\\\\mukre\\\\Desktop\\\\rideyo\\\\supabase\\\\migrations\" /b)",
+      "Bash(dir \"c:/Users/mukre/Desktop/rideyo/supabase/migrations\" /b /o:n)"
+    ]
+  }
+}
