@@ -55,7 +55,10 @@
       "mahalle": "Mahalle",
       "ilPlaceholder": "İl seçin",
       "ilcePlaceholder": "İlçe seçin",
-      "mahallePlaceholder": "Mahalle seçin"
+      "mahallePlaceholder": "Mahalle seçin",
+      "loading": "Yükleniyor…",
+      "pickIlFirst": "Önce il seçin",
+      "pickIlceFirst": "Önce ilçe seçin"
     },
     "notFound": "Sayfa bulunamadı",
     "notFoundDesc": "Aradığınız sayfa mevcut değil veya taşınmış olabilir.",

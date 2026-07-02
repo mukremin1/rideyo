@@ -55,7 +55,10 @@
       "mahalle": "Neighborhood",
       "ilPlaceholder": "Select province",
       "ilcePlaceholder": "Select district",
-      "mahallePlaceholder": "Select neighborhood"
+      "mahallePlaceholder": "Select neighborhood",
+      "loading": "Loading…",
+      "pickIlFirst": "Select province first",
+      "pickIlceFirst": "Select district first"
     },
     "notFound": "Page not found",
     "notFoundDesc": "The page you are looking for does not exist or may have been moved.",

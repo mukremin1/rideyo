@@ -371,6 +371,7 @@ const AdminRegionsSection = () => {
 
               <TurkeyRegionSelects
                 idPrefix="admin-region"
+                restrictProvinces={false}
                 value={picker}
                 onChange={setPicker}
               />

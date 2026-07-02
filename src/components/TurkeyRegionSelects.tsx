@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
 import {
@@ -30,6 +30,8 @@ type TurkeyRegionSelectsProps = {
   value: TurkeyRegionValue;
   onChange: (value: TurkeyRegionValue) => void;
   allowedRegions?: AllowedRegion[];
+  /** Admin: tüm iller; araç sahibi: sadece onaylı iller */
+  restrictProvinces?: boolean;
   disabled?: boolean;
   showMahalle?: boolean;
   idPrefix?: string;
@@ -39,6 +41,7 @@ const TurkeyRegionSelects = ({
   value,
   onChange,
   allowedRegions = [],
+  restrictProvinces = true,
   disabled = false,
   showMahalle = true,
   idPrefix = "region",
@@ -56,10 +59,12 @@ const TurkeyRegionSelects = ({
     void fetchTurkeyProvinces()
       .then((rows) => {
         const names = rows.map((p) => p.name).sort((a, b) => a.localeCompare(b, "tr"));
-        setProvinces(filterProvinceNames(names, allowedRegions));
+        setProvinces(
+          restrictProvinces ? filterProvinceNames(names, allowedRegions) : names,
+        );
       })
       .finally(() => setLoadingProvinces(false));
-  }, [allowedRegions]);
+  }, [allowedRegions, restrictProvinces]);
 
   useEffect(() => {
     if (!value.il) {
@@ -92,7 +97,19 @@ const TurkeyRegionSelects = ({
       .finally(() => setLoadingNeighborhoods(false));
   }, [value.il, value.ilce, allowedRegions, showMahalle]);
 
-  const ilOptions = useMemo(() => provinces, [provinces]);
+  const ilPlaceholder = loadingProvinces
+    ? t("common.region.loading")
+    : t("common.region.ilPlaceholder");
+  const ilcePlaceholder = !value.il
+    ? t("common.region.pickIlFirst")
+    : loadingDistricts
+      ? t("common.region.loading")
+      : t("common.region.ilcePlaceholder");
+  const mahallePlaceholder = !value.ilce
+    ? t("common.region.pickIlceFirst")
+    : loadingNeighborhoods
+      ? t("common.region.loading")
+      : t("common.region.mahallePlaceholder");
 
   const onIlChange = (il: string) => {
     onChange({ il, ilce: "", mahalle: "" });
@@ -106,6 +123,9 @@ const TurkeyRegionSelects = ({
     onChange({ ...value, mahalle });
   };
 
+  const emptyIlce = !loadingDistricts && value.il && districts.length === 0;
+  const emptyMahalle = !loadingNeighborhoods && value.ilce && neighborhoods.length === 0;
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <div className="space-y-2">
@@ -116,10 +136,10 @@ const TurkeyRegionSelects = ({
           disabled={disabled || loadingProvinces}
         >
           <SelectTrigger id={`${idPrefix}-il`}>
-            <SelectValue placeholder={t("common.region.ilPlaceholder")} />
+            <SelectValue placeholder={ilPlaceholder} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
-            {ilOptions.map((name) => (
+            {provinces.map((name) => (
               <SelectItem key={name} value={name}>
                 {name}
               </SelectItem>
@@ -133,10 +153,10 @@ const TurkeyRegionSelects = ({
         <Select
           value={value.ilce || undefined}
           onValueChange={onIlceChange}
-          disabled={disabled || !value.il || loadingDistricts || districts.length === 0}
+          disabled={disabled || !value.il || loadingDistricts || emptyIlce}
         >
           <SelectTrigger id={`${idPrefix}-ilce`}>
-            <SelectValue placeholder={t("common.region.ilcePlaceholder")} />
+            <SelectValue placeholder={ilcePlaceholder} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
             {districts.map((name) => (
@@ -154,15 +174,10 @@ const TurkeyRegionSelects = ({
           <Select
             value={value.mahalle || undefined}
             onValueChange={onMahalleChange}
-            disabled={
-              disabled ||
-              !value.ilce ||
-              loadingNeighborhoods ||
-              neighborhoods.length === 0
-            }
+            disabled={disabled || !value.ilce || loadingNeighborhoods || emptyMahalle}
           >
             <SelectTrigger id={`${idPrefix}-mahalle`}>
-              <SelectValue placeholder={t("common.region.mahallePlaceholder")} />
+              <SelectValue placeholder={mahallePlaceholder} />
             </SelectTrigger>
             <SelectContent className="max-h-72">
               {neighborhoods.map((name) => (
