@@ -68,6 +68,16 @@ const Auth = () => {
   const isResetMode = searchParams.get("reset") === "1";
 
   useEffect(() => {
+    if (searchParams.get("forgot") === "1") {
+      setShowForgotPassword(true);
+      setActiveTab("signin");
+      const next = new URLSearchParams(searchParams);
+      next.delete("forgot");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
     if (searchParams.get("verified") !== "1") return;
 
     setEmailVerifiedBanner(true);

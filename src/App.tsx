@@ -69,6 +69,7 @@ const App = () => (
             <Route path="/cars" element={<Cars />} />
             <Route path="/car/:id" element={<CarDetail />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/callback" element={<Auth />} />
             <Route path="/add-car" element={<AddCar />} />
             <Route path="/my-cars" element={<MyCars />} />
             <Route path="/subscription" element={<Subscription />} />

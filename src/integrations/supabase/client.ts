@@ -16,7 +16,8 @@ function getClient(): SupabaseClient<Database> {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      flowType: "pkce",
+      // Implicit flow: mail links (şifre sıfırlama / doğrulama) farklı tarayıcıda açılabilir.
+      flowType: "implicit",
     },
   });
   return client;
