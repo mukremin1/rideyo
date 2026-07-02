@@ -158,11 +158,10 @@
     },
     "dashboard": {
       "title": "Araç Sahibi Paneli",
-      "subtitle": "Araçlarınızı ve kazançlarınızı yönetin",
+      "subtitle": "Araçlarınızı ve kiralamalarınızı yönetin",
       "payoutSettings": "Hakediş Ayarları",
       "addCar": "Araç Ekle",
-      "totalEarnings": "Toplam Kazanç",
-      "thisMonth": "Bu Ay",
+      "monthlyRentals": "Bu Ay Kiralama",
       "totalRentals": "Toplam Kiralama",
       "activeRentals": "Aktif Kiralama",
       "averageRating": "Ortalama Puan",
@@ -182,12 +181,12 @@
       "myCars": "Araçlarım",
       "noCars": "Henüz araç eklemediniz.",
       "carTotalRentals": "Toplam Kiralama",
-      "carMonthlyEarnings": "Aylık Kazanç",
+      "carMonthlyRentals": "Bu Ay Kiralama",
       "allRentals": "Tüm Kiralamalar",
       "allRentalsDesc": "Geçmiş ve aktif kiralama işlemleri",
       "startDate": "Başlangıç",
       "endDate": "Bitiş",
-      "amount": "Tutar"
+      "rentalType": "Kiralama Türü"
     },
     "availability": {
       "title": "Müsaitlik Takvimi",

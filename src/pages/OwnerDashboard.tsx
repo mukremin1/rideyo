@@ -7,7 +7,6 @@ import {
   TrendingUp,
   Car,
   Calendar,
-  DollarSign,
   Star,
   Clock,
   Users,
@@ -32,7 +31,7 @@ type OwnerCar = {
   plate: string;
   status: string;
   totalRentals: number;
-  monthlyEarnings: number;
+  monthlyRentals: number;
   rating: number;
   nextBooking: string;
 };
@@ -43,7 +42,7 @@ type OwnerRental = {
   renter: string;
   startDate: string;
   endDate: string;
-  amount: number;
+  rentalType: string;
   status: string;
   rating: number | null;
 };
@@ -55,9 +54,8 @@ const OwnerDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    totalEarnings: 0,
-    monthlyEarnings: 0,
     totalRentals: 0,
+    monthlyRentals: 0,
     activeRentals: 0,
     averageRating: 0,
     totalCars: 0,
@@ -88,9 +86,8 @@ const OwnerDashboard = () => {
 
       if (carIds.length === 0) {
         setStats({
-          totalEarnings: 0,
-          monthlyEarnings: 0,
           totalRentals: 0,
+          monthlyRentals: 0,
           activeRentals: 0,
           averageRating: 0,
           totalCars: 0,
@@ -110,10 +107,7 @@ const OwnerDashboard = () => {
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-      const totalEarnings = paidBookings.reduce((sum, b) => sum + b.total_price, 0);
-      const monthlyEarnings = paidBookings
-        .filter((b) => parseISO(b.start_time) >= monthStart)
-        .reduce((sum, b) => sum + b.total_price, 0);
+      const monthlyRentals = paidBookings.filter((b) => parseISO(b.start_time) >= monthStart).length;
 
       const activeRentals = paidBookings.filter((b) =>
         isWithinInterval(now, { start: parseISO(b.start_time), end: parseISO(b.end_time) }),
@@ -143,11 +137,15 @@ const OwnerDashboard = () => {
         carBookingsMap.set(booking.car_id, list);
       }
 
+      const rentalTypeLabel: Record<string, string> = {
+        minute: t("owner.common.rentalTypes.minute"),
+        hour: t("owner.common.rentalTypes.hour"),
+        day: t("owner.common.rentalTypes.day"),
+      };
+
       const mappedCars: OwnerCar[] = carList.map((car) => {
         const carBookings = carBookingsMap.get(car.id) ?? [];
-        const carMonthly = carBookings
-          .filter((b) => parseISO(b.start_time) >= monthStart)
-          .reduce((sum, b) => sum + b.total_price, 0);
+        const carMonthlyRentals = carBookings.filter((b) => parseISO(b.start_time) >= monthStart).length;
 
         const activeOnCar = carBookings.some((b) =>
           isWithinInterval(now, { start: parseISO(b.start_time), end: parseISO(b.end_time) }),
@@ -174,7 +172,7 @@ const OwnerDashboard = () => {
           plate: car.plate_number ?? "—",
           status,
           totalRentals: carBookings.length,
-          monthlyEarnings: carMonthly,
+          monthlyRentals: carMonthlyRentals,
           rating: Math.round(carRating * 10) / 10,
           nextBooking: upcoming
             ? format(parseISO(upcoming.start_time), "d MMM yyyy", { locale: dateLocale })
@@ -197,16 +195,15 @@ const OwnerDashboard = () => {
           renter: profileMap.get(b.user_id) ?? t("owner.common.renter"),
           startDate: format(start, "d MMM yyyy", { locale: dateLocale }),
           endDate: format(end, "d MMM yyyy", { locale: dateLocale }),
-          amount: b.total_price,
+          rentalType: rentalTypeLabel[b.rental_type] ?? b.rental_type,
           status,
           rating: null,
         };
       });
 
       setStats({
-        totalEarnings,
-        monthlyEarnings,
         totalRentals: paidBookings.length,
+        monthlyRentals,
         activeRentals,
         averageRating: Math.round(avgRating * 10) / 10,
         totalCars: carList.length,
@@ -232,9 +229,6 @@ const OwnerDashboard = () => {
     const config = variants[status] || variants.available;
     return <Badge variant={config.variant}>{t(`owner.common.status.${config.labelKey}`)}</Badge>;
   };
-
-  const formatMoney = (value: number) =>
-    value.toLocaleString("tr-TR", { maximumFractionDigits: 0 });
 
   if (loading) {
     return (
@@ -262,7 +256,6 @@ const OwnerDashboard = () => {
             <div className="flex gap-2">
               <Link to="/owner/payout">
                 <Button variant="outline" size="lg">
-                  <DollarSign className="w-4 h-4 mr-2" />
                   {t("owner.dashboard.payoutSettings")}
                 </Button>
               </Link>
@@ -275,19 +268,12 @@ const OwnerDashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-            <Card>
-              <CardContent className="pt-6">
-                <DollarSign className="w-8 h-8 text-primary mb-2" />
-                <p className="text-2xl font-bold">₺{formatMoney(stats.totalEarnings)}</p>
-                <p className="text-xs text-muted-foreground">{t("owner.dashboard.totalEarnings")}</p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
             <Card>
               <CardContent className="pt-6">
                 <TrendingUp className="w-8 h-8 text-green-600 mb-2" />
-                <p className="text-2xl font-bold">₺{formatMoney(stats.monthlyEarnings)}</p>
-                <p className="text-xs text-muted-foreground">{t("owner.dashboard.thisMonth")}</p>
+                <p className="text-2xl font-bold">{stats.monthlyRentals}</p>
+                <p className="text-xs text-muted-foreground">{t("owner.dashboard.monthlyRentals")}</p>
               </CardContent>
             </Card>
             <Card>
@@ -349,7 +335,7 @@ const OwnerDashboard = () => {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="font-bold text-primary">₺{formatMoney(rental.amount)}</p>
+                              <p className="text-sm font-medium text-muted-foreground">{rental.rentalType}</p>
                               {getStatusBadge(rental.status)}
                             </div>
                           </div>
@@ -415,8 +401,8 @@ const OwnerDashboard = () => {
                             <p className="text-xl font-bold">{car.totalRentals}</p>
                           </div>
                           <div className="p-3 bg-muted/50 rounded-lg">
-                            <p className="text-xs text-muted-foreground mb-1">{t("owner.dashboard.carMonthlyEarnings")}</p>
-                            <p className="text-xl font-bold text-primary">₺{formatMoney(car.monthlyEarnings)}</p>
+                            <p className="text-xs text-muted-foreground mb-1">{t("owner.dashboard.carMonthlyRentals")}</p>
+                            <p className="text-xl font-bold text-primary">{car.monthlyRentals}</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -469,8 +455,8 @@ const OwnerDashboard = () => {
                               <p className="font-semibold text-sm">{rental.endDate}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-muted-foreground">{t("owner.dashboard.amount")}</p>
-                              <p className="font-semibold text-sm text-primary">₺{formatMoney(rental.amount)}</p>
+                              <p className="text-xs text-muted-foreground">{t("owner.dashboard.rentalType")}</p>
+                              <p className="font-semibold text-sm">{rental.rentalType}</p>
                             </div>
                           </div>
                         </div>

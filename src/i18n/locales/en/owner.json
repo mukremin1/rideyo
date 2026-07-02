@@ -158,11 +158,10 @@
     },
     "dashboard": {
       "title": "Owner Dashboard",
-      "subtitle": "Manage your cars and earnings",
+      "subtitle": "Manage your cars and rentals",
       "payoutSettings": "Payout Settings",
       "addCar": "Add Car",
-      "totalEarnings": "Total Earnings",
-      "thisMonth": "This Month",
+      "monthlyRentals": "Rentals This Month",
       "totalRentals": "Total Rentals",
       "activeRentals": "Active Rentals",
       "averageRating": "Average Rating",
@@ -182,12 +181,12 @@
       "myCars": "My Cars",
       "noCars": "You haven't added any cars yet.",
       "carTotalRentals": "Total Rentals",
-      "carMonthlyEarnings": "Monthly Earnings",
+      "carMonthlyRentals": "Rentals This Month",
       "allRentals": "All Rentals",
       "allRentalsDesc": "Past and active rental transactions",
       "startDate": "Start",
       "endDate": "End",
-      "amount": "Amount"
+      "rentalType": "Rental Type"
     },
     "availability": {
       "title": "Availability Calendar",
