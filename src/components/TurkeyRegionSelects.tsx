@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,16 +37,26 @@ type TurkeyRegionSelectsProps = {
   idPrefix?: string;
 };
 
+const EMPTY_ALLOWED_REGIONS: AllowedRegion[] = [];
+
 const TurkeyRegionSelects = ({
   value,
   onChange,
-  allowedRegions = [],
+  allowedRegions: allowedRegionsProp,
   restrictProvinces = true,
   disabled = false,
   showMahalle = true,
   idPrefix = "region",
 }: TurkeyRegionSelectsProps) => {
   const { t } = useTranslation();
+  const allowedRegions = allowedRegionsProp ?? EMPTY_ALLOWED_REGIONS;
+  const allowedRegionsKey = useMemo(
+    () =>
+      allowedRegions
+        .map((r) => `${r.id}:${r.level}:${r.name}:${r.is_active ? 1 : 0}`)
+        .join("|"),
+    [allowedRegions],
+  );
   const [provinces, setProvinces] = useState<string[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
@@ -55,47 +65,79 @@ const TurkeyRegionSelects = ({
   const [loadingNeighborhoods, setLoadingNeighborhoods] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     setLoadingProvinces(true);
     void fetchTurkeyProvinces()
       .then((rows) => {
+        if (cancelled) return;
         const names = rows.map((p) => p.name).sort((a, b) => a.localeCompare(b, "tr"));
         setProvinces(
           restrictProvinces ? filterProvinceNames(names, allowedRegions) : names,
         );
       })
-      .finally(() => setLoadingProvinces(false));
-  }, [allowedRegions, restrictProvinces]);
+      .catch(() => {
+        if (!cancelled) setProvinces([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingProvinces(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [allowedRegionsKey, restrictProvinces, allowedRegions]);
 
   useEffect(() => {
     if (!value.il) {
       setDistricts([]);
       setNeighborhoods([]);
+      setLoadingDistricts(false);
       return;
     }
+    let cancelled = false;
     setLoadingDistricts(true);
     void fetchTurkeyDistricts(value.il)
       .then((rows) => {
+        if (cancelled) return;
         const names = rows.map((d) => d.name).sort((a, b) => a.localeCompare(b, "tr"));
         setDistricts(filterDistrictNames(names, allowedRegions, value.il));
       })
-      .finally(() => setLoadingDistricts(false));
-  }, [value.il, allowedRegions]);
+      .catch(() => {
+        if (!cancelled) setDistricts([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingDistricts(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [value.il, allowedRegionsKey, allowedRegions]);
 
   useEffect(() => {
     if (!value.il || !value.ilce || !showMahalle) {
       setNeighborhoods([]);
+      setLoadingNeighborhoods(false);
       return;
     }
+    let cancelled = false;
     setLoadingNeighborhoods(true);
     void fetchTurkeyNeighborhoods(value.il, value.ilce)
       .then((rows) => {
+        if (cancelled) return;
         const names = rows.map((n) => n.name).sort((a, b) => a.localeCompare(b, "tr"));
         setNeighborhoods(
           filterNeighborhoodNames(names, allowedRegions, value.il, value.ilce),
         );
       })
-      .finally(() => setLoadingNeighborhoods(false));
-  }, [value.il, value.ilce, allowedRegions, showMahalle]);
+      .catch(() => {
+        if (!cancelled) setNeighborhoods([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingNeighborhoods(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [value.il, value.ilce, allowedRegionsKey, allowedRegions, showMahalle]);
 
   const ilPlaceholder = loadingProvinces
     ? t("common.region.loading")

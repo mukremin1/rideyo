@@ -27,10 +27,21 @@ let provincesCache: TurkeyProvince[] | null = null;
 const districtsCache = new Map<string, TurkeyDistrict[]>();
 const neighborhoodsCache = new Map<string, TurkeyNeighborhood[]>();
 
+const FETCH_TIMEOUT_MS = 15_000;
+
 async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`API ${res.status}`);
-  return res.json() as Promise<T>;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    return res.json() as Promise<T>;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function fetchTurkeyProvinces(): Promise<TurkeyProvince[]> {
@@ -49,29 +60,33 @@ export async function fetchTurkeyDistricts(provinceName: string): Promise<Turkey
   const key = provinceName.toLocaleLowerCase("tr");
   if (districtsCache.has(key)) return districtsCache.get(key)!;
 
-  const json = await fetchJson<
-    ApiList<{
-      id: number;
-      name: string;
-      province: string;
-      neighborhoods?: { id: number; name: string }[];
-    }>
-  >(`${API_BASE}/districts?province=${encodeURIComponent(provinceName)}`);
+  try {
+    const json = await fetchJson<
+      ApiList<{
+        id: number;
+        name: string;
+        province: string;
+        neighborhoods?: { id: number; name: string }[];
+      }>
+    >(`${API_BASE}/districts?province=${encodeURIComponent(provinceName)}`);
 
-  const districts: TurkeyDistrict[] = json.data.map((d) => ({
-    id: d.id,
-    name: d.name,
-    province: d.province,
-    neighborhoods: d.neighborhoods?.map((n) => ({
-      id: n.id,
-      name: n.name,
-      district: d.name,
+    const districts: TurkeyDistrict[] = json.data.map((d) => ({
+      id: d.id,
+      name: d.name,
       province: d.province,
-    })),
-  }));
+      neighborhoods: d.neighborhoods?.map((n) => ({
+        id: n.id,
+        name: n.name,
+        district: d.name,
+        province: d.province,
+      })),
+    }));
 
-  districtsCache.set(key, districts);
-  return districts;
+    districtsCache.set(key, districts);
+    return districts;
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchTurkeyNeighborhoods(
@@ -84,19 +99,23 @@ export async function fetchTurkeyNeighborhoods(
   const key = `${provinceName}:${districtName}`.toLocaleLowerCase("tr");
   if (neighborhoodsCache.has(key)) return neighborhoodsCache.get(key)!;
 
-  const json = await fetchJson<
-    ApiList<{ id: number; name: string; district: string; province: string }>
-  >(
-    `${API_BASE}/neighborhoods?province=${encodeURIComponent(provinceName)}&district=${encodeURIComponent(districtName)}`,
-  );
+  try {
+    const json = await fetchJson<
+      ApiList<{ id: number; name: string; district: string; province: string }>
+    >(
+      `${API_BASE}/neighborhoods?province=${encodeURIComponent(provinceName)}&district=${encodeURIComponent(districtName)}`,
+    );
 
-  const rows = json.data.map((n) => ({
-    id: n.id,
-    name: n.name,
-    district: n.district,
-    province: n.province,
-  }));
+    const rows = json.data.map((n) => ({
+      id: n.id,
+      name: n.name,
+      district: n.district,
+      province: n.province,
+    }));
 
-  neighborhoodsCache.set(key, rows);
-  return rows;
+    neighborhoodsCache.set(key, rows);
+    return rows;
+  } catch {
+    return [];
+  }
 }
