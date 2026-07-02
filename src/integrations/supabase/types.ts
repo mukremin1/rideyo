@@ -151,11 +151,13 @@ export type Database = {
       }
       cars: {
         Row: {
+          allowed_region_id: string | null
           available: boolean | null
           battery_level: number | null
           city: string | null
           created_at: string | null
           description: string | null
+          district: string | null
           fuel_type: string
           gps_device_id: string | null
           heading: number | null
@@ -168,6 +170,7 @@ export type Database = {
           lock_status: string | null
           longitude: number | null
           name: string
+          neighborhood: string | null
           owner_id: string
           plate_number: string | null
           price_per_day: number
@@ -182,11 +185,13 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          allowed_region_id?: string | null
           available?: boolean | null
           battery_level?: number | null
           city?: string | null
           created_at?: string | null
           description?: string | null
+          district?: string | null
           fuel_type: string
           gps_device_id?: string | null
           heading?: number | null
@@ -199,6 +204,7 @@ export type Database = {
           lock_status?: string | null
           longitude?: number | null
           name: string
+          neighborhood?: string | null
           owner_id: string
           plate_number?: string | null
           price_per_day: number
@@ -213,11 +219,13 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          allowed_region_id?: string | null
           available?: boolean | null
           battery_level?: number | null
           city?: string | null
           created_at?: string | null
           description?: string | null
+          district?: string | null
           fuel_type?: string
           gps_device_id?: string | null
           heading?: number | null
@@ -230,6 +238,7 @@ export type Database = {
           lock_status?: string | null
           longitude?: number | null
           name?: string
+          neighborhood?: string | null
           owner_id?: string
           plate_number?: string | null
           price_per_day?: number
@@ -243,7 +252,62 @@ export type Database = {
           updated_at?: string | null
           year?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cars_allowed_region_id_fkey"
+            columns: ["allowed_region_id"]
+            isOneToOne: false
+            referencedRelation: "allowed_regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      allowed_regions: {
+        Row: {
+          boundaries: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          level: Database["public"]["Enums"]["region_level"]
+          name: string
+          parent_id: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          boundaries?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level: Database["public"]["Enums"]["region_level"]
+          name: string
+          parent_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          boundaries?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level?: Database["public"]["Enums"]["region_level"]
+          name?: string
+          parent_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allowed_regions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "allowed_regions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       driver_history: {
         Row: {
@@ -909,6 +973,7 @@ export type Database = {
       app_role: "user" | "car_owner" | "admin"
       car_type: "compact" | "sedan" | "suv"
       fuel_type: "Benzin" | "Dizel" | "Elektrik" | "Hibrit"
+      region_level: "bolge" | "il" | "ilce" | "mahalle"
       subscription_tier: "basic" | "premium" | "vip"
       transmission_type: "Manuel" | "Otomatik"
     }

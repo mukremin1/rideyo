@@ -7,6 +7,7 @@
   "nav": {
     "home": "Ana Sayfa",
     "fleet": "Araç Filosu",
+    "fleetManagement": "Filo Yönetimi",
     "howItWorks": "Nasıl Çalışır",
     "owners": "Araç Sahipleri",
     "support": "Destek",
@@ -224,7 +225,16 @@
     "completedDesc": "{{carName}} için kiralama başarıyla bitirildi. Araç kapıları kilitlendi.",
     "goToBookings": "Rezervasyonlarıma Git",
     "minutes": "dk",
-    "km": "km"
+    "km": "km",
+    "dropoffLocationRequired": "Araç bırakmak için konum izni gerekli. Lütfen GPS'i açın.",
+    "dropoffZoneHint": "Aracı yalnızca onaylı hizmet bölgelerinde bırakabilirsiniz.",
+    "region": {
+      "notAllowed": "Bu konuma araç bırakılamaz. Lütfen onaylı bir bölgeye gidin.",
+      "il_not_allowed": "Bu ilde araç bırakma izni yok.",
+      "ilce_not_allowed": "Bu ilçede araç bırakma izni yok.",
+      "mahalle_not_allowed": "Bu mahallede araç bırakma izni yok.",
+      "missing_coordinates": "Bırakış konumu alınamadı."
+    }
   },
   "bookings": {
     "title": "Rezervasyonlarım",

@@ -7,6 +7,7 @@
   "nav": {
     "home": "Home",
     "fleet": "Fleet",
+    "fleetManagement": "Fleet Management",
     "howItWorks": "How It Works",
     "owners": "Car Owners",
     "support": "Support",
@@ -224,7 +225,16 @@
     "completedDesc": "Rental for {{carName}} ended successfully. Doors are locked.",
     "goToBookings": "Go to My Bookings",
     "minutes": "min",
-    "km": "km"
+    "km": "km",
+    "dropoffLocationRequired": "Location permission is required to drop off the car. Please enable GPS.",
+    "dropoffZoneHint": "You can only leave the car in approved service regions.",
+    "region": {
+      "notAllowed": "You cannot leave the car here. Please move to an approved region.",
+      "il_not_allowed": "Drop-off is not allowed in this province.",
+      "ilce_not_allowed": "Drop-off is not allowed in this district.",
+      "mahalle_not_allowed": "Drop-off is not allowed in this neighborhood.",
+      "missing_coordinates": "Could not determine drop-off location."
+    }
   },
   "bookings": {
     "title": "My Bookings",

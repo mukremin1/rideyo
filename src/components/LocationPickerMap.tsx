@@ -32,10 +32,18 @@ const selectedLocationIcon = L.divIcon({
   iconAnchor: [16, 32],
 });
 
+import { parseNominatimAddress, type ParsedLocation } from "@/lib/allowedRegions";
+
+export type LocationPickResult = {
+  address: string;
+  components: ParsedLocation;
+  rawAddress?: Record<string, string>;
+};
+
 interface LocationPickerMapProps {
   initialLat?: number;
   initialLng?: number;
-  onLocationSelect: (lat: number, lng: number, address?: string) => void;
+  onLocationSelect: (lat: number, lng: number, result?: LocationPickResult) => void;
   height?: string;
 }
 
@@ -74,13 +82,14 @@ const LocationPickerMap = ({
   const [isLocating, setIsLocating] = useState(false);
   const [addressText, setAddressText] = useState<string>("");
 
-  const reverseGeocode = async (lat: number, lng: number) => {
+  const reverseGeocode = async (lat: number, lng: number): Promise<LocationPickResult | null> => {
     try {
       const lang = i18n.language?.split("-")[0] ?? "tr";
       const url = new URL("https://nominatim.openstreetmap.org/reverse");
       url.searchParams.set("format", "json");
       url.searchParams.set("lat", lat.toString());
       url.searchParams.set("lon", lng.toString());
+      url.searchParams.set("addressdetails", "1");
       url.searchParams.set("accept-language", lang);
 
       const res = await fetch(url.toString(), {
@@ -90,19 +99,20 @@ const LocationPickerMap = ({
       if (res.ok) {
         const data = await res.json();
         const address = data.display_name || "";
+        const components = parseNominatimAddress(data.address, address);
         setAddressText(address);
-        return address;
+        return { address, components, rawAddress: data.address };
       }
     } catch {
       // Silent fail
     }
-    return "";
+    return null;
   };
 
   const handleMapClick = async (lat: number, lng: number) => {
     setSelectedPosition([lat, lng]);
-    const address = await reverseGeocode(lat, lng);
-    onLocationSelect(lat, lng, address);
+    const result = await reverseGeocode(lat, lng);
+    onLocationSelect(lat, lng, result ?? undefined);
   };
 
   const getCurrentLocation = () => {
@@ -118,7 +128,7 @@ const LocationPickerMap = ({
         setSelectedPosition([lat, lng]);
         setMapCenter([lat, lng]);
         const address = await reverseGeocode(lat, lng);
-        onLocationSelect(lat, lng, address);
+        onLocationSelect(lat, lng, address ?? undefined);
         setIsLocating(false);
       },
       () => {

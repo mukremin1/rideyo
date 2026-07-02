@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { fetchAllowedRegions } from "@/lib/allowedRegions";
 import { Car as CarType } from "@/types/car";
 import carCompact from "@/assets/car-compact.jpg";
 import carSedan from "@/assets/car-sedan.jpg";
@@ -42,19 +43,31 @@ const Cars = () => {
 
   const fetchCars = async () => {
     try {
-      const { data, error } = await supabase
-        .from("cars")
-        .select("*")
-        .eq("available", true)
-        .order("created_at", { ascending: false });
+      const [regionsResult, carsResult] = await Promise.all([
+        fetchAllowedRegions().catch(() => []),
+        supabase
+          .from("cars")
+          .select("*")
+          .eq("available", true)
+          .order("created_at", { ascending: false }),
+      ]);
 
+      const { data, error } = carsResult;
       if (error) {
         console.error("Araçlar yüklenirken hata:", error);
         toast.error(t("cars.loadError"));
         return;
       }
 
-      const convertedCars: CarType[] = (data || []).map((car) => {
+      const strictRegions = regionsResult.some((r) => r.is_active);
+      const activeRegionIds = new Set(regionsResult.filter((r) => r.is_active).map((r) => r.id));
+      const rows = strictRegions
+        ? (data ?? []).filter(
+            (car) => car.allowed_region_id && activeRegionIds.has(car.allowed_region_id),
+          )
+        : (data ?? []);
+
+      const convertedCars: CarType[] = rows.map((car) => {
         let image = carCompact;
         if (car.type === "sedan") image = carSedan;
         if (car.type === "suv") image = carSuv;

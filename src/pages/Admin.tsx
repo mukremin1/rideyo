@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car, ClipboardList, Wallet } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car, ClipboardList, Wallet, MapPinned } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminFleetSection from "@/components/AdminFleetSection";
 import AdminRentalsSection from "@/components/AdminRentalsSection";
 import AdminPayoutsSection from "@/components/AdminPayoutsSection";
+import AdminRegionsSection from "@/components/AdminRegionsSection";
 
 interface Campaign {
   id: string;
@@ -221,8 +222,16 @@ const Admin = () => {
             </div>
           </div>
 
-          <Tabs defaultValue="rentals" className="space-y-6 sm:space-y-8">
-            <TabsList className="flex h-auto w-full gap-1 overflow-x-auto p-1 sm:grid sm:grid-cols-4 sm:overflow-visible">
+          <Tabs defaultValue="fleet" className="space-y-6 sm:space-y-8">
+            <TabsList className="flex h-auto w-full gap-1 overflow-x-auto p-1 sm:grid sm:grid-cols-6 sm:overflow-visible">
+              <TabsTrigger value="fleet" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
+                <Car className="hidden h-4 w-4 shrink-0 sm:block" />
+                {t("admin.tabs.fleet")}
+              </TabsTrigger>
+              <TabsTrigger value="regions" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
+                <MapPinned className="hidden h-4 w-4 shrink-0 sm:block" />
+                {t("admin.tabs.regions")}
+              </TabsTrigger>
               <TabsTrigger value="rentals" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
                 <ClipboardList className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.rentals")}
@@ -231,15 +240,19 @@ const Admin = () => {
                 <Wallet className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.payouts")}
               </TabsTrigger>
-              <TabsTrigger value="fleet" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
-                <Car className="hidden h-4 w-4 shrink-0 sm:block" />
-                {t("admin.tabs.fleet")}
-              </TabsTrigger>
               <TabsTrigger value="campaigns" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
                 <Megaphone className="hidden h-4 w-4 shrink-0 sm:block" />
                 {t("admin.tabs.campaigns")}
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="fleet">
+              <AdminFleetSection />
+            </TabsContent>
+
+            <TabsContent value="regions">
+              <AdminRegionsSection />
+            </TabsContent>
 
             <TabsContent value="rentals">
               <AdminRentalsSection />
@@ -247,10 +260,6 @@ const Admin = () => {
 
             <TabsContent value="payouts">
               <AdminPayoutsSection />
-            </TabsContent>
-
-            <TabsContent value="fleet">
-              <AdminFleetSection />
             </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">

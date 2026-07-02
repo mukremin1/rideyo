@@ -87,6 +87,8 @@
         "cityPlaceholder": "İl seçin",
         "location": "Lokasyon *",
         "selectedAddress": "Seçilen adres:",
+        "regionApproved": "Onaylı bölge",
+        "regionNotAllowed": "Bu konum hizmet bölgesi dışında. Lütfen onaylı bir alan seçin.",
         "plate": "Plaka (Opsiyonel)",
         "platePlaceholder": "örn: 25 ABC 123",
         "photo": "Araç Fotoğrafı",
@@ -122,7 +124,13 @@
         "fillRequired": "Araç bilgileri adımındaki zorunlu alanları doldurun.",
         "selectMapLocation": "Lütfen haritadan bir konum seçin.",
         "uploadPhoto": "Devam etmek için en az bir araç fotoğrafı yükleyin.",
-        "fillPricing": "Fiyatlandırma adımındaki tüm alanları doldurun."
+        "fillPricing": "Fiyatlandırma adımındaki tüm alanları doldurun.",
+        "region": {
+          "notAllowed": "Bu konuma araç bırakılamaz. Lütfen onaylı bir hizmet bölgesi seçin.",
+          "il_not_allowed": "Bu ilde araç bırakma izni yok.",
+          "ilce_not_allowed": "Bu ilçede araç bırakma izni yok.",
+          "mahalle_not_allowed": "Bu mahallede araç bırakma izni yok."
+        }
       },
       "validation": {
         "nameMin": "Araç adı en az 2 karakter olmalıdır",

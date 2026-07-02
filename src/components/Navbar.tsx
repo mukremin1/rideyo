@@ -37,6 +37,7 @@ import {
 import BrandLogo from "./BrandLogo";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
@@ -44,14 +45,15 @@ import { useTranslation } from "react-i18next";
 const Navbar = () => {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
     { to: "/", label: t("nav.home") },
     { to: "/cars", label: t("nav.fleet") },
+    ...(isAdmin ? [{ to: "/admin", label: t("nav.fleetManagement") }] : []),
     { to: "/#how-it-works", label: t("nav.howItWorks"), hash: true },
     { to: "/owner-dashboard", label: t("nav.owners") },
     { to: "/support", label: t("nav.support") },
@@ -65,7 +67,6 @@ const Navbar = () => {
   useEffect(() => {
     if (user) {
       fetchUnreadNotifications();
-      checkAdminRole();
 
       const channel = supabase
         .channel("notifications")
@@ -97,17 +98,6 @@ const Navbar = () => {
       .eq("is_read", false);
 
     setUnreadCount(count || 0);
-  };
-
-  const checkAdminRole = async () => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user?.id)
-      .eq("role", "admin")
-      .single();
-
-    setIsAdmin(!!data);
   };
 
   const go = (path: string) => {
@@ -331,11 +321,7 @@ const Navbar = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => navigate("/admin")}>
                           <Shield className="mr-2 h-4 w-4" />
-                          {t("nav.adminPanel")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate("/add-car")}>
-                          <Plus className="mr-2 h-4 w-4" />
-                          {t("nav.addCar")}
+                          {t("nav.fleetManagement")}
                         </DropdownMenuItem>
                       </>
                     )}

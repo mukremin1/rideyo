@@ -47,7 +47,8 @@ serve(async (req) => {
   }
 
   try {
-    const { action, carId, bookingId, userId, latitude, longitude, notes } = await req.json();
+    const { action, carId, bookingId, userId, latitude, longitude, notes, city, district, neighborhood, dropoffAddress } =
+      await req.json();
 
     console.log(`[vehicle-control] Action: ${action} for car: ${carId}`);
 
@@ -157,10 +158,68 @@ serve(async (req) => {
       }
 
       case "end_rental": {
-        const { error } = await supabase
-          .from("cars")
-          .update({ lock_status: "locked", available: true })
-          .eq("id", carId);
+        const carUpdate: Record<string, unknown> = {
+          lock_status: "locked",
+          available: true,
+        };
+
+        if (latitude != null && longitude != null) {
+          const { data: validation, error: validationError } = await supabase.rpc(
+            "validate_dropoff_location",
+            {
+              p_latitude: latitude,
+              p_longitude: longitude,
+              p_city: city ?? null,
+              p_district: district ?? null,
+              p_neighborhood: neighborhood ?? null,
+            },
+          );
+
+          if (validationError) throw validationError;
+
+          const result = validation as {
+            allowed?: boolean;
+            strict_mode?: boolean;
+            reason?: string;
+            region_id?: string;
+          };
+
+          if (result.strict_mode && !result.allowed) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: "DROP_OFF_NOT_ALLOWED",
+                reason: result.reason ?? "not_allowed",
+              }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+          }
+
+          carUpdate.latitude = latitude;
+          carUpdate.longitude = longitude;
+          if (result.region_id) carUpdate.allowed_region_id = result.region_id;
+          if (city) carUpdate.city = city;
+          if (district) carUpdate.district = district;
+          if (neighborhood) carUpdate.neighborhood = neighborhood;
+          if (dropoffAddress) carUpdate.location = dropoffAddress;
+        } else {
+          const { count } = await supabase
+            .from("allowed_regions")
+            .select("id", { count: "exact", head: true })
+            .eq("is_active", true);
+
+          if ((count ?? 0) > 0) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: "DROP_OFF_LOCATION_REQUIRED",
+              }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+          }
+        }
+
+        const { error } = await supabase.from("cars").update(carUpdate).eq("id", carId);
         if (error) throw error;
 
         if (bookingId) {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -18,6 +19,7 @@ interface Car {
 const GPSTracking = () => {
   const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,18 +34,22 @@ const GPSTracking = () => {
 
       const { data, error } = await supabase
         .from("cars")
-        .select("id, name, gps_device_id")
-        .eq("owner_id", user.id)
-        .not("gps_device_id", "is", null);
+        .select("id, name, gps_device_id, latitude, longitude, owner_id")
+        .or("gps_device_id.not.is.null,and(latitude.not.is.null,longitude.not.is.null)");
 
-      if (!error && data) {
-        setCars(data);
+      let rows = data ?? [];
+      if (!isAdmin) {
+        rows = rows.filter((c) => c.owner_id === user.id);
+      }
+
+      if (!error) {
+        setCars(rows.map(({ id, name, gps_device_id }) => ({ id, name, gps_device_id })));
       }
       setLoading(false);
     };
 
     fetchCars();
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, isAdmin]);
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">

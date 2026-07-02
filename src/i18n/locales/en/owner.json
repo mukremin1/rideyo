@@ -87,6 +87,8 @@
         "cityPlaceholder": "Select city",
         "location": "Location *",
         "selectedAddress": "Selected address:",
+        "regionApproved": "Approved region",
+        "regionNotAllowed": "This location is outside the service area. Please pick an approved spot.",
         "plate": "Plate (Optional)",
         "platePlaceholder": "e.g. 25 ABC 123",
         "photo": "Car Photo",
@@ -122,7 +124,13 @@
         "fillRequired": "Please fill in required fields in the car details step.",
         "selectMapLocation": "Please select a location on the map.",
         "uploadPhoto": "Upload at least one car photo to continue.",
-        "fillPricing": "Please fill in all pricing fields."
+        "fillPricing": "Please fill in all pricing fields.",
+        "region": {
+          "notAllowed": "Cars cannot be parked at this location. Please select an approved service region.",
+          "il_not_allowed": "Parking is not allowed in this province.",
+          "ilce_not_allowed": "Parking is not allowed in this district.",
+          "mahalle_not_allowed": "Parking is not allowed in this neighborhood."
+        }
       },
       "validation": {
         "nameMin": "Car name must be at least 2 characters",

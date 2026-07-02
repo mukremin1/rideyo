@@ -29,6 +29,7 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useTranslation } from "react-i18next";
 import VehiclePhotoCapture from "@/components/VehiclePhotoCapture";
 import CarLocationMap from "@/components/CarLocationMap";
+import { getRegionErrorKey, validateDropoffCoords } from "@/lib/allowedRegions";
 
 interface RentalState {
   bookingId: string;
@@ -52,7 +53,7 @@ const StartRental = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { sendRentalNotification, permission: notifPermission, requestPermission: requestNotifPermission } = usePushNotifications();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const locationState = location.state as RentalState | null;
   const bookingIdParam = searchParams.get("bookingId");
   const activeBookingId = locationState?.bookingId ?? bookingIdParam ?? null;
@@ -478,6 +479,33 @@ const StartRental = () => {
     setLoading(true);
 
     try {
+      let lat = userLocation?.lat;
+      let lng = userLocation?.lng;
+
+      if (lat == null || lng == null) {
+        if (!navigator.geolocation) {
+          toast.error(t("rental.dropoffLocationRequired"));
+          setLoading(false);
+          return;
+        }
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 15000,
+          });
+        });
+        lat = position.coords.latitude;
+        lng = position.coords.longitude;
+        setUserLocation({ lat, lng });
+      }
+
+      const dropoff = await validateDropoffCoords(lat, lng, i18n.language);
+      if (dropoff.strictMode && !dropoff.allowed) {
+        toast.error(t(`rental.region.${getRegionErrorKey(dropoff.reason)}`));
+        setLoading(false);
+        return;
+      }
+
       // Fotoğrafları kaydet
       for (const photo of afterPhotos) {
         await supabase.from('vehicle_photos').insert({
@@ -496,9 +524,13 @@ const StartRental = () => {
         carId: rentalInfo.carId,
         bookingId: rentalInfo.bookingId,
         userId: user.id,
-        latitude: userLocation?.lat,
-        longitude: userLocation?.lng,
-        notes: `Anahtar torpidoya bırakıldı. Konum: ${carLocation}`,
+        latitude: lat,
+        longitude: lng,
+        city: dropoff.parsed.il || undefined,
+        district: dropoff.parsed.ilce || undefined,
+        neighborhood: dropoff.parsed.mahalle || undefined,
+        dropoffAddress: dropoff.address,
+        notes: `Anahtar torpidoya bırakıldı. Konum: ${dropoff.address || carLocation}`,
       });
 
       const response = data;
@@ -506,6 +538,15 @@ const StartRental = () => {
         toast.success(t("rental.endSuccess"));
         setRentalEnded(true);
       } else {
+        const err = response as VehicleControlResponse & { reason?: string };
+        if (err.error === "DROP_OFF_NOT_ALLOWED") {
+          toast.error(t(`rental.region.${getRegionErrorKey(err.reason)}`));
+          return;
+        }
+        if (err.error === "DROP_OFF_LOCATION_REQUIRED") {
+          toast.error(t("rental.dropoffLocationRequired"));
+          return;
+        }
         throw new Error(response.error ?? t("rental.endFailed"));
       }
     } catch (error: unknown) {
@@ -813,7 +854,13 @@ const StartRental = () => {
             />
           </div>
 
-          <div className="p-4 bg-amber-500/10 rounded-lg">
+          <div className="p-4 bg-amber-500/10 rounded-lg space-y-3">
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-amber-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-amber-700 dark:text-amber-400">{t("rental.dropoffZoneHint")}</p>
+              </div>
+            </div>
             <div className="flex items-start gap-3">
               <Key className="w-5 h-5 text-amber-600 mt-0.5" />
               <div>
