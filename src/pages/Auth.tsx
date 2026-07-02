@@ -497,19 +497,7 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="signin-password">{t("auth.fields.password")}</Label>
-                    <button
-                      type="button"
-                      className="text-xs text-primary hover:underline"
-                      onClick={() => {
-                        setShowForgotPassword(true);
-                        setShowSignUpPrompt(false);
-                      }}
-                    >
-                      {t("auth.forgotPassword.link")}
-                    </button>
-                  </div>
+                  <Label htmlFor="signin-password">{t("auth.fields.password")}</Label>
                   <Input
                     id="signin-password"
                     type="password"
@@ -542,6 +530,18 @@ const Auth = () => {
 
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? t("auth.signIn.submitting") : t("auth.signIn.submit")}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full text-primary"
+                  onClick={() => {
+                    setShowForgotPassword(true);
+                    setShowSignUpPrompt(false);
+                  }}
+                >
+                  {t("auth.forgotPassword.link")}
                 </Button>
 
                 <p className="text-center text-sm text-muted-foreground">
@@ -709,9 +709,6 @@ const Auth = () => {
                   ? t("auth.resendVerification.waitSeconds", { seconds: resendCooldown })
                   : t("auth.resendVerification.submit")}
             </Button>
-            <p className="text-xs text-muted-foreground leading-relaxed rounded-md border bg-muted/40 p-3">
-              {t("auth.resendVerification.troubleshoot")}
-            </p>
           </div>
           )}
         </Card>
