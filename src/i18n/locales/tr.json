@@ -49,6 +49,14 @@
     "goToAuth": "Giriş Yap",
     "required": "Zorunlu",
     "optional": "Opsiyonel",
+    "region": {
+      "il": "İl",
+      "ilce": "İlçe",
+      "mahalle": "Mahalle",
+      "ilPlaceholder": "İl seçin",
+      "ilcePlaceholder": "İlçe seçin",
+      "mahallePlaceholder": "Mahalle seçin"
+    },
     "notFound": "Sayfa bulunamadı",
     "notFoundDesc": "Aradığınız sayfa mevcut değil veya taşınmış olabilir.",
     "backHome": "Ana Sayfaya Dön"

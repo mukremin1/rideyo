@@ -228,6 +228,68 @@ export function getAllowedIlNames(regions: AllowedRegion[]): string[] {
     .sort((a, b) => a.localeCompare(b, "tr"));
 }
 
+export function filterProvinceNames(
+  provinceNames: string[],
+  regions: AllowedRegion[],
+): string[] {
+  const allowedIls = getAllowedIlNames(regions);
+  if (allowedIls.length === 0) return provinceNames;
+  return provinceNames.filter((name) =>
+    allowedIls.some((il) => namesMatch(il, name)),
+  );
+}
+
+export function filterDistrictNames(
+  districtNames: string[],
+  regions: AllowedRegion[],
+  ilName: string,
+): string[] {
+  const active = regions.filter((r) => r.is_active);
+  if (active.length === 0) return districtNames;
+
+  const ilMatch = active.find((r) => r.level === "il" && namesMatch(r.name, ilName));
+  if (!ilMatch) return [];
+
+  const ilceChildren = active.filter(
+    (r) => r.level === "ilce" && r.parent_id === ilMatch.id,
+  );
+  if (ilceChildren.length === 0) return districtNames;
+
+  return districtNames.filter((name) =>
+    ilceChildren.some((c) => namesMatch(c.name, name)),
+  );
+}
+
+export function filterNeighborhoodNames(
+  neighborhoodNames: string[],
+  regions: AllowedRegion[],
+  ilName: string,
+  districtName: string,
+): string[] {
+  const active = regions.filter((r) => r.is_active);
+  if (active.length === 0) return neighborhoodNames;
+
+  const ilMatch = active.find((r) => r.level === "il" && namesMatch(r.name, ilName));
+  if (!ilMatch) return [];
+
+  const ilceMatch = active.find(
+    (r) =>
+      r.level === "ilce" &&
+      r.parent_id === ilMatch.id &&
+      namesMatch(r.name, districtName),
+  );
+  if (!ilceMatch) return [];
+
+  const mahalleChildren = active.filter(
+    (r) => r.level === "mahalle" && r.parent_id === ilceMatch.id,
+  );
+  if (mahalleChildren.length === 0) return neighborhoodNames;
+
+  return neighborhoodNames.filter((name) =>
+    mahalleChildren.some((m) => namesMatch(m.name, name)),
+  );
+}
+
 export function getRegionLevelLabel(level: RegionLevel, t: (key: string) => string): string {
   return t(`admin.regions.levels.${level}`);
 }

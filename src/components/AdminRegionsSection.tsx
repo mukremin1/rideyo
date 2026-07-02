@@ -10,10 +10,10 @@ import {
 import {
   fetchTurkeyDistricts,
   fetchTurkeyNeighborhoods,
-  fetchTurkeyProvinces,
   type TurkeyDistrict,
   type TurkeyNeighborhood,
 } from "@/lib/turkeyAdminApi";
+import TurkeyRegionSelects from "@/components/TurkeyRegionSelects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,13 +22,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Collapsible,
   CollapsibleContent,
@@ -65,8 +58,7 @@ function findRegion(
 const AdminRegionsSection = () => {
   const { t } = useTranslation();
   const [regions, setRegions] = useState<AllowedRegion[]>([]);
-  const [provinces, setProvinces] = useState<{ id: number; name: string }[]>([]);
-  const [selectedProvince, setSelectedProvince] = useState("Trabzon");
+  const [picker, setPicker] = useState({ il: "Trabzon", ilce: "", mahalle: "" });
   const [districts, setDistricts] = useState<TurkeyDistrict[]>([]);
   const [neighborhoodsByDistrict, setNeighborhoodsByDistrict] = useState<
     Record<string, TurkeyNeighborhood[]>
@@ -93,8 +85,9 @@ const AdminRegionsSection = () => {
 
   useEffect(() => {
     void loadRegions();
-    void fetchTurkeyProvinces().then(setProvinces);
   }, [loadRegions]);
+
+  const selectedProvince = picker.il;
 
   useEffect(() => {
     if (!selectedProvince) return;
@@ -371,34 +364,62 @@ const AdminRegionsSection = () => {
         <TabsContent value="selection" className="space-y-4">
           <Card>
             <CardContent className="space-y-4 p-4 sm:p-6">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>{t("admin.regions.selectProvince")}</Label>
-                  <Select value={selectedProvince} onValueChange={setSelectedProvince}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      {provinces.map((p) => (
-                        <SelectItem key={p.id} value={p.name}>
-                          {p.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>{t("admin.regions.searchAreas")}</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder={t("admin.regions.searchPlaceholder")}
-                      className="pl-9"
-                    />
-                  </div>
-                </div>
+              <div>
+                <h3 className="font-semibold">{t("admin.regions.quickPickerTitle")}</h3>
+                <p className="text-sm text-muted-foreground">{t("admin.regions.quickPickerDesc")}</p>
+              </div>
+
+              <TurkeyRegionSelects
+                idPrefix="admin-region"
+                value={picker}
+                onChange={setPicker}
+              />
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  disabled={!picker.il || !!savingKey}
+                  onClick={() => toggleIl(true)}
+                >
+                  {t("admin.regions.enableProvince")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!picker.ilce || !!savingKey}
+                  onClick={() => toggleIlce(picker.ilce, true)}
+                >
+                  {t("admin.regions.enableDistrict")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!picker.mahalle || !!savingKey}
+                  onClick={() => toggleMahalle(picker.ilce, picker.mahalle, true)}
+                >
+                  {t("admin.regions.enableNeighborhood")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={!picker.ilce || !!savingKey}
+                  onClick={() => {
+                    const district = districts.find((d) => d.name === picker.ilce);
+                    if (district) void toggleAllMahalle(district, true);
+                  }}
+                >
+                  {t("admin.regions.enableAllNeighborhoods")}
+                </Button>
+              </div>
+
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t("admin.regions.searchPlaceholder")}
+                  className="pl-9"
+                />
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4">

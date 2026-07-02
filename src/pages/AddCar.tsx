@@ -36,24 +36,12 @@ import { Progress } from "@/components/ui/progress";
 import CarImageUpload from "@/components/CarImageUpload";
 
 import LocationPickerMap from "@/components/LocationPickerMap";
+import TurkeyRegionSelects from "@/components/TurkeyRegionSelects";
 import {
   fetchAllowedRegions,
-  getAllowedIlNames,
   validateLocationAgainstRegions,
   type AllowedRegion,
 } from "@/lib/allowedRegions";
-
-
-
-import { TURKEY_CITIES } from "@/lib/turkeyCities";
-
-const extractCityFromLocation = (location: string, otherLabel: string): string => {
-  const lowerLocation = location.toLocaleLowerCase("tr");
-  const match = TURKEY_CITIES.find((city) =>
-    lowerLocation.includes(city.toLocaleLowerCase("tr"))
-  );
-  return match || otherLabel;
-};
 
 const AddCar = () => {
   const { t } = useTranslation();
@@ -84,8 +72,6 @@ const AddCar = () => {
       }),
     [t]
   );
-
-  const otherCityLabel = t("owner.common.other");
 
   const navigate = useNavigate();
 
@@ -144,11 +130,25 @@ const AddCar = () => {
   const [matchedRegionName, setMatchedRegionName] = useState<string | null>(null);
 
   const strictRegions = allowedRegions.some((r) => r.is_active);
-  const selectableCities = useMemo(() => {
-    if (!strictRegions) return [...TURKEY_CITIES];
-    const allowed = getAllowedIlNames(allowedRegions);
-    return allowed.length > 0 ? allowed : [...TURKEY_CITIES];
-  }, [allowedRegions, strictRegions]);
+
+  const applyLocationValidation = (
+    city: string,
+    district: string,
+    neighborhood: string,
+    location: string,
+    lat: number | null,
+    lng: number | null,
+  ) => {
+    const check = validateLocationAgainstRegions(
+      allowedRegions,
+      { il: city, ilce: district, mahalle: neighborhood, displayAddress: location },
+      lat,
+      lng,
+    );
+    setLocationAllowed(check.allowed);
+    setMatchedRegionName(check.matchedRegionName);
+    return check;
+  };
 
 
 
@@ -258,6 +258,11 @@ const AddCar = () => {
 
       if (formData.latitude === null || formData.longitude === null) {
         toast.error(t("owner.addCar.toast.selectLocation"));
+        return;
+      }
+
+      if (!formData.city || !formData.district) {
+        toast.error(t("owner.addCar.toast.selectRegion"));
         return;
       }
 
@@ -382,7 +387,7 @@ const AddCar = () => {
 
   const validateCurrentStep = () => {
     if (currentStep === 1) {
-      if (!formData.name.trim() || !formData.year || !formData.city || !formData.location) {
+      if (!formData.name.trim() || !formData.year || !formData.city || !formData.district || !formData.location) {
         toast.error(t("owner.addCar.toast.fillRequired"));
         return false;
       }
@@ -777,23 +782,39 @@ const AddCar = () => {
 
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="city">{t("owner.addCar.fields.city")}</Label>
-                      <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("owner.addCar.fields.cityPlaceholder")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectableCities.map((city) => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-
-
-
+                    <TurkeyRegionSelects
+                      idPrefix="add-car"
+                      allowedRegions={allowedRegions}
+                      value={{
+                        il: formData.city,
+                        ilce: formData.district,
+                        mahalle: formData.neighborhood,
+                      }}
+                      onChange={({ il, ilce, mahalle }) => {
+                        const next = {
+                          ...formData,
+                          city: il,
+                          district: ilce,
+                          neighborhood: mahalle,
+                        };
+                        setFormData(next);
+                        if (formData.latitude != null && formData.longitude != null) {
+                          const check = applyLocationValidation(
+                            il,
+                            ilce,
+                            mahalle,
+                            next.location,
+                            formData.latitude,
+                            formData.longitude,
+                          );
+                          if (check.strictMode && !check.allowed) {
+                            toast.error(
+                              t(`owner.addCar.toast.region.${check.reason ?? "notAllowed"}`),
+                            );
+                          }
+                        }
+                      }}
+                    />
 
                     <div className="space-y-2">
 
@@ -814,49 +835,37 @@ const AddCar = () => {
                         height="300px"
 
                         onLocationSelect={(lat, lng, result) => {
-
                           const address = result?.address ?? "";
                           const parsed = result?.components;
-                          const derivedCity = address ? extractCityFromLocation(address, otherCityLabel) : "";
-                          const city =
-                            parsed?.il ||
-                            (derivedCity && derivedCity !== otherCityLabel ? derivedCity : formData.city);
+                          const city = formData.city || parsed?.il || "";
+                          const district = formData.district || parsed?.ilce || "";
+                          const neighborhood = formData.neighborhood || parsed?.mahalle || "";
 
-                          const check = validateLocationAgainstRegions(
-                            allowedRegions,
-                            {
-                              il: city,
-                              ilce: parsed?.ilce ?? "",
-                              mahalle: parsed?.mahalle ?? "",
-                              displayAddress: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-                            },
+                          const check = applyLocationValidation(
+                            city,
+                            district,
+                            neighborhood,
+                            address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
                             lat,
                             lng,
                           );
 
-                          setLocationAllowed(check.allowed);
-                          setMatchedRegionName(check.matchedRegionName);
-
                           if (check.strictMode && !check.allowed) {
-                            toast.error(t(`owner.addCar.toast.region.${check.reason ?? "notAllowed"}`));
+                            toast.error(
+                              t(`owner.addCar.toast.region.${check.reason ?? "notAllowed"}`),
+                            );
                           }
 
                           setFormData({
-
                             ...formData,
-
                             latitude: lat,
-
                             longitude: lng,
-
                             location: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-                            city,
-                            district: parsed?.ilce ?? "",
-                            neighborhood: parsed?.mahalle ?? "",
+                            city: city || formData.city,
+                            district: district || formData.district,
+                            neighborhood: neighborhood || formData.neighborhood,
                             allowedRegionId: check.regionId,
-
                           });
-
                         }}
 
                       />

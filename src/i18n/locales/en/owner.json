@@ -123,6 +123,7 @@
         "addSuccess": "Car added successfully!",
         "fillRequired": "Please fill in required fields in the car details step.",
         "selectMapLocation": "Please select a location on the map.",
+        "selectRegion": "Please select province and district from the list.",
         "uploadPhoto": "Upload at least one car photo to continue.",
         "fillPricing": "Please fill in all pricing fields.",
         "region": {

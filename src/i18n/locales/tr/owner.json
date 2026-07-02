@@ -123,6 +123,7 @@
         "addSuccess": "Araç başarıyla eklendi!",
         "fillRequired": "Araç bilgileri adımındaki zorunlu alanları doldurun.",
         "selectMapLocation": "Lütfen haritadan bir konum seçin.",
+        "selectRegion": "Lütfen listeden il ve ilçe seçin.",
         "uploadPhoto": "Devam etmek için en az bir araç fotoğrafı yükleyin.",
         "fillPricing": "Fiyatlandırma adımındaki tüm alanları doldurun.",
         "region": {
