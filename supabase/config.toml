@@ -24,5 +24,8 @@ verify_jwt = false
 [functions.refund-payment]
 verify_jwt = false
 
+[functions.resend-verification]
+verify_jwt = false
+
 [functions.register-submerchant]
 verify_jwt = false

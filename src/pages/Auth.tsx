@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Car, User, KeyRound } from "lucide-react";
 import { z } from "zod";
 import { getAuthRedirectUrl, getAuthErrorMessage } from "@/lib/authRedirect";
+import { isDuplicateSignupUser, sendVerificationEmail } from "@/lib/verificationEmail";
 
 const createSignInSchema = (t: TFunction) =>
   z.object({
@@ -72,6 +73,38 @@ const Auth = () => {
     setResendCooldown(RESEND_COOLDOWN_SEC);
   }, []);
 
+  const notifyVerificationSent = useCallback(
+    (method: "edge" | "resend" | "magic_link") => {
+      if (method === "magic_link") {
+        toast.success(t("auth.toast.magicLinkSent"));
+      } else {
+        toast.success(t("auth.toast.resendVerificationSuccess"));
+      }
+      startResendCooldown();
+    },
+    [startResendCooldown, t],
+  );
+
+  const trySendVerification = useCallback(
+    async (targetEmail: string, options?: { silent?: boolean }) => {
+      const result = await sendVerificationEmail(targetEmail);
+      if (result.ok) {
+        if (!options?.silent) notifyVerificationSent(result.method);
+        return true;
+      }
+
+      if (result.code === "already_confirmed") {
+        toast.error(t("auth.toast.emailAlreadyConfirmed"));
+      } else if (result.code === "not_found") {
+        toast.error(t("auth.toast.verificationUserNotFound"));
+      } else {
+        toast.error(result.message || t("auth.toast.verificationSendFailed"));
+      }
+      return false;
+    },
+    [notifyVerificationSent, t],
+  );
+
   const signInSchema = useMemo(() => createSignInSchema(t), [t]);
   const signUpSchema = useMemo(() => createSignUpSchema(t), [t]);
 
@@ -120,7 +153,7 @@ const Auth = () => {
         const lower = error.message.toLowerCase();
         if (lower.includes("already registered")) {
           setResendEmail(email.trim());
-          toast.error(t("auth.toast.alreadyRegisteredResend"));
+          await trySendVerification(email.trim());
         } else {
           toast.error(getAuthErrorMessage(error, t));
         }
@@ -137,7 +170,12 @@ const Auth = () => {
         navigate("/");
       } else {
         setResendEmail(email.trim());
-        toast.success(t("auth.toast.signUpVerifyEmail"));
+        if (isDuplicateSignupUser(data.user)) {
+          await trySendVerification(email.trim());
+        } else {
+          const sent = await trySendVerification(email.trim(), { silent: true });
+          toast.success(sent ? t("auth.toast.signUpVerifyEmail") : t("auth.toast.signUpVerifyEmailCheckResend"));
+        }
       }
     } catch (error) {
       console.error("Kayıt hatası:", error);
@@ -205,21 +243,7 @@ const Auth = () => {
 
     setResendingVerification(true);
     try {
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email: targetEmail,
-        options: { emailRedirectTo: getAuthRedirectUrl("/") },
-      });
-
-      if (error) {
-        toast.error(getAuthErrorMessage(error, t));
-        return;
-      }
-
-      startResendCooldown();
-      toast.success(t("auth.toast.resendVerificationSuccess"));
-    } catch {
-      toast.error(t("auth.toast.genericError"));
+      await trySendVerification(targetEmail);
     } finally {
       setResendingVerification(false);
     }
