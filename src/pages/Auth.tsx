@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+﻿import { useMemo, useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -37,6 +37,8 @@ const createSignUpSchema = (t: TFunction) =>
 
 type UserType = "renter" | "car_owner";
 
+const RESEND_COOLDOWN_SEC = 60;
+
 const Auth = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
@@ -47,10 +49,28 @@ const Auth = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [userType, setUserType] = useState<UserType>("renter");
   const [loading, setLoading] = useState(false);
-  const [showResendVerification, setShowResendVerification] = useState(false);
-  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+  const [resendEmail, setResendEmail] = useState("");
   const [resendingVerification, setResendingVerification] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendCooldown]);
+
+  useEffect(() => {
+    if (email.trim() && !resendEmail.trim()) {
+      setResendEmail(email.trim());
+    }
+  }, [email, resendEmail]);
+
+  const startResendCooldown = useCallback(() => {
+    setResendCooldown(RESEND_COOLDOWN_SEC);
+  }, []);
 
   const signInSchema = useMemo(() => createSignInSchema(t), [t]);
   const signUpSchema = useMemo(() => createSignUpSchema(t), [t]);
@@ -97,9 +117,12 @@ const Auth = () => {
       });
 
       if (error) {
-        toast.error(getAuthErrorMessage(error, t));
-        if (error.message.toLowerCase().includes("already registered")) {
-          setShowResendVerification(true);
+        const lower = error.message.toLowerCase();
+        if (lower.includes("already registered")) {
+          setResendEmail(email.trim());
+          toast.error(t("auth.toast.alreadyRegisteredResend"));
+        } else {
+          toast.error(getAuthErrorMessage(error, t));
         }
         return;
       }
@@ -112,9 +135,8 @@ const Auth = () => {
 
         toast.success(successMessage);
         navigate("/");
-      } else if (data.user) {
-        setPendingVerificationEmail(email.trim());
-        setShowResendVerification(true);
+      } else {
+        setResendEmail(email.trim());
         toast.success(t("auth.toast.signUpVerifyEmail"));
       }
     } catch (error) {
@@ -149,8 +171,8 @@ const Auth = () => {
         if (error.message.includes("Invalid login credentials")) {
           toast.error(t("auth.toast.invalidCredentials"));
         } else if (error.message.toLowerCase().includes("email not confirmed")) {
+          setResendEmail(email.trim());
           toast.error(t("auth.toast.emailNotConfirmed"));
-          setShowResendVerification(true);
         } else {
           toast.error(getAuthErrorMessage(error, t));
         }
@@ -170,9 +192,14 @@ const Auth = () => {
   };
 
   const handleResendVerification = async () => {
-    const targetEmail = (pendingVerificationEmail || email).trim();
+    const targetEmail = resendEmail.trim();
     if (!targetEmail) {
       toast.error(t("auth.toast.resendEmailRequired"));
+      return;
+    }
+
+    if (resendCooldown > 0) {
+      toast.message(t("auth.resendVerification.waitSeconds", { seconds: resendCooldown }));
       return;
     }
 
@@ -189,6 +216,7 @@ const Auth = () => {
         return;
       }
 
+      startResendCooldown();
       toast.success(t("auth.toast.resendVerificationSuccess"));
     } catch {
       toast.error(t("auth.toast.genericError"));
@@ -243,20 +271,6 @@ const Auth = () => {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? t("auth.signIn.submitting") : t("auth.signIn.submit")}
                 </Button>
-
-                {showResendVerification && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    disabled={resendingVerification}
-                    onClick={handleResendVerification}
-                  >
-                    {resendingVerification
-                      ? t("auth.signIn.resendingVerification")
-                      : t("auth.signIn.resendVerification")}
-                  </Button>
-                )}
               </form>
             </TabsContent>
 
@@ -370,20 +384,6 @@ const Auth = () => {
                   {loading ? t("auth.signUp.submitting") : t("auth.signUp.submit")}
                 </Button>
 
-                {showResendVerification && pendingVerificationEmail && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    disabled={resendingVerification}
-                    onClick={handleResendVerification}
-                  >
-                    {resendingVerification
-                      ? t("auth.signIn.resendingVerification")
-                      : t("auth.signIn.resendVerification")}
-                  </Button>
-                )}
-
                 {userType === "car_owner" && (
                   <p className="text-xs text-muted-foreground text-center mt-2">
                     {t("auth.signUp.carOwnerHint")}
@@ -392,6 +392,38 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+
+          <div className="mt-6 border-t pt-6 space-y-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">{t("auth.resendVerification.title")}</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                {t("auth.resendVerification.hint")}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="resend-email">{t("auth.fields.email")}</Label>
+              <Input
+                id="resend-email"
+                type="email"
+                placeholder={t("auth.placeholders.email")}
+                value={resendEmail}
+                onChange={(e) => setResendEmail(e.target.value)}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={resendingVerification || resendCooldown > 0 || !resendEmail.trim()}
+              onClick={handleResendVerification}
+            >
+              {resendingVerification
+                ? t("auth.resendVerification.submitting")
+                : resendCooldown > 0
+                  ? t("auth.resendVerification.waitSeconds", { seconds: resendCooldown })
+                  : t("auth.resendVerification.submit")}
+            </Button>
+          </div>
         </Card>
       </div>
     </div>

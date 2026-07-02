@@ -48,6 +48,9 @@ export function getAuthErrorMessage(error: { message: string }, t: (key: string)
   if (msg.includes("rate limit") || msg.includes("too many")) {
     return t("auth.toast.emailRateLimit");
   }
+  if (msg.includes("already confirmed") || msg.includes("email address has already been verified")) {
+    return t("auth.toast.emailAlreadyConfirmed");
+  }
 
   return error.message;
 }
