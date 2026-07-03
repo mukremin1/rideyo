@@ -37,6 +37,7 @@ import CarImageUpload from "@/components/CarImageUpload";
 
 import LocationPickerMap from "@/components/LocationPickerMap";
 import TurkeyRegionSelects from "@/components/TurkeyRegionSelects";
+import { mobilePageShell, mobileTopInset } from "@/lib/mobileLayout";
 import {
   fetchAllowedRegions,
   validateLocationAgainstRegions,
@@ -603,15 +604,15 @@ const AddCar = () => {
 
   return (
 
-    <div className="min-h-screen bg-background">
+    <div className={`${mobilePageShell} bg-background`}>
 
       <Navbar />
 
       
 
-      <main className="pt-24 pb-12">
+      <main className={`${mobileTopInset} px-3 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] sm:px-4 md:pb-12`}>
 
-        <div className="container mx-auto px-4 max-w-3xl">
+        <div className="container mx-auto max-w-3xl fit-viewport px-0 sm:px-4">
 
           <Link to="/my-cars" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
 

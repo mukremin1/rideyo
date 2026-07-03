@@ -8,7 +8,7 @@ const Hero = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden">
+    <section className="hero-fit relative flex min-h-[88vh] items-center justify-center overflow-hidden">
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -20,7 +20,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/55" />
       </div>
 
-      <div className="container relative z-10 mx-auto px-4 py-16 sm:px-6 lg:px-8 sm:py-20">
+      <div className="container relative z-10 mx-auto px-4 py-10 sm:px-6 sm:py-20 lg:px-8">
         <div className="max-w-2xl">
           <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-primary/15 bg-background/80 px-4 py-2 backdrop-blur-sm">
             <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />

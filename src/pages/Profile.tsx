@@ -1,18 +1,20 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { CalendarDays, Heart, LogOut, Mail, Package, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { CalendarDays, Heart, LogOut, Mail, Package, Phone, ShieldCheck, UserRound, LayoutDashboard } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { displayDriverScore } from "@/lib/driverScore";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { mobilePageShell, mobileTopInset } from "@/lib/mobileLayout";
 import { useTranslation } from "react-i18next";
 
 interface ActiveSubscription {
@@ -31,6 +33,7 @@ interface DriverRecord {
 
 export default function Profile() {
   const { user, loading, signOut } = useAuth();
+  const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
@@ -142,10 +145,41 @@ export default function Profile() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className={`${mobilePageShell} flex flex-col bg-background`}>
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 pt-24 pb-24 md:pb-12">
-        <div className="max-w-3xl mx-auto space-y-6">
+      <main className={`${mobileTopInset} flex-1 container mx-auto px-3 pb-[calc(env(safe-area-inset-bottom)+5rem)] sm:px-4 md:pb-12`}>
+        <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-xl font-bold sm:text-2xl">{t("profile.title")}</h1>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => void signOut()}
+            >
+              <LogOut className="mr-1.5 h-4 w-4" />
+              {t("profile.signOut")}
+            </Button>
+          </div>
+
+          {isAdmin && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <LayoutDashboard className="h-5 w-5 text-primary" />
+                  {t("nav.fleetManagement")}
+                </CardTitle>
+                <CardDescription>{t("profile.adminPanelDesc")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => navigate("/admin")}>
+                  {t("profile.openAdminPanel")}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>{t("profile.languageSettings")}</CardTitle>
@@ -276,7 +310,7 @@ export default function Profile() {
               <CardTitle>{t("profile.quickActions")}</CardTitle>
               <CardDescription>{t("profile.quickActionsDesc")}</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Button type="button" variant="outline" onClick={() => navigate("/my-bookings")}>
                 {t("profile.myBookings")}
               </Button>
@@ -284,7 +318,17 @@ export default function Profile() {
                 <Heart className="h-4 w-4 mr-2" />
                 {t("profile.favorites")}
               </Button>
-              <Button type="button" variant="destructive" onClick={() => void signOut()}>
+            </CardContent>
+          </Card>
+
+          <Card className="border-destructive/30 md:hidden">
+            <CardContent className="p-4">
+              <Button
+                type="button"
+                variant="destructive"
+                className="w-full"
+                onClick={() => void signOut()}
+              >
                 <LogOut className="h-4 w-4 mr-2" />
                 {t("profile.signOut")}
               </Button>
@@ -292,7 +336,9 @@ export default function Profile() {
           </Card>
         </div>
       </main>
-      <Footer />
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </div>
   );
 }

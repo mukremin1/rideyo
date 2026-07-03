@@ -119,7 +119,7 @@
         { "q": "Ne kadar kazanabilirim?", "a": "Kazançlar araç tipine, fiyatlandırmaya ve kiralama sıklığına bağlıdır. RideYo %15 komisyon ücreti alır." },
         { "q": "Sigorta durumu nasıl?", "a": "Tüm kiralamalar RideYo Mini Kasko ile korunur. Zorunlu Trafik Sigortası (ZTS) her araçta olmalıdır." },
         { "q": "Ödemeler nasıl ve ne zaman yapılır?", "a": "Kiralama bedeli kiracıdan RideYo tarafından tahsil edilir, %15 komisyon kesintisi yapılır. Kalan tutar 7 iş günü içinde hesabınıza aktarılır." },
-        { "q": "Aracımı nasıl koruyabilirim?", "a": "GPS takip sistemi ile aracınızı anlık izleyebilirsiniz. Kiracılar kimlik ve ehliyet doğrulamasından geçer." },
+        { "q": "Aracımı nasıl koruyabilirim?", "a": "Rideyo yönetimi aktif kiralamalarda GPS takibini yürütür. Kiracılar kimlik ve ehliyet doğrulamasından geçer." },
         { "q": "Rezervasyonları reddetebilir miyim?", "a": "Evet, gelen rezervasyon isteklerini değerlendirip kabul veya reddedebilirsiniz." },
         { "q": "Aracımda hasar oluşursa ne olur?", "a": "Hasar durumunda derhal RideYo'yu bilgilendirin. Sigorta kapsamındaki hasarlar sigorta tarafından karşılanır." },
         { "q": "Vergi durumu nasıl?", "a": "Araç kiralama geliri vergiye tabidir. RideYo size aylık gelir raporu sağlar." },

@@ -52,5 +52,7 @@ jobs:
           supabase functions deploy vehicle-control --no-verify-jwt
           supabase functions deploy verify-license --no-verify-jwt
           supabase functions deploy resend-verification --no-verify-jwt
+          supabase functions deploy update-rental-location
+          supabase functions deploy update-gps --no-verify-jwt
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

@@ -186,7 +186,7 @@ const TurkeyRegionSelects = ({
   const emptyMahalle = !loadingNeighborhoods && value.ilce && neighborhoods.length === 0;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid w-full max-w-full gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       <div className="space-y-2">
         <Label htmlFor={`${idPrefix}-il`}>{t("common.region.il")}</Label>
         <Select

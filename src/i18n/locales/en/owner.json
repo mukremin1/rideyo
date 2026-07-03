@@ -263,10 +263,10 @@
     },
     "gpsTracking": {
       "title": "GPS Tracking System",
-      "subtitle": "Track your vehicles' real-time location",
-      "info": "GPS tracking shows vehicle locations in real time. Only cars with GPS devices installed appear in the list.",
+      "subtitle": "Monitor all vehicle locations in real time (admin only)",
+      "info": "This page is for administrators only. During active rentals the renter's phone shares live location; cars with GPS devices also appear here.",
       "loadingCars": "Loading cars...",
-      "noGpsCars": "No cars with GPS devices found. Fill in the GPS Device ID when adding a car."
+      "noGpsCars": "No trackable vehicles found. Phone location during rental or a GPS device is required."
     },
     "vehicleAlerts": {
       "title": "Vehicle Alerts",

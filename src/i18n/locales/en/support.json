@@ -119,7 +119,7 @@
         { "q": "How much can I earn?", "a": "Earnings depend on car type, pricing, and rental frequency. RideYo charges a 15% commission." },
         { "q": "What about insurance?", "a": "All rentals are covered by RideYo Mini Comprehensive Insurance. Mandatory traffic insurance is required on every vehicle." },
         { "q": "How and when are payments made?", "a": "RideYo collects payment from renters, deducts 15% commission, and transfers the remainder within 7 business days." },
-        { "q": "How can I protect my car?", "a": "Track your car in real time with GPS. All renters pass identity and license verification." },
+        { "q": "How can I protect my car?", "a": "Rideyo administrators monitor GPS during active rentals. All renters pass identity and license verification." },
         { "q": "Can I reject reservations?", "a": "Yes, you can accept or reject incoming reservation requests." },
         { "q": "What if my car is damaged?", "a": "Notify RideYo immediately. Insured damage is covered by insurance." },
         { "q": "What about taxes?", "a": "Car rental income is taxable. RideYo provides monthly income reports." },

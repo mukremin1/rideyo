@@ -17,6 +17,7 @@ import { Car, User, KeyRound } from "lucide-react";
 import { z } from "zod";
 import { getAuthRedirectUrl, getAuthErrorMessage } from "@/lib/authRedirect";
 import { isDuplicateSignupUser, sendVerificationEmail } from "@/lib/verificationEmail";
+import { authPageScroll, authPageShell } from "@/lib/mobileLayout";
 
 const createSignInSchema = (t: TFunction) =>
   z.object({
@@ -398,18 +399,19 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-            <Car className="w-7 h-7 text-primary-foreground" />
+    <div className={authPageShell}>
+      <div className={`${authPageScroll} sm:flex sm:items-center sm:justify-center`}>
+        <div className="mx-auto w-full max-w-md sm:py-4">
+        <Link to="/" className="mb-4 flex items-center justify-center gap-2 sm:mb-6">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary sm:h-12 sm:w-12">
+            <Car className="h-5 w-5 text-primary-foreground sm:h-7 sm:w-7" />
           </div>
-          <span className="text-2xl font-bold text-foreground">RideYo</span>
+          <span className="text-xl font-bold text-foreground sm:text-2xl">RideYo</span>
         </Link>
 
-        <Card className="p-8">
+        <Card className="p-4 sm:p-8">
           {emailVerifiedBanner && (
-            <Alert className="mb-6 border-emerald-500/40 bg-emerald-50 text-emerald-950 dark:bg-emerald-950/30 dark:text-emerald-50">
+            <Alert className="mb-4 border-emerald-500/40 bg-emerald-50 text-emerald-950 dark:bg-emerald-950/30 dark:text-emerald-50 sm:mb-6">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               <AlertDescription className="text-sm font-medium">
                 {t("auth.emailVerifiedBanner")}
@@ -453,7 +455,7 @@ const Auth = () => {
             </form>
           ) : (
           <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setShowSignUpPrompt(false); setShowForgotPassword(false); }} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="mb-4 grid h-10 w-full grid-cols-2 sm:mb-6 sm:h-11">
               <TabsTrigger value="signin">{t("auth.tabs.signIn")}</TabsTrigger>
               <TabsTrigger value="signup">{t("auth.tabs.signUp")}</TabsTrigger>
             </TabsList>
@@ -493,7 +495,7 @@ const Auth = () => {
                   </Button>
                 </form>
               ) : (
-              <form onSubmit={handleSignIn} className="space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">{t("auth.fields.email")}</Label>
                   <Input
@@ -569,34 +571,34 @@ const Auth = () => {
             </TabsContent>
 
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-3">
+              <form onSubmit={handleSignUp} className="space-y-3 sm:space-y-4">
+                <div className="space-y-2 sm:space-y-3">
                   <Label>{t("auth.fields.accountType")}</Label>
                   <RadioGroup
                     value={userType}
                     onValueChange={(value) => setUserType(value as UserType)}
-                    className="grid grid-cols-2 gap-4"
+                    className="grid grid-cols-2 gap-2 sm:gap-4"
                   >
                     <div>
                       <RadioGroupItem value="renter" id="renter" className="peer sr-only" />
                       <Label
                         htmlFor="renter"
-                        className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        className="flex cursor-pointer flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-2.5 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary sm:p-4 [&:has([data-state=checked])]:border-primary"
                       >
-                        <User className="mb-2 h-6 w-6" />
-                        <span className="text-sm font-medium">{t("auth.signUp.renter")}</span>
-                        <span className="text-xs text-muted-foreground text-center mt-1">{t("auth.signUp.renterDesc")}</span>
+                        <User className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
+                        <span className="text-xs font-medium sm:text-sm">{t("auth.signUp.renter")}</span>
+                        <span className="mt-0.5 text-center text-[10px] text-muted-foreground sm:mt-1 sm:text-xs">{t("auth.signUp.renterDesc")}</span>
                       </Label>
                     </div>
                     <div>
                       <RadioGroupItem value="car_owner" id="car_owner" className="peer sr-only" />
                       <Label
                         htmlFor="car_owner"
-                        className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        className="flex cursor-pointer flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-2.5 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary sm:p-4 [&:has([data-state=checked])]:border-primary"
                       >
-                        <KeyRound className="mb-2 h-6 w-6" />
-                        <span className="text-sm font-medium">{t("auth.signUp.carOwner")}</span>
-                        <span className="text-xs text-muted-foreground text-center mt-1">{t("auth.signUp.carOwnerDesc")}</span>
+                        <KeyRound className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
+                        <span className="text-xs font-medium sm:text-sm">{t("auth.signUp.carOwner")}</span>
+                        <span className="mt-0.5 text-center text-[10px] text-muted-foreground sm:mt-1 sm:text-xs">{t("auth.signUp.carOwnerDesc")}</span>
                       </Label>
                     </div>
                   </RadioGroup>
@@ -689,7 +691,7 @@ const Auth = () => {
           )}
 
           {!isResetMode && (
-          <div className="mt-6 border-t pt-6 space-y-3">
+          <div className="mt-4 space-y-2 border-t pt-4 sm:mt-6 sm:space-y-3 sm:pt-6">
             <div>
               <p className="text-sm font-medium text-foreground">{t("auth.resendVerification.title")}</p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -722,6 +724,7 @@ const Auth = () => {
           </div>
           )}
         </Card>
+        </div>
       </div>
     </div>
   );

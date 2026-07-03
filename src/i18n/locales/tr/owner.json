@@ -263,10 +263,10 @@
     },
     "gpsTracking": {
       "title": "GPS Takip Sistemi",
-      "subtitle": "Araçlarınızın gerçek zamanlı konumunu takip edin",
-      "info": "GPS takip sistemi gerçek zamanlı olarak araç konumlarını gösterir. GPS cihazı kurulu araçlar listede görünecektir.",
+      "subtitle": "Tüm araçların gerçek zamanlı konumunu izleyin (yalnızca admin)",
+      "info": "Bu sayfa yalnızca admin kullanıcıları içindir. Aktif kiralamalarda kiracı telefonu konum gönderir; GPS cihazlı araçlar da burada görünür.",
       "loadingCars": "Araçlar yükleniyor...",
-      "noGpsCars": "GPS cihazı kurulu araç bulunamadı. Araç eklerken GPS Cihaz ID alanını doldurun."
+      "noGpsCars": "Takip edilebilir araç bulunamadı. Aktif kiralama sırasında telefon konumu veya GPS cihazı gerekir."
     },
     "vehicleAlerts": {
       "title": "Araç Uyarıları",

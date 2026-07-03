@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Crown, Bell } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useTranslation } from "react-i18next";
+import { mobilePageShell, mobileTopInset } from "@/lib/mobileLayout";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const Index = () => {
   } = usePushNotifications();
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0 overflow-x-hidden pt-[calc(env(safe-area-inset-top)+4.5rem)] md:pt-[calc(env(safe-area-inset-top)+5rem)]">
+    <div className={`${mobilePageShell} ${mobileTopInset} bg-background overflow-x-hidden`}>
       <Navbar />
 
       <div className="overflow-x-hidden border-b border-primary/10 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(18_90%_46%))] px-3 py-2.5 text-primary-foreground sm:px-6 sm:py-3">

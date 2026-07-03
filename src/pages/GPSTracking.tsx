@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import GPSTracker from "@/components/GPSTracker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { toast } from "sonner";
 
 interface Car {
   id: string;
@@ -19,37 +20,37 @@ interface Car {
 const GPSTracking = () => {
   const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin } = useUserRoles();
+  const { isAdmin, loading: rolesLoading } = useUserRoles();
   const navigate = useNavigate();
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCars = async () => {
-      if (authLoading) return;
+      if (authLoading || rolesLoading) return;
       if (!user) {
         navigate("/auth");
+        return;
+      }
+      if (!isAdmin) {
+        toast.error(t("admin.noAccess"));
+        navigate("/");
         return;
       }
 
       const { data, error } = await supabase
         .from("cars")
-        .select("id, name, gps_device_id, latitude, longitude, owner_id")
+        .select("id, name, gps_device_id, latitude, longitude")
         .or("gps_device_id.not.is.null,and(latitude.not.is.null,longitude.not.is.null)");
 
-      let rows = data ?? [];
-      if (!isAdmin) {
-        rows = rows.filter((c) => c.owner_id === user.id);
-      }
-
       if (!error) {
-        setCars(rows.map(({ id, name, gps_device_id }) => ({ id, name, gps_device_id })));
+        setCars((data ?? []).map(({ id, name, gps_device_id }) => ({ id, name, gps_device_id })));
       }
       setLoading(false);
     };
 
     fetchCars();
-  }, [user, authLoading, navigate, isAdmin]);
+  }, [user, authLoading, rolesLoading, navigate, isAdmin, t]);
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
@@ -67,7 +68,7 @@ const GPSTracking = () => {
             <AlertDescription>{t("owner.gpsTracking.info")}</AlertDescription>
           </Alert>
 
-          {authLoading || loading ? (
+          {authLoading || rolesLoading || loading ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">{t("owner.gpsTracking.loadingCars")}</p>
             </div>

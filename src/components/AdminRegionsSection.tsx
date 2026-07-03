@@ -326,7 +326,7 @@ const AdminRegionsSection = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="fit-viewport space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-xl font-bold sm:text-2xl">{t("admin.regions.title")}</h2>
@@ -338,7 +338,7 @@ const AdminRegionsSection = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
         {[
           { key: "total", label: t("admin.regions.statsActive"), value: stats.total },
           { key: "il", label: t("admin.regions.levels.il"), value: stats.il },
@@ -463,7 +463,7 @@ const AdminRegionsSection = () => {
                   {t("admin.regions.loadingDistricts")}
                 </p>
               ) : (
-                <ScrollArea className="h-[min(70vh,560px)] pr-3">
+                <ScrollArea className="mobile-scroll-pane pr-2 sm:h-[min(70vh,560px)] sm:max-h-none">
                   <div className="space-y-2">
                     {filteredDistricts.map((district) => {
                       const hoods =

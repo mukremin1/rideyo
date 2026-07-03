@@ -30,6 +30,8 @@ import { useTranslation } from "react-i18next";
 import VehiclePhotoCapture from "@/components/VehiclePhotoCapture";
 import CarLocationMap from "@/components/CarLocationMap";
 import { getRegionErrorKey, validateDropoffCoords } from "@/lib/allowedRegions";
+import { useRentalLocationBroadcast } from "@/hooks/useRentalLocationBroadcast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RentalState {
   bookingId: string;
@@ -83,6 +85,13 @@ const StartRental = () => {
   const [bookingValidationLoading, setBookingValidationLoading] = useState(true);
   const [bookingValidated, setBookingValidated] = useState(false);
   const [carUnlocked, setCarUnlocked] = useState(false);
+  const [locationSharingConsent, setLocationSharingConsent] = useState(false);
+
+  useRentalLocationBroadcast({
+    bookingId: rentalInfo?.bookingId ?? null,
+    carId: rentalInfo?.carId ?? null,
+    enabled: rentalStarted && !rentalEnded && locationSharingConsent,
+  });
 
   const AUTO_UNLOCK_DISTANCE_METERS = 30;
   const AUTO_UNLOCK_RESET_DISTANCE_METERS = 60;
@@ -163,10 +172,6 @@ const StartRental = () => {
           const newData = payload.new as { latitude?: number | null; longitude?: number | null };
           if (newData.latitude && newData.longitude) {
             setCarGPSData({ latitude: newData.latitude, longitude: newData.longitude });
-            // Konum güncelleme bildirimi gönder
-            if (rentalStarted) {
-              sendRentalNotification("location", carName, t("rental.locationUpdated"));
-            }
           }
         }
       )
@@ -175,7 +180,7 @@ const StartRental = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [rentalInfo?.carId, rentalInfo?.carName, rentalStarted, sendRentalNotification]);
+  }, [rentalInfo?.carId]);
 
   useEffect(() => {
     if (!rentalStarted || !carGPSData) return;
@@ -419,6 +424,11 @@ const StartRental = () => {
 
     if (!user || beforePhotos.length === 0) {
       toast.error(t("rental.takePhotosFirst"));
+      return;
+    }
+
+    if (!locationSharingConsent) {
+      toast.error(t("rental.locationConsentRequired"));
       return;
     }
 
@@ -736,11 +746,25 @@ const StartRental = () => {
         )}
       </div>
 
-      <Button 
+      <div className="mb-6 flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <Checkbox
+          id="location-sharing-consent"
+          checked={locationSharingConsent}
+          onCheckedChange={(checked) => setLocationSharingConsent(checked === true)}
+        />
+        <div className="space-y-1">
+          <Label htmlFor="location-sharing-consent" className="cursor-pointer font-medium leading-snug">
+            {t("rental.locationConsentLabel")}
+          </Label>
+          <p className="text-sm text-muted-foreground">{t("rental.locationConsentDesc")}</p>
+        </div>
+      </div>
+
+      <Button
         size="lg"
         className="w-full gap-2 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--accent)))] shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)] hover:opacity-95"
         onClick={handleStartRental}
-        disabled={loading}
+        disabled={loading || !locationSharingConsent}
       >
         {loading ? (
           <>
@@ -810,7 +834,11 @@ const StartRental = () => {
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Bell className="w-4 h-4" />
-            <span>{t("rental.locationUpdates")}</span>
+            <span>
+              {locationSharingConsent
+                ? t("rental.phoneTrackingActive")
+                : t("rental.locationUpdates")}
+            </span>
           </div>
         </div>
 

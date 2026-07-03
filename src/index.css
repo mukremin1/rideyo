@@ -173,4 +173,45 @@ All colors MUST be HSL.
   .text-price {
     @apply font-semibold tabular-nums tracking-tight text-primary;
   }
+
+  .native-mobile {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .native-mobile,
+  .native-mobile body,
+  .native-mobile #root {
+    width: 100%;
+    max-width: 100vw;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  .native-mobile .container {
+    @apply px-3 sm:px-6;
+    max-width: 100%;
+  }
+
+  .native-mobile img,
+  .native-mobile video,
+  .native-mobile iframe {
+    max-width: 100%;
+  }
+
+  .native-mobile .fit-viewport {
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+
+  .native-mobile .hero-fit {
+    min-height: auto !important;
+  }
+
+  .native-mobile .mobile-scroll-pane {
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 13rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
 }
