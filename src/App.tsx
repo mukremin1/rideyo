@@ -58,9 +58,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <OfflineIndicator />
-      <Chatbot />
       <BrowserRouter basename={getRouterBasename()}>
         <AuthProvider>
+          <Chatbot />
           <GeolocationProvider>
           <AuthEmailCallback />
           <NfcLoginVerificationPrompt />
