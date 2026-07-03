@@ -263,8 +263,8 @@
     },
     "gpsTracking": {
       "title": "GPS Takip Sistemi",
-      "subtitle": "Tüm araçların gerçek zamanlı konumunu izleyin (yalnızca admin)",
-      "info": "Bu sayfa yalnızca admin kullanıcıları içindir. Aktif kiralamalarda kiracı telefonu konum gönderir; GPS cihazlı araçlar da burada görünür.",
+      "subtitle": "Tüm araçların gerçek zamanlı konumunu izleyin (yalnızca yönetici)",
+      "info": "Bu sayfa yalnızca yöneticiler içindir. Aktif kiralamalarda kiracı telefonu konum gönderir; GPS cihazlı araçlar da burada görünür.",
       "loadingCars": "Araçlar yükleniyor...",
       "noGpsCars": "Takip edilebilir araç bulunamadı. Aktif kiralama sırasında telefon konumu veya GPS cihazı gerekir."
     },
@@ -323,7 +323,7 @@
       "securityItems": [
         "Tüm kiracılar kimlik ve ehliyet doğrulamasından geçer",
         "Sürücü puanı ve geçmişi kontrol edilir",
-        "Rideyo yönetimi aktif kiralamalarda GPS takibini yürütür",
+        "Rideyo yöneticisi aktif kiralamalarda GPS takibini yürütür",
         "Hasar tespiti için öncesi ve sonrası fotoğraf çekilir",
         "7/24 destek ekibi her zaman yanınızda"
       ],

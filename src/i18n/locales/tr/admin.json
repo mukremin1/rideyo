@@ -1,7 +1,7 @@
 {
   "admin": {
     "noAccess": "Bu sayfaya erişim yetkiniz yok",
-    "title": "Filo Yönetimi",
+    "title": "Yönetici Paneli",
     "subtitle": "Tüm araçları izleyin, kiralamaları ve hakedişleri yönetin",
     "tabs": {
       "rentals": "Kiralamalar",
