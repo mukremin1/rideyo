@@ -1,7 +1,7 @@
 {
   "cars": {
     "title": "Available Cars",
-    "subtitle": "Discover cars near you and rent instantly",
+    "subtitle": "Discover available cars nationwide — rent from any location",
     "searchPlaceholder": "Search car or location...",
     "filter": "Filter",
     "all": "All",
@@ -47,7 +47,8 @@
     "tabMinute": "Minute",
     "tabDay": "Day",
     "minuteRental": "Per-Minute Rental",
-    "flexibleUse": "Flexible usage",
+    "flexibleUse": "Pick up anywhere, drop off anywhere",
+    "minutePickupAnywhere": "With minute-based rental, you can pick up and drop off the car at any location.",
     "perMinute": "per minute",
     "minutes15": "15 Minutes",
     "minutes30": "30 Minutes",

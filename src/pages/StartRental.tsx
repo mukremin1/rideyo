@@ -37,6 +37,7 @@ interface RentalState {
   bookingId: string;
   carId: string;
   carName: string;
+  rentalType: "minute" | "hour" | "day";
 }
 
 interface VehicleControlResponse {
@@ -260,7 +261,7 @@ const StartRental = () => {
       setBookingValidationLoading(true);
       const { data, error } = await supabase
         .from("bookings")
-        .select("id, user_id, payment_status, car_id, cars(name)")
+        .select("id, user_id, payment_status, car_id, rental_type, cars(name)")
         .eq("id", activeBookingId)
         .eq("user_id", user.id)
         .maybeSingle();
@@ -287,10 +288,14 @@ const StartRental = () => {
         return;
       }
 
+      const rentalType =
+        data.rental_type === "hour" || data.rental_type === "day" ? data.rental_type : "minute";
+
       setRentalInfo({
         bookingId: data.id,
         carId: locationState?.carId ?? data.car_id,
         carName: locationState?.carName ?? data.cars?.name ?? t("rental.defaultCarName"),
+        rentalType,
       });
       setBookingValidated(true);
       setBookingValidationLoading(false);
@@ -510,7 +515,9 @@ const StartRental = () => {
       }
 
       const dropoff = await validateDropoffCoords(lat, lng, i18n.language);
-      if (dropoff.strictMode && !dropoff.allowed) {
+      const flexibleRental =
+        rentalInfo.rentalType === "minute" || rentalInfo.rentalType === "hour";
+      if (!flexibleRental && dropoff.strictMode && !dropoff.allowed) {
         toast.error(t(`rental.region.${getRegionErrorKey(dropoff.reason)}`));
         setLoading(false);
         return;

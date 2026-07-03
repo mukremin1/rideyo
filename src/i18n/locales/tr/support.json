@@ -105,7 +105,7 @@
         { "q": "Araç kiralamak için ne yapmalıyım?", "a": "Öncelikle bir hesap oluşturup kimlik doğrulaması yapmanız gerekiyor. Ardından uygulama üzerinden uygun bir araç seçip, kiralama süresini belirleyebilir ve ödeme yapabilirsiniz." },
         { "q": "Kiralama için hangi belgeler gerekli?", "a": "Geçerli bir kimlik belgesi ve en az 2 yıllık sürücü belgesi gerekmektedir. Yaşınız 21-70 arasında olmalı, sürücü puanınız minimum 60 olmalıdır." },
         { "q": "Fiyatlandırma nasıl yapılıyor?", "a": "Her araç için dakikalık, saatlik ve günlük fiyatlar belirlenmiştir. Kiralama sürenize göre otomatik olarak hesaplama yapılır." },
-        { "q": "Minimum kiralama süresi var mı?", "a": "Dakikalık kiralama için minimum 30 dakika, saatlik kiralama için minimum 1 saat, günlük kiralama için minimum 1 gün süre bulunmaktadır." },
+        { "q": "Minimum kiralama süresi var mı?", "a": "Dakikalık kiralama 15 dakikadan başlar (15, 30 veya 45 dakika seçebilirsiniz). Saatlik kiralama minimum 1 saat, günlük kiralama minimum 1 gündür." },
         { "q": "İptal politikası nedir?", "a": "Kiralama başlangıcından 24 saat öncesine kadar ücretsiz iptal yapabilirsiniz. 12-24 saat arası iptallerde %50 iade, 12 saatten kısa sürede iptal durumunda iade yapılmaz." },
         { "q": "Araç teslim ve iade nasıl yapılır?", "a": "Araç sahibi ile koordine ederek belirlenen lokasyonda teslim alma ve iade işlemlerini gerçekleştirirsiniz." },
         { "q": "Kaza durumunda ne olur?", "a": "Tüm araçlar sigorta ile korunmaktadır. Kaza durumunda derhal RideYo destek hattını (7/24) aramanız gerekmektedir." },

@@ -2,12 +2,15 @@ export const MINUTE_PROVISION_FEE = 300;
 export const DAY_PROVISION_FEE = 350;
 export const DIFFERENT_ZONE_FEE = 150;
 export const ADDITIONAL_DRIVER_DAILY_FEE = 50;
+export const MINUTE_RENTAL_OPTIONS = [15, 30, 45] as const;
+export const DEFAULT_RENTAL_MINUTES = 15;
 
 export type RentalPricingInput = {
   rentalType: "minute" | "hour" | "day";
   pricePerMinute: number;
   pricePerHour: number;
   pricePerDay: number;
+  rentalMinutes: number;
   rentalHours: number;
   rentalDays: number;
   insurancePrice: number;
@@ -38,7 +41,8 @@ export function computeRentalPricing(input: RentalPricingInput): RentalPricingBr
   let provisionFee = 0;
 
   if (input.rentalType === "minute") {
-    rentalBase = input.pricePerMinute * 30;
+    const minutes = Math.max(15, input.rentalMinutes || DEFAULT_RENTAL_MINUTES);
+    rentalBase = input.pricePerMinute * minutes;
     provisionFee = MINUTE_PROVISION_FEE;
   } else if (input.rentalType === "hour") {
     rentalBase = input.pricePerHour * input.rentalHours;

@@ -15,7 +15,7 @@ import InsurancePackages from "@/components/InsurancePackages";
 import CarLocationMap from "@/components/CarLocationMap";
 import { checkRentalEligibility } from "@/lib/rentalEligibility";
 import { fetchActiveCampaignForCarType, type ActiveCampaign } from "@/lib/campaigns";
-import { computeRentalPricing, ADDITIONAL_DRIVER_DAILY_FEE } from "@/lib/rentalPricing";
+import { computeRentalPricing, ADDITIONAL_DRIVER_DAILY_FEE, MINUTE_RENTAL_OPTIONS } from "@/lib/rentalPricing";
 import { createBookingRecord } from "@/lib/bookings";
 import { Checkbox } from "@/components/ui/checkbox";
 import carCompact from "@/assets/car-compact.jpg";
@@ -63,7 +63,7 @@ const CarDetail = () => {
   const { user } = useAuth();
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPricing, setSelectedPricing] = useState<"minute" | "hour" | "day" | null>(null);
+  const [selectedPricing, setSelectedPricing] = useState<"minute" | "hour" | "day" | null>("minute");
   const [selectedKmPackage, setSelectedKmPackage] = useState<string | null>(null);
   const [selectedInsurance, setSelectedInsurance] = useState<string | null>(null);
   const [insurancePrice, setInsurancePrice] = useState(0);
@@ -73,6 +73,7 @@ const CarDetail = () => {
   const [trafficDelayMinutes, setTrafficDelayMinutes] = useState(10);
   const [rentalDays, setRentalDays] = useState(1);
   const [rentalHours, setRentalHours] = useState(0.5);
+  const [rentalMinutes, setRentalMinutes] = useState(15);
   const [serviceZones, setServiceZones] = useState<ServiceZone[]>([]);
   const [pickupZoneId, setPickupZoneId] = useState<string>("");
   const [dropoffZoneId, setDropoffZoneId] = useState<string>("");
@@ -378,7 +379,7 @@ const CarDetail = () => {
     } else if (selectedPricing === "day") {
       endTime.setDate(endTime.getDate() + rentalDays);
     } else {
-      endTime.setMinutes(endTime.getMinutes() + 30);
+      endTime.setMinutes(endTime.getMinutes() + rentalMinutes);
     }
 
     const pricing = computeRentalPricing({
@@ -386,6 +387,7 @@ const CarDetail = () => {
       pricePerMinute: car.price_per_minute,
       pricePerHour: car.price_per_hour,
       pricePerDay: car.price_per_day,
+      rentalMinutes,
       rentalHours,
       rentalDays,
       insurancePrice,
@@ -472,6 +474,7 @@ const CarDetail = () => {
         pricePerMinute: car.price_per_minute,
         pricePerHour: car.price_per_hour,
         pricePerDay: car.price_per_day,
+        rentalMinutes,
         rentalHours,
         rentalDays,
         insurancePrice,
@@ -700,19 +703,30 @@ const CarDetail = () => {
                           </div>
                         </div>
                         <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">{t("carDetail.minutes15")}</span>
-                            <span className="font-semibold">{(car.price_per_minute * 15).toFixed(2)}₺</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">{t("carDetail.minutes30")}</span>
-                            <span className="font-semibold">{(car.price_per_minute * 30).toFixed(2)}₺</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">{t("carDetail.minutes45")}</span>
-                            <span className="font-semibold">{(car.price_per_minute * 45).toFixed(2)}₺</span>
-                          </div>
+                          {MINUTE_RENTAL_OPTIONS.map((minutes) => (
+                            <button
+                              key={minutes}
+                              type="button"
+                              onClick={() => {
+                                setRentalMinutes(minutes);
+                                setSelectedPricing("minute");
+                              }}
+                              className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 transition-colors ${
+                                selectedPricing === "minute" && rentalMinutes === minutes
+                                  ? "border-primary bg-primary/10"
+                                  : "border-border hover:border-primary/40"
+                              }`}
+                            >
+                              <span className="text-muted-foreground">
+                                {t(`carDetail.minutes${minutes}` as "carDetail.minutes15")}
+                              </span>
+                              <span className="font-semibold">
+                                {(car.price_per_minute * minutes).toFixed(2)}₺
+                              </span>
+                            </button>
+                          ))}
                         </div>
+                        <p className="mt-3 text-xs text-muted-foreground">{t("carDetail.minutePickupAnywhere")}</p>
                         <Button
                           variant={selectedPricing === "minute" ? "default" : "outline"}
                           className="w-full mt-4"

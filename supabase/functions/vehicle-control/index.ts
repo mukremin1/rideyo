@@ -163,46 +163,61 @@ serve(async (req) => {
           available: true,
         };
 
+        let rentalType: string | null = null;
+        if (bookingId) {
+          const { data: bookingTypeRow } = await supabase
+            .from("bookings")
+            .select("rental_type")
+            .eq("id", bookingId)
+            .maybeSingle();
+          rentalType = bookingTypeRow?.rental_type ?? null;
+        }
+
+        const flexibleRental = rentalType === "minute" || rentalType === "hour";
+
         if (latitude != null && longitude != null) {
-          const { data: validation, error: validationError } = await supabase.rpc(
-            "validate_dropoff_location",
-            {
-              p_latitude: latitude,
-              p_longitude: longitude,
-              p_city: city ?? null,
-              p_district: district ?? null,
-              p_neighborhood: neighborhood ?? null,
-            },
-          );
-
-          if (validationError) throw validationError;
-
-          const result = validation as {
-            allowed?: boolean;
-            strict_mode?: boolean;
-            reason?: string;
-            region_id?: string;
-          };
-
-          if (result.strict_mode && !result.allowed) {
-            return new Response(
-              JSON.stringify({
-                success: false,
-                error: "DROP_OFF_NOT_ALLOWED",
-                reason: result.reason ?? "not_allowed",
-              }),
-              { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          if (!flexibleRental) {
+            const { data: validation, error: validationError } = await supabase.rpc(
+              "validate_dropoff_location",
+              {
+                p_latitude: latitude,
+                p_longitude: longitude,
+                p_city: city ?? null,
+                p_district: district ?? null,
+                p_neighborhood: neighborhood ?? null,
+              },
             );
+
+            if (validationError) throw validationError;
+
+            const validationResult = validation as {
+              allowed?: boolean;
+              strict_mode?: boolean;
+              reason?: string;
+              region_id?: string;
+            };
+
+            if (validationResult.strict_mode && !validationResult.allowed) {
+              return new Response(
+                JSON.stringify({
+                  success: false,
+                  error: "DROP_OFF_NOT_ALLOWED",
+                  reason: validationResult.reason ?? "not_allowed",
+                }),
+                { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+              );
+            }
+
+            if (validationResult.region_id) carUpdate.allowed_region_id = validationResult.region_id;
           }
 
           carUpdate.latitude = latitude;
           carUpdate.longitude = longitude;
-          if (result.region_id) carUpdate.allowed_region_id = result.region_id;
           if (city) carUpdate.city = city;
           if (district) carUpdate.district = district;
           if (neighborhood) carUpdate.neighborhood = neighborhood;
           if (dropoffAddress) carUpdate.location = dropoffAddress;
-        } else {
+        } else if (!flexibleRental) {
           const { count } = await supabase
             .from("allowed_regions")
             .select("id", { count: "exact", head: true })

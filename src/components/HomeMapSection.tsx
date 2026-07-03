@@ -40,8 +40,8 @@ const HomeMapSection = () => {
 
   const userLocation = latitude && longitude ? { latitude, longitude } : null;
   const { cars, loading: carsLoading } = useNearbyCars(latitude, longitude, locationLoading, {
-    maxDistance: 100,
-    limit: 12,
+    maxDistance: 5000,
+    limit: 50,
   });
 
   const activeCarId = selectedCarId ?? cars[0]?.id ?? null;

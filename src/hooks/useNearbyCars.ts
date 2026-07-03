@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveCoordinatesFromLocation } from "@/lib/locationGeocoding";
-import { fetchAllowedRegions } from "@/lib/allowedRegions";
 
 export interface NearbyCar {
   id: string;
@@ -11,6 +10,7 @@ export interface NearbyCar {
   latitude: number | null;
   longitude: number | null;
   price_per_hour: number;
+  price_per_minute: number;
   fuel_type: string;
   image_url: string | null;
   distance?: number;
@@ -35,24 +35,19 @@ export function useNearbyCars(
   locationLoading: boolean,
   options: { maxDistance?: number; limit?: number } = {},
 ) {
-  const { maxDistance = 50, limit = 12 } = options;
+  const { maxDistance = 5000, limit = 50 } = options;
   const [cars, setCars] = useState<NearbyCar[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCars = async () => {
       setLoading(true);
-      const [regions, carsResult] = await Promise.all([
-        fetchAllowedRegions().catch(() => []),
-        supabase
-          .from("cars")
-          .select(
-            "id, name, type, location, latitude, longitude, price_per_hour, fuel_type, image_url, allowed_region_id",
-          )
-          .eq("available", true),
-      ]);
-
-      const { data, error } = carsResult;
+      const { data, error } = await supabase
+        .from("cars")
+        .select(
+          "id, name, type, location, latitude, longitude, price_per_hour, price_per_minute, fuel_type, image_url",
+        )
+        .eq("available", true);
 
       if (error) {
         console.error("Error fetching cars:", error);
@@ -61,13 +56,7 @@ export function useNearbyCars(
         return;
       }
 
-      const strictRegions = regions.some((r) => r.is_active);
-      const activeRegionIds = new Set(regions.filter((r) => r.is_active).map((r) => r.id));
-      const rows = strictRegions
-        ? (data ?? []).filter(
-            (car) => car.allowed_region_id && activeRegionIds.has(car.allowed_region_id),
-          )
-        : (data ?? []);
+      const rows = data ?? [];
 
       if (rows.length && latitude !== null && longitude !== null) {
         const carsWithDistance = await Promise.all(

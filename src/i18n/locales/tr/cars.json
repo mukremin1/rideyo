@@ -1,7 +1,7 @@
 {
   "cars": {
     "title": "Müsait Araçlar",
-    "subtitle": "Yakınındaki araçları keşfet ve hemen kirala",
+    "subtitle": "Türkiye genelindeki müsait araçları keşfet — istediğin konumdan kirala",
     "searchPlaceholder": "Araç veya lokasyon ara...",
     "filter": "Filtrele",
     "all": "Tümü",
@@ -47,7 +47,8 @@
     "tabMinute": "Dakika",
     "tabDay": "Gün",
     "minuteRental": "Dakikalık Kiralama",
-    "flexibleUse": "Esnek kullanım",
+    "flexibleUse": "İstediğin konumdan al, istediğin yerde bırak",
+    "minutePickupAnywhere": "Dakikalık kiralamada araç herhangi bir konumdan alınabilir ve bırakılabilir.",
     "perMinute": "dakika başı",
     "minutes15": "15 Dakika",
     "minutes30": "30 Dakika",

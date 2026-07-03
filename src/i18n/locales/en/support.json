@@ -105,7 +105,7 @@
         { "q": "What do I need to rent a car?", "a": "First create an account and complete identity verification. Then select a suitable car, set your rental duration, and pay through the app." },
         { "q": "What documents are required?", "a": "A valid ID and at least 2 years of driving license are required. You must be 21-70 years old with a minimum driver score of 60." },
         { "q": "How is pricing calculated?", "a": "Each car has minute, hourly, and daily rates. Charges are calculated automatically based on your rental duration." },
-        { "q": "Is there a minimum rental period?", "a": "Minimum 30 minutes for minute rentals, 1 hour for hourly, and 1 day for daily rentals." },
+        { "q": "Is there a minimum rental period?", "a": "Minute rentals start at 15 minutes (you can choose 15, 30, or 45 minutes). Hourly rentals are minimum 1 hour; daily rentals are minimum 1 day." },
         { "q": "What is the cancellation policy?", "a": "Free cancellation up to 24 hours before start. 50% refund for 12-24 hours, no refund within 12 hours or for no-shows." },
         { "q": "How are pickup and return handled?", "a": "Coordinate with the owner and complete pickup and return at the agreed location." },
         { "q": "What happens in an accident?", "a": "All vehicles are insured. In an accident, contact RideYo support (24/7) immediately." },
