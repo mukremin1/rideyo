@@ -121,12 +121,22 @@
     },
     "chatbot": {
       "title": "RideYo Asistan",
+      "mobileSubtitle": "Yapay zeka destek asistanı",
+      "mobileBadge": "AI",
+      "open": "Yapay zeka asistanını aç",
+      "close": "Asistanı kapat",
       "welcome": "Merhaba! RideYo'ya hoş geldiniz. Size nasıl yardımcı olabilirim?",
       "placeholder": "Mesajınızı yazın...",
       "tooManyRequests": "Çok fazla istek gönderildi. Lütfen biraz bekleyin.",
       "serviceUnavailable": "Servis şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
       "streamError": "Stream başlatılamadı",
-      "genericError": "Bir hata oluştu. Lütfen tekrar deneyin."
+      "genericError": "Bir hata oluştu. Lütfen tekrar deneyin.",
+      "talkToHuman": "İnsanla konuş",
+      "humanTicketSubject": "AI asistan — canlı destek",
+      "humanTicketDefaultMessage": "Kullanıcı AI sohbetinden canlı desteğe geçti.",
+      "ticketCreated": "Talep alındı ({{ref}}). WhatsApp açılıyor…",
+      "ticketCreateFailed": "Talep kaydedilemedi.",
+      "whatsappPrefill": "Merhaba, RideYo canlı destek istiyorum."
     },
     "offlineIndicator": {
       "online": "Tekrar çevrimiçisiniz!",

@@ -10,7 +10,37 @@
       "welcome": "Merhaba! RideYo müşteri hizmetlerine hoş geldiniz. Öncelikle yapay zeka asistanım size yardımcı olacak. İsterseniz daha sonra canlı destek ile görüşebilirsiniz. Size nasıl yardımcı olabilirim?",
       "placeholder": "Mesajınızı yazın...",
       "sendFailed": "Mesaj gönderilemedi",
-      "streamError": "Stream başlatılamadı"
+      "streamError": "Stream başlatılamadı",
+      "talkToHuman": "İnsanla konuş",
+      "humanHint": "Canlı destek: Pazartesi–Cumartesi 09:00–22:00. Talep no ile WhatsApp üzerinden yanıt verilir.",
+      "humanTicketSubject": "Canlı destek talebi",
+      "humanTicketDefaultMessage": "Kullanıcı canlı destek istedi.",
+      "ticketCreated": "Talebiniz alındı ({{ref}}). WhatsApp açılıyor…",
+      "ticketCreateFailed": "Talep kaydedilemedi, yine de WhatsApp'a yönlendiriliyorsunuz.",
+      "tabChat": "AI Sohbet",
+      "tabTicket": "Destek Talebi",
+      "ticketFormTitle": "Destek talebi oluştur",
+      "ticketCategory": "Kategori",
+      "ticketSubject": "Konu",
+      "ticketSubjectPlaceholder": "Örn. Ödeme iadesi",
+      "ticketMessage": "Mesajınız",
+      "ticketMessagePlaceholder": "Sorununuzu kısaca açıklayın…",
+      "submitTicket": "Talebi gönder",
+      "myTickets": "Taleplerim",
+      "noTickets": "Henüz destek talebiniz yok.",
+      "categories": {
+        "payment": "Ödeme",
+        "rental": "Kiralama",
+        "vehicle": "Araç",
+        "account": "Hesap",
+        "other": "Diğer"
+      },
+      "status": {
+        "open": "Açık",
+        "in_progress": "İşlemde",
+        "resolved": "Çözüldü",
+        "closed": "Kapalı"
+      }
     },
     "contact": {
       "title": "İletişim",
@@ -33,7 +63,10 @@
       "messagePlaceholder": "Mesajınız",
       "submit": "Gönder",
       "toastTitle": "Mesajınız alındı",
-      "toastDesc": "En kısa sürede size dönüş yapacağız."
+      "toastDesc": "En kısa sürede size dönüş yapacağız.",
+      "toastDescWithRef": "Talep numaranız: {{ref}}. En kısa sürede dönüş yapacağız.",
+      "toastErrorTitle": "Gönderilemedi",
+      "toastErrorDesc": "Mesajınız kaydedilemedi. Lütfen tekrar deneyin veya WhatsApp ile ulaşın."
     },
     "about": {
       "title": "Hakkımızda",

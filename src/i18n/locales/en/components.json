@@ -121,12 +121,22 @@
     },
     "chatbot": {
       "title": "RideYo Assistant",
+      "mobileSubtitle": "AI-powered support assistant",
+      "mobileBadge": "AI",
+      "open": "Open AI assistant",
+      "close": "Close assistant",
       "welcome": "Hello! Welcome to RideYo. How can I help you?",
       "placeholder": "Type your message...",
       "tooManyRequests": "Too many requests. Please wait a moment.",
       "serviceUnavailable": "Service is currently unavailable. Please try again later.",
       "streamError": "Could not start stream",
-      "genericError": "An error occurred. Please try again."
+      "genericError": "An error occurred. Please try again.",
+      "talkToHuman": "Talk to a human",
+      "humanTicketSubject": "AI assistant — live support",
+      "humanTicketDefaultMessage": "User escalated from AI chat to live support.",
+      "ticketCreated": "Ticket received ({{ref}}). Opening WhatsApp…",
+      "ticketCreateFailed": "Could not save ticket.",
+      "whatsappPrefill": "Hello, I need live support from RideYo."
     },
     "offlineIndicator": {
       "online": "You're back online!",

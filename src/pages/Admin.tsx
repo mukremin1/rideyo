@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { mobilePageShell, mobileTopInset } from "@/lib/mobileLayout";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -13,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car, ClipboardList, Wallet, MapPinned } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar as CalendarIcon, Megaphone, Car, ClipboardList, Wallet, MapPinned, Headphones } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ import AdminFleetSection from "@/components/AdminFleetSection";
 import AdminRentalsSection from "@/components/AdminRentalsSection";
 import AdminPayoutsSection from "@/components/AdminPayoutsSection";
 import AdminRegionsSection from "@/components/AdminRegionsSection";
+import AdminSupportSection from "@/components/AdminSupportSection";
 
 interface Campaign {
   id: string;
@@ -200,9 +202,9 @@ const Admin = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className={`${mobilePageShell} bg-background`}>
         <Navbar />
-        <div className="container mx-auto px-4 pt-24 pb-12 text-center">
+        <div className={`${mobileTopInset} container mx-auto px-3 pb-12 text-center sm:px-4`}>
           <p className="text-xl text-muted-foreground">{t("common.loading")}</p>
         </div>
       </div>
@@ -210,39 +212,43 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className={`${mobilePageShell} bg-background`}>
       <Navbar />
       
-      <main className="pt-24 pb-12 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">{t("admin.title")}</h1>
-              <p className="text-muted-foreground">{t("admin.subtitle")}</p>
+      <main className={`${mobileTopInset} px-3 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] sm:px-4 md:pb-12`}>
+        <div className="container mx-auto max-w-6xl fit-viewport">
+          <div className="mb-6 flex items-center justify-between sm:mb-8">
+            <div className="min-w-0">
+              <h1 className="mb-1 text-2xl font-bold text-foreground sm:mb-2 sm:text-4xl">{t("admin.title")}</h1>
+              <p className="text-sm text-muted-foreground sm:text-base">{t("admin.subtitle")}</p>
             </div>
           </div>
 
           <Tabs defaultValue="fleet" className="space-y-6 sm:space-y-8">
-            <TabsList className="flex h-auto w-full gap-1 overflow-x-auto p-1 sm:grid sm:grid-cols-6 sm:overflow-visible">
-              <TabsTrigger value="fleet" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
-                <Car className="hidden h-4 w-4 shrink-0 sm:block" />
+            <TabsList className="flex h-auto w-full max-w-full gap-1 overflow-x-auto p-1 hide-scrollbar sm:grid sm:grid-cols-7 sm:overflow-visible">
+              <TabsTrigger value="fleet" className="min-w-[5.5rem] shrink-0 gap-1.5 px-2.5 py-2 text-xs whitespace-nowrap sm:min-w-0 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm">
+                <Car className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 {t("admin.tabs.fleet")}
               </TabsTrigger>
-              <TabsTrigger value="regions" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
-                <MapPinned className="hidden h-4 w-4 shrink-0 sm:block" />
+              <TabsTrigger value="regions" className="min-w-[5.5rem] shrink-0 gap-1.5 px-2.5 py-2 text-xs whitespace-nowrap sm:min-w-0 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm">
+                <MapPinned className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 {t("admin.tabs.regions")}
               </TabsTrigger>
-              <TabsTrigger value="rentals" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
-                <ClipboardList className="hidden h-4 w-4 shrink-0 sm:block" />
+              <TabsTrigger value="rentals" className="min-w-[5.5rem] shrink-0 gap-1.5 px-2.5 py-2 text-xs whitespace-nowrap sm:min-w-0 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm">
+                <ClipboardList className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 {t("admin.tabs.rentals")}
               </TabsTrigger>
-              <TabsTrigger value="payouts" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
-                <Wallet className="hidden h-4 w-4 shrink-0 sm:block" />
+              <TabsTrigger value="payouts" className="min-w-[5.5rem] shrink-0 gap-1.5 px-2.5 py-2 text-xs whitespace-nowrap sm:min-w-0 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm">
+                <Wallet className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 {t("admin.tabs.payouts")}
               </TabsTrigger>
-              <TabsTrigger value="campaigns" className="min-w-[6.5rem] shrink-0 gap-2 px-3 py-2.5 text-sm whitespace-nowrap sm:min-w-0">
-                <Megaphone className="hidden h-4 w-4 shrink-0 sm:block" />
+              <TabsTrigger value="campaigns" className="min-w-[5.5rem] shrink-0 gap-1.5 px-2.5 py-2 text-xs whitespace-nowrap sm:min-w-0 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm">
+                <Megaphone className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 {t("admin.tabs.campaigns")}
+              </TabsTrigger>
+              <TabsTrigger value="support" className="min-w-[5.5rem] shrink-0 gap-1.5 px-2.5 py-2 text-xs whitespace-nowrap sm:min-w-0 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm">
+                <Headphones className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                {t("admin.tabs.support")}
               </TabsTrigger>
             </TabsList>
 
@@ -260,6 +266,10 @@ const Admin = () => {
 
             <TabsContent value="payouts">
               <AdminPayoutsSection />
+            </TabsContent>
+
+            <TabsContent value="support">
+              <AdminSupportSection />
             </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">

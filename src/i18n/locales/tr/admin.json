@@ -8,7 +8,8 @@
       "payouts": "Hakediş",
       "fleet": "Araç Filosu",
       "regions": "Bölge Seçimi",
-      "campaigns": "Kampanyalar"
+      "campaigns": "Kampanyalar",
+      "support": "Destek"
     },
     "payouts": {
       "title": "Manuel Hakediş",
@@ -194,6 +195,48 @@
       "compact": "Kompakt",
       "sedan": "Sedan",
       "suv": "SUV"
+    },
+    "support": {
+      "title": "Destek Talepleri",
+      "subtitle": "Kullanıcı taleplerini görüntüleyin, durum güncelleyin ve WhatsApp ile yanıtlayın.",
+      "refresh": "Yenile",
+      "empty": "Bu sekmede destek talebi yok.",
+      "loadError": "Destek talepleri yüklenemedi",
+      "updateError": "Talep güncellenemedi",
+      "updateSuccess": "Talep güncellendi",
+      "openCount": "{{count}} açık talep",
+      "unknownUser": "Misafir kullanıcı",
+      "adminNotes": "İç notlar",
+      "adminNotesPlaceholder": "Ekip notları (kullanıcı görmez)",
+      "saveNotes": "Notları kaydet",
+      "replyWhatsApp": "WhatsApp ile yanıtla",
+      "tabs": {
+        "all": "Tümü",
+        "open": "Açık",
+        "in_progress": "İşlemde",
+        "resolved": "Çözüldü",
+        "closed": "Kapalı"
+      },
+      "status": {
+        "open": "Açık",
+        "in_progress": "İşlemde",
+        "resolved": "Çözüldü",
+        "closed": "Kapalı"
+      },
+      "category": {
+        "payment": "Ödeme",
+        "rental": "Kiralama",
+        "vehicle": "Araç",
+        "account": "Hesap",
+        "other": "Diğer"
+      },
+      "source": {
+        "in_app": "Uygulama",
+        "chatbot": "AI Asistan",
+        "support_page": "Destek sayfası",
+        "contact_page": "İletişim formu",
+        "whatsapp": "WhatsApp"
+      }
     }
   }
 }

@@ -8,7 +8,8 @@
       "payouts": "Payouts",
       "fleet": "Fleet",
       "regions": "Region Selection",
-      "campaigns": "Campaigns"
+      "campaigns": "Campaigns",
+      "support": "Support"
     },
     "payouts": {
       "title": "Manual Payouts",
@@ -189,6 +190,48 @@
       "compact": "Compact",
       "sedan": "Sedan",
       "suv": "SUV"
+    },
+    "support": {
+      "title": "Support Tickets",
+      "subtitle": "View user requests, update status, and reply via WhatsApp.",
+      "refresh": "Refresh",
+      "empty": "No support tickets in this tab.",
+      "loadError": "Could not load support tickets",
+      "updateError": "Could not update ticket",
+      "updateSuccess": "Ticket updated",
+      "openCount": "{{count}} open tickets",
+      "unknownUser": "Guest user",
+      "adminNotes": "Internal notes",
+      "adminNotesPlaceholder": "Team notes (not visible to users)",
+      "saveNotes": "Save notes",
+      "replyWhatsApp": "Reply on WhatsApp",
+      "tabs": {
+        "all": "All",
+        "open": "Open",
+        "in_progress": "In progress",
+        "resolved": "Resolved",
+        "closed": "Closed"
+      },
+      "status": {
+        "open": "Open",
+        "in_progress": "In progress",
+        "resolved": "Resolved",
+        "closed": "Closed"
+      },
+      "category": {
+        "payment": "Payment",
+        "rental": "Rental",
+        "vehicle": "Vehicle",
+        "account": "Account",
+        "other": "Other"
+      },
+      "source": {
+        "in_app": "In-app",
+        "chatbot": "AI assistant",
+        "support_page": "Support page",
+        "contact_page": "Contact form",
+        "whatsapp": "WhatsApp"
+      }
     }
   }
 }

@@ -1,22 +1,59 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { createSupportTicket } from "@/lib/supportContact";
 
 const Contact = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: t("support.contact.toastTitle"),
-      description: t("support.contact.toastDesc"),
-    });
+    if (submitting) return;
+
+    setSubmitting(true);
+    try {
+      const ticket = await createSupportTicket({
+        userId: user?.id ?? null,
+        contactName: form.name.trim(),
+        contactEmail: form.email.trim(),
+        contactPhone: form.phone.trim() || undefined,
+        subject: form.subject.trim(),
+        message: form.message.trim(),
+        category: "other",
+        source: "contact_page",
+      });
+
+      toast({
+        title: t("support.contact.toastTitle"),
+        description: t("support.contact.toastDescWithRef", { ref: ticket.ticket_ref }),
+      });
+      setForm({ name: "", email: "", phone: "", subject: "", message: "" });
+    } catch {
+      toast({
+        title: t("support.contact.toastErrorTitle"),
+        description: t("support.contact.toastErrorDesc"),
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -76,12 +113,49 @@ const Contact = () => {
               <h2 className="text-2xl font-semibold text-foreground mb-6">{t("support.contact.sendMessage")}</h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Input type="text" placeholder={t("support.contact.namePlaceholder")} required className="w-full" />
-                <Input type="email" placeholder={t("support.contact.emailPlaceholder")} required className="w-full" />
-                <Input type="tel" placeholder={t("support.contact.phonePlaceholder")} className="w-full" />
-                <Input type="text" placeholder={t("support.contact.subjectPlaceholder")} required className="w-full" />
-                <Textarea placeholder={t("support.contact.messagePlaceholder")} required rows={6} className="w-full" />
-                <Button type="submit" className="w-full">{t("support.contact.submit")}</Button>
+                <Input
+                  type="text"
+                  placeholder={t("support.contact.namePlaceholder")}
+                  required
+                  className="w-full"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                />
+                <Input
+                  type="email"
+                  placeholder={t("support.contact.emailPlaceholder")}
+                  required
+                  className="w-full"
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                />
+                <Input
+                  type="tel"
+                  placeholder={t("support.contact.phonePlaceholder")}
+                  className="w-full"
+                  value={form.phone}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                />
+                <Input
+                  type="text"
+                  placeholder={t("support.contact.subjectPlaceholder")}
+                  required
+                  className="w-full"
+                  value={form.subject}
+                  onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+                />
+                <Textarea
+                  placeholder={t("support.contact.messagePlaceholder")}
+                  required
+                  rows={6}
+                  className="w-full"
+                  value={form.message}
+                  onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                />
+                <Button type="submit" className="w-full gap-2" disabled={submitting}>
+                  {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {t("support.contact.submit")}
+                </Button>
               </form>
             </div>
           </div>

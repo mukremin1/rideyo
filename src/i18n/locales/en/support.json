@@ -10,7 +10,37 @@
       "welcome": "Hello! Welcome to RideYo customer service. Our AI assistant will help you first. You can also speak with live support later. How can I help you?",
       "placeholder": "Type your message...",
       "sendFailed": "Message could not be sent",
-      "streamError": "Could not start stream"
+      "streamError": "Could not start stream",
+      "talkToHuman": "Talk to a human",
+      "humanHint": "Live support: Mon–Sat 09:00–22:00. Reply via WhatsApp with your ticket number.",
+      "humanTicketSubject": "Live support request",
+      "humanTicketDefaultMessage": "User requested live support.",
+      "ticketCreated": "Request received ({{ref}}). Opening WhatsApp…",
+      "ticketCreateFailed": "Could not save ticket; redirecting to WhatsApp anyway.",
+      "tabChat": "AI Chat",
+      "tabTicket": "Support Ticket",
+      "ticketFormTitle": "Create a support ticket",
+      "ticketCategory": "Category",
+      "ticketSubject": "Subject",
+      "ticketSubjectPlaceholder": "e.g. Payment refund",
+      "ticketMessage": "Your message",
+      "ticketMessagePlaceholder": "Briefly describe your issue…",
+      "submitTicket": "Submit ticket",
+      "myTickets": "My tickets",
+      "noTickets": "You have no support tickets yet.",
+      "categories": {
+        "payment": "Payment",
+        "rental": "Rental",
+        "vehicle": "Vehicle",
+        "account": "Account",
+        "other": "Other"
+      },
+      "status": {
+        "open": "Open",
+        "in_progress": "In progress",
+        "resolved": "Resolved",
+        "closed": "Closed"
+      }
     },
     "contact": {
       "title": "Contact",
@@ -33,7 +63,10 @@
       "messagePlaceholder": "Your Message",
       "submit": "Send",
       "toastTitle": "Message received",
-      "toastDesc": "We will get back to you as soon as possible."
+      "toastDesc": "We will get back to you as soon as possible.",
+      "toastDescWithRef": "Your ticket number: {{ref}}. We will get back to you soon.",
+      "toastErrorTitle": "Could not send",
+      "toastErrorDesc": "Your message could not be saved. Please try again or contact us on WhatsApp."
     },
     "about": {
       "title": "About Us",
