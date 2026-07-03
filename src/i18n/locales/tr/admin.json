@@ -7,7 +7,8 @@
       "rentals": "Kiralamalar",
       "payouts": "Hakediş",
       "fleet": "Araç Filosu",
-      "regions": "Bölge Seçimi",
+      "tracking": "Araç Takip",
+      "regions": "Bölgeler",
       "campaigns": "Kampanyalar",
       "support": "Destek"
     },
@@ -94,6 +95,22 @@
       "deleteDesc": "{{name}} platformdan kalıcı olarak kaldırılacak.",
       "deleteSuccess": "Araç silindi",
       "deleteError": "Araç silinemedi"
+    },
+    "gpsTracking": {
+      "title": "Araç Takip",
+      "subtitle": "Aktif kiralamalarda ve GPS cihazlı araçlarda canlı konum izleyin.",
+      "info": "Kiracı telefonu yalnızca aktif kiralama sırasında konum gönderir. Sinyal yoksa kiralama başladıktan sonra birkaç dakika bekleyin.",
+      "refresh": "Yenile",
+      "loading": "Araçlar yükleniyor…",
+      "loadError": "Takip listesi yüklenemedi",
+      "empty": "Şu an takip edilebilir araç yok. Aktif kiralama veya GPS cihazı olan araçlar burada görünür.",
+      "searchPlaceholder": "Araç, plaka veya şehir ara…",
+      "statsTotal": "Takipte",
+      "statsLive": "Canlı sinyal",
+      "statsRented": "Aktif kiralama",
+      "activeRental": "Kirada",
+      "waitingGps": "Sinyal bekleniyor",
+      "noSignalYet": "Henüz konum alınamadı. Kiracı uygulamayı açık tutuyorsa kısa süre içinde görünür."
     },
     "regions": {
       "title": "Hizmet Bölgeleri",

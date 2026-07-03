@@ -273,7 +273,9 @@ const AdminFleetSection = () => {
           {filteredCars.map((car) => {
             const owner = owners[car.owner_id];
             const active = activeByCar[car.id];
-            const hasGps = Boolean(car.gps_device_id || (car.latitude && car.longitude));
+            const hasGps = Boolean(
+              car.gps_device_id || (car.latitude && car.longitude) || active,
+            );
             const gpsExpanded = expandedGpsId === car.id;
 
             return (

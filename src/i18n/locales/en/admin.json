@@ -7,7 +7,8 @@
       "rentals": "Rentals",
       "payouts": "Payouts",
       "fleet": "Fleet",
-      "regions": "Region Selection",
+      "tracking": "GPS Tracking",
+      "regions": "Regions",
       "campaigns": "Campaigns",
       "support": "Support"
     },
@@ -94,6 +95,22 @@
       "deleteDesc": "{{name}} will be permanently removed from the platform.",
       "deleteSuccess": "Vehicle deleted",
       "deleteError": "Could not delete vehicle"
+    },
+    "gpsTracking": {
+      "title": "Vehicle Tracking",
+      "subtitle": "Monitor live location during active rentals and on GPS-equipped vehicles.",
+      "info": "The renter's phone shares location only during an active rental. If there is no signal yet, wait a few minutes after the rental starts.",
+      "refresh": "Refresh",
+      "loading": "Loading vehicles…",
+      "loadError": "Could not load tracking list",
+      "empty": "No trackable vehicles right now. Vehicles with an active rental or GPS device appear here.",
+      "searchPlaceholder": "Search car, plate or city…",
+      "statsTotal": "Tracking",
+      "statsLive": "Live signal",
+      "statsRented": "Active rentals",
+      "activeRental": "Rented",
+      "waitingGps": "Awaiting signal",
+      "noSignalYet": "No location received yet. It should appear shortly if the renter keeps the app open."
     },
     "regions": {
       "title": "Service Regions",

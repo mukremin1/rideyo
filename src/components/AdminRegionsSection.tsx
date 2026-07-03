@@ -356,25 +356,31 @@ const AdminRegionsSection = () => {
       </div>
 
       <Tabs defaultValue="selection" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="selection">{t("admin.regions.tabSelection")}</TabsTrigger>
-          <TabsTrigger value="bolge">{t("admin.regions.tabCustomZones")}</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1">
+          <TabsTrigger value="selection" className="text-xs sm:text-sm">
+            {t("admin.regions.tabSelection")}
+          </TabsTrigger>
+          <TabsTrigger value="bolge" className="text-xs sm:text-sm">
+            {t("admin.regions.tabCustomZones")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="selection" className="space-y-4">
-          <Card>
+          <Card className="min-w-0 overflow-hidden">
             <CardContent className="space-y-4 p-4 sm:p-6">
-              <div>
+              <div className="min-w-0">
                 <h3 className="font-semibold">{t("admin.regions.quickPickerTitle")}</h3>
                 <p className="text-sm text-muted-foreground">{t("admin.regions.quickPickerDesc")}</p>
               </div>
 
-              <TurkeyRegionSelects
-                idPrefix="admin-region"
-                restrictProvinces={false}
-                value={picker}
-                onChange={setPicker}
-              />
+              <div className="min-w-0 overflow-hidden">
+                <TurkeyRegionSelects
+                  idPrefix="admin-region"
+                  restrictProvinces={false}
+                  value={picker}
+                  onChange={setPicker}
+                />
+              </div>
 
               <div className="flex flex-wrap gap-2">
                 <Button

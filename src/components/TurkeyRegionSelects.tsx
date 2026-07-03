@@ -186,15 +186,15 @@ const TurkeyRegionSelects = ({
   const emptyMahalle = !loadingNeighborhoods && value.ilce && neighborhoods.length === 0;
 
   return (
-    <div className="grid w-full max-w-full gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-      <div className="space-y-2">
+    <div className="grid w-full min-w-0 max-w-full gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="min-w-0 space-y-2">
         <Label htmlFor={`${idPrefix}-il`}>{t("common.region.il")}</Label>
         <Select
           value={value.il || undefined}
           onValueChange={onIlChange}
           disabled={disabled || loadingProvinces}
         >
-          <SelectTrigger id={`${idPrefix}-il`}>
+          <SelectTrigger id={`${idPrefix}-il`} className="w-full min-w-0">
             <SelectValue placeholder={ilPlaceholder} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
@@ -207,14 +207,14 @@ const TurkeyRegionSelects = ({
         </Select>
       </div>
 
-      <div className="space-y-2">
+      <div className="min-w-0 space-y-2">
         <Label htmlFor={`${idPrefix}-ilce`}>{t("common.region.ilce")}</Label>
         <Select
           value={value.ilce || undefined}
           onValueChange={onIlceChange}
           disabled={disabled || !value.il || loadingDistricts || emptyIlce}
         >
-          <SelectTrigger id={`${idPrefix}-ilce`}>
+          <SelectTrigger id={`${idPrefix}-ilce`} className="w-full min-w-0">
             <SelectValue placeholder={ilcePlaceholder} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
@@ -228,14 +228,14 @@ const TurkeyRegionSelects = ({
       </div>
 
       {showMahalle && (
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2 sm:col-span-2 lg:col-span-1">
           <Label htmlFor={`${idPrefix}-mahalle`}>{t("common.region.mahalle")}</Label>
           <Select
             value={value.mahalle || undefined}
             onValueChange={onMahalleChange}
             disabled={disabled || !value.ilce || loadingNeighborhoods || emptyMahalle}
           >
-            <SelectTrigger id={`${idPrefix}-mahalle`}>
+            <SelectTrigger id={`${idPrefix}-mahalle`} className="w-full min-w-0">
               <SelectValue placeholder={mahallePlaceholder} />
             </SelectTrigger>
             <SelectContent className="max-h-72">
