@@ -69,17 +69,19 @@ const Admin = () => {
 
   const checkAdminAccess = async () => {
     if (!user) {
+      setLoading(false);
       navigate("/auth");
       return;
     }
 
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
         .eq("role", "admin")
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         toast.error(t("admin.noAccess"));
@@ -88,7 +90,7 @@ const Admin = () => {
       }
 
       setIsAdmin(true);
-    } catch (error) {
+    } catch {
       navigate("/");
     } finally {
       setLoading(false);
@@ -209,6 +211,10 @@ const Admin = () => {
         </div>
       </div>
     );
+  }
+
+  if (!isAdmin) {
+    return null;
   }
 
   return (
