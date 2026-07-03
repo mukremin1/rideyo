@@ -323,7 +323,7 @@
       "securityItems": [
         "All renters pass identity and license verification",
         "Driver score and history are checked",
-        "Track your car with GPS",
+        "Rideyo administrators monitor GPS during active rentals",
         "Before and after photos for damage assessment",
         "24/7 support team always available"
       ],
@@ -383,7 +383,7 @@
         "Use in-app messaging on RideYo",
         "Try phone and WhatsApp",
         "Call RideYo support in emergencies",
-        "Check car location via GPS tracking"
+        "Contact Rideyo support if you need help during a rental"
       ],
       "bestPractices": "Best Practices",
       "maintenance": "Car Maintenance",

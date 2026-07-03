@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import GPSTracker from "@/components/GPSTracker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,8 @@ type TrackableCar = {
 
 const AdminGpsSection = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { isAdmin, loading: rolesLoading } = useUserRoles();
   const [cars, setCars] = useState<TrackableCar[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -71,8 +75,13 @@ const AdminGpsSection = () => {
   }, [t]);
 
   useEffect(() => {
+    if (rolesLoading) return;
+    if (!isAdmin) {
+      navigate("/");
+      return;
+    }
     void fetchTrackableCars();
-  }, [fetchTrackableCars]);
+  }, [fetchTrackableCars, isAdmin, navigate, rolesLoading]);
 
   const filteredCars = useMemo(() => {
     const q = search.trim().toLocaleLowerCase("tr");
