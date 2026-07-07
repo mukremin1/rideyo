@@ -90,7 +90,7 @@ const AddCar = () => {
 
     type: "compact",
 
-    pricePerMinute: "",
+    pricePerMinute: "5",
 
     pricePerHour: "",
 

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,16 +14,14 @@ import {
   Camera, 
   CheckCircle, 
   MapPin, 
-  AlertTriangle,
   Key,
-  ArrowRight,
   Loader2,
   Navigation,
   Bell
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { isBookingPaid } from "@/lib/paymentStatus";
+import { isBookingPaid, isRentalActive } from "@/lib/paymentStatus";
 import { createSupabaseInvoker, invokeVehicleControl } from "@/lib/serverApi";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useTranslation } from "react-i18next";
@@ -65,27 +63,25 @@ const StartRental = () => {
     locationState?.bookingId && locationState?.carId ? locationState : null,
   );
 
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const [locking, setLocking] = useState(false);
-  const [beforePhotos, setBeforePhotos] = useState<string[]>([]);
   const [afterPhotos, setAfterPhotos] = useState<string[]>([]);
   const [damageNotes, setDamageNotes] = useState("");
-  const [carLocation, setCarLocation] = useState("");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [rentalStarted, setRentalStarted] = useState(false);
   const [rentalEnded, setRentalEnded] = useState(false);
   const [carGPSData, setCarGPSData] = useState<{ latitude: number; longitude: number } | null>(null);
   const [lastGPSData, setLastGPSData] = useState<{ latitude: number; longitude: number } | null>(null);
   const [rentalStartTime, setRentalStartTime] = useState<Date | null>(null);
+  const [prepaidEndTime, setPrepaidEndTime] = useState<Date | null>(null);
   const [elapsedMinutes, setElapsedMinutes] = useState(0);
+  const [remainingMinutes, setRemainingMinutes] = useState(0);
+  const [timeExpired, setTimeExpired] = useState(false);
+  const warnedThresholds = useRef<Set<number>>(new Set());
   const [distanceKm, setDistanceKm] = useState(0);
-  const [lastAutoUnlockAt, setLastAutoUnlockAt] = useState<number | null>(null);
-  const [autoUnlockArmed, setAutoUnlockArmed] = useState(true);
   const [bookingValidationLoading, setBookingValidationLoading] = useState(true);
   const [bookingValidated, setBookingValidated] = useState(false);
-  const [carUnlocked, setCarUnlocked] = useState(false);
   const [locationSharingConsent, setLocationSharingConsent] = useState(false);
 
   useRentalLocationBroadcast({
@@ -94,9 +90,7 @@ const StartRental = () => {
     enabled: rentalStarted && !rentalEnded && locationSharingConsent,
   });
 
-  const AUTO_UNLOCK_DISTANCE_METERS = 30;
-  const AUTO_UNLOCK_RESET_DISTANCE_METERS = 60;
-  const AUTO_UNLOCK_INTERVAL_MS = 15000;
+  const NEAR_CAR_DISTANCE_METERS = 30;
 
   const callVehicleControl = async (body: Record<string, unknown>): Promise<VehicleControlResponse> => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -123,19 +117,21 @@ const StartRental = () => {
   };
 
   useEffect(() => {
-    // Kullanıcı konumunu al
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => console.error("Konum alınamadı:", error)
-      );
-    }
-  }, []);
+    if (rentalStarted || !navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (error) => console.error("Konum alınamadı:", error),
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [rentalStarted]);
 
   // Araç GPS verilerini çek ve dinle
   useEffect(() => {
@@ -198,51 +194,40 @@ const StartRental = () => {
   }, [carGPSData, rentalStarted, lastGPSData]);
 
   useEffect(() => {
-    if (rentalStarted || unlocking) return;
-    if (!userLocation || !carGPSData) return;
-    if (step !== 1) return;
+    if (!rentalStarted || !rentalStartTime) return;
 
-    const checkAndUnlock = () => {
-      const distanceKm = calculateDistanceKm(
-        { latitude: userLocation.lat, longitude: userLocation.lng },
-        carGPSData
-      );
+    const tick = () => {
+      const diffMs = Date.now() - rentalStartTime.getTime();
+      setElapsedMinutes(Math.max(0, Math.floor(diffMs / 60000)));
 
-      if (!Number.isFinite(distanceKm)) return;
+      if (prepaidEndTime) {
+        const remainingMs = prepaidEndTime.getTime() - Date.now();
+        const remaining = Math.max(0, Math.ceil(remainingMs / 60000));
+        setRemainingMinutes(remaining);
+        const expired = remainingMs <= 0;
+        setTimeExpired(expired);
 
-      const distanceMeters = distanceKm * 1000;
-
-      if (distanceMeters >= AUTO_UNLOCK_RESET_DISTANCE_METERS && !autoUnlockArmed) {
-        setAutoUnlockArmed(true);
-        return;
-      }
-
-      if (distanceMeters <= AUTO_UNLOCK_DISTANCE_METERS && autoUnlockArmed) {
-        const now = Date.now();
-        if (!lastAutoUnlockAt || now - lastAutoUnlockAt >= AUTO_UNLOCK_INTERVAL_MS) {
-          setLastAutoUnlockAt(now);
-          setAutoUnlockArmed(false);
-          handleUnlockCar();
+        if (rentalInfo?.rentalType === "minute" || rentalInfo?.rentalType === "hour") {
+          if (remaining === 5 && !warnedThresholds.current.has(5)) {
+            warnedThresholds.current.add(5);
+            toast.warning(t("rental.timeWarning5"));
+          }
+          if (remaining === 1 && !warnedThresholds.current.has(1)) {
+            warnedThresholds.current.add(1);
+            toast.warning(t("rental.timeWarning1"));
+          }
+          if (expired && !warnedThresholds.current.has(0)) {
+            warnedThresholds.current.add(0);
+            toast.error(t("rental.timeExpired"));
+          }
         }
       }
     };
 
-    checkAndUnlock();
-    const interval = setInterval(checkAndUnlock, AUTO_UNLOCK_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [rentalStarted, unlocking, userLocation, carGPSData, step, lastAutoUnlockAt, autoUnlockArmed]);
-
-  useEffect(() => {
-    if (!rentalStarted || !rentalStartTime) return;
-
-    const timer = setInterval(() => {
-      const diffMs = Date.now() - rentalStartTime.getTime();
-      setElapsedMinutes(Math.max(0, Math.floor(diffMs / 60000)));
-    }, 30000);
-
+    tick();
+    const timer = setInterval(tick, 10000);
     return () => clearInterval(timer);
-  }, [rentalStarted, rentalStartTime]);
+  }, [rentalStarted, rentalStartTime, prepaidEndTime, rentalInfo?.rentalType, t]);
 
   useEffect(() => {
     const validateAndLoadBooking = async () => {
@@ -261,7 +246,7 @@ const StartRental = () => {
       setBookingValidationLoading(true);
       const { data, error } = await supabase
         .from("bookings")
-        .select("id, user_id, payment_status, car_id, rental_type, cars(name)")
+        .select("id, user_id, payment_status, car_id, rental_type, start_time, end_time, cars(name)")
         .eq("id", activeBookingId)
         .eq("user_id", user.id)
         .maybeSingle();
@@ -298,6 +283,16 @@ const StartRental = () => {
         rentalType,
       });
       setBookingValidated(true);
+
+      if (isRentalActive(data.payment_status)) {
+        setRentalStarted(true);
+        setLocationSharingConsent(true);
+        setRentalStartTime(new Date(data.start_time));
+        if (data.end_time) {
+          setPrepaidEndTime(new Date(data.end_time));
+        }
+      }
+
       setBookingValidationLoading(false);
     };
 
@@ -360,6 +355,20 @@ const StartRental = () => {
     return null;
   }
 
+  const distanceToCarMeters =
+    userLocation && carGPSData
+      ? calculateDistanceKm(
+          { latitude: userLocation.lat, longitude: userLocation.lng },
+          carGPSData,
+        ) * 1000
+      : null;
+
+  const hasCarPosition = Boolean(carGPSData);
+  const nearCar =
+    Boolean(userLocation) &&
+    (!hasCarPosition ||
+      (distanceToCarMeters !== null && distanceToCarMeters <= NEAR_CAR_DISTANCE_METERS));
+
   const handleUnlockCar = async () => {
     if (!user) return;
     setUnlocking(true);
@@ -376,7 +385,6 @@ const StartRental = () => {
 
       if (data.success) {
         toast.success(data.message);
-        setCarUnlocked(true);
       } else {
         throw new Error(data.error);
       }
@@ -417,18 +425,23 @@ const StartRental = () => {
   };
 
   const handleStartRental = async () => {
-    if (!bookingValidated) {
+    if (!bookingValidated || !user) {
       toast.error(t("rental.validationRetry"));
       return;
     }
 
-    if (!carUnlocked) {
-      toast.error(t("rental.unlockBeforeStart"));
+    if (!userLocation) {
+      toast.error(t("rental.locationRequired"));
       return;
     }
 
-    if (!user || beforePhotos.length === 0) {
-      toast.error(t("rental.takePhotosFirst"));
+    if (!nearCar) {
+      toast.error(
+        t("rental.notNearCar", {
+          meters: NEAR_CAR_DISTANCE_METERS,
+          current: Math.round(distanceToCarMeters ?? 0),
+        }),
+      );
       return;
     }
 
@@ -440,42 +453,42 @@ const StartRental = () => {
     setLoading(true);
 
     try {
-      // Fotoğrafları kaydet
-      for (const photo of beforePhotos) {
-        await supabase.from('vehicle_photos').insert({
-          booking_id: rentalInfo.bookingId,
-          car_id: rentalInfo.carId,
-          user_id: user.id,
-          photo_type: 'before_rental',
-          photo_url: photo,
-          notes: damageNotes || null,
-        });
-      }
-
-      // Kiralamayı başlat
       const data = await callVehicleControl({
         action: "start_rental",
         carId: rentalInfo.carId,
         bookingId: rentalInfo.bookingId,
         userId: user.id,
-        latitude: userLocation?.lat,
-        longitude: userLocation?.lng,
-        notes: `Konum: ${carLocation}`,
+        latitude: userLocation.lat,
+        longitude: userLocation.lng,
+        notes: "Kiralama arac yaninda baslatildi",
       });
 
-      const response = data;
-      if (response.success) {
+      if (data.success) {
         toast.success(t("rental.startSuccess"));
         sendRentalNotification("start", rentalInfo.carName);
         setRentalStarted(true);
-        const startTime = new Date();
-        setRentalStartTime(startTime);
+        warnedThresholds.current.clear();
+
+        const { data: bookingRow } = await supabase
+          .from("bookings")
+          .select("start_time, end_time")
+          .eq("id", rentalInfo.bookingId)
+          .maybeSingle();
+
+        if (bookingRow?.start_time) {
+          setRentalStartTime(new Date(bookingRow.start_time));
+        } else {
+          setRentalStartTime(new Date());
+        }
+        if (bookingRow?.end_time) {
+          setPrepaidEndTime(new Date(bookingRow.end_time));
+        }
+
         if (carGPSData) {
           setLastGPSData(carGPSData);
         }
-        setStep(4);
       } else {
-        throw new Error(response.error ?? t("rental.startFailed"));
+        throw new Error(data.error ?? t("rental.startFailed"));
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : t("rental.startFailed");
@@ -485,8 +498,9 @@ const StartRental = () => {
     }
   };
 
-  const handleEndRental = async () => {
-    if (!user || afterPhotos.length === 0) {
+  const handleEndRental = async (options?: { skipPhotos?: boolean; autoExpired?: boolean }) => {
+    if (!user) return;
+    if (!options?.skipPhotos && afterPhotos.length === 0) {
       toast.error(t("rental.takePhotosFirst"));
       return;
     }
@@ -524,16 +538,22 @@ const StartRental = () => {
       }
 
       // Fotoğrafları kaydet
-      for (const photo of afterPhotos) {
-        await supabase.from('vehicle_photos').insert({
-          booking_id: rentalInfo.bookingId,
-          car_id: rentalInfo.carId,
-          user_id: user.id,
-          photo_type: 'after_rental',
-          photo_url: photo,
-          notes: damageNotes || null,
-        });
+      if (!options?.skipPhotos) {
+        for (const photo of afterPhotos) {
+          await supabase.from('vehicle_photos').insert({
+            booking_id: rentalInfo.bookingId,
+            car_id: rentalInfo.carId,
+            user_id: user.id,
+            photo_type: 'after_rental',
+            photo_url: photo,
+            notes: damageNotes || null,
+          });
+        }
       }
+
+      const endNotes = options?.autoExpired
+        ? `On odemeli sure doldu — otomatik bitirildi. Konum: ${dropoff.address || ""}`
+        : `Anahtar torpidoya bırakıldı. Konum: ${dropoff.address || ""}`;
 
       // Kiralamayı bitir
       const data = await callVehicleControl({
@@ -547,7 +567,7 @@ const StartRental = () => {
         district: dropoff.parsed.ilce || undefined,
         neighborhood: dropoff.parsed.mahalle || undefined,
         dropoffAddress: dropoff.address,
-        notes: `Anahtar torpidoya bırakıldı. Konum: ${dropoff.address || carLocation}`,
+        notes: endNotes,
       });
 
       const response = data;
@@ -574,15 +594,15 @@ const StartRental = () => {
     }
   };
 
-  const renderUnlockStep = () => (
+  const renderReadyToStart = () => (
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Unlock className="w-5 h-5 text-primary" />
+          <Car className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">{t("rental.step1Title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("rental.step1Desc")}</p>
+          <h2 className="text-lg font-semibold">{t("rental.readyTitle")}</h2>
+          <p className="text-sm text-muted-foreground">{t("rental.readyDesc")}</p>
         </div>
       </div>
 
@@ -592,163 +612,32 @@ const StartRental = () => {
         </div>
       )}
 
-      <div className="text-center py-4">
-        <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-          <Car className="w-12 h-12 text-primary" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2">{rentalInfo.carName}</h3>
-        <p className="text-muted-foreground mb-6">{t("rental.nearCar")}</p>
-        <p className="text-xs text-muted-foreground mb-4">
-          {t("rental.autoUnlock", { meters: AUTO_UNLOCK_DISTANCE_METERS })}
-        </p>
-
-        <Button 
-          size="lg" 
-          className="w-full max-w-xs gap-2"
-          onClick={handleUnlockCar}
-          disabled={unlocking}
-        >
-          {unlocking ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              {t("rental.unlocking")}
-            </>
-          ) : carUnlocked ? (
-            <>
-              <CheckCircle className="w-5 h-5" />
-              {t("rental.doorsOpen")}
-            </>
-          ) : (
-            <>
-              <Unlock className="w-5 h-5" />
-              {t("rental.unlockDoors")}
-            </>
-          )}
-        </Button>
-      </div>
-
-      <Button 
-        className="w-full mt-4" 
-        onClick={() => setStep(2)}
-        disabled={!carUnlocked}
-      >
-        {carUnlocked ? t("common.continue") : t("rental.unlockFirst")} <ArrowRight className="w-4 h-4 ml-2" />
-      </Button>
-    </Card>
-  );
-
-  const renderPhotoStep = () => (
-    <Card className="p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Camera className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold">{t("rental.step2Title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("rental.step2Desc")}</p>
-        </div>
-      </div>
-
-      <div className="flex items-start gap-3 p-4 bg-green-500/10 rounded-lg mb-6">
-        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
-        <div>
-          <p className="font-medium text-green-700 dark:text-green-400">{t("rental.unlockedBanner")}</p>
-          <p className="text-sm text-muted-foreground">{t("rental.unlockedBannerDesc")}</p>
-        </div>
-      </div>
-
-      <VehiclePhotoCapture
-        onPhotosChange={setBeforePhotos}
-        photos={beforePhotos}
-        maxPhotos={4}
-      />
-
-      <div className="mt-6 space-y-4">
-        <div>
-          <Label htmlFor="damageNotes">{t("rental.damageNotes")}</Label>
-          <Textarea
-            id="damageNotes"
-            placeholder={t("rental.damagePlaceholder")}
-            value={damageNotes}
-            onChange={(e) => setDamageNotes(e.target.value)}
-            className="mt-2"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="carLocation">{t("rental.carLocation")}</Label>
-          <div className="flex gap-2 mt-2">
-            <div className="flex-1 relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                id="carLocation"
-                type="text"
-                placeholder={t("rental.carLocationPlaceholder")}
-                value={carLocation}
-                onChange={(e) => setCarLocation(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg bg-background"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Button 
-        className="w-full mt-6" 
-        onClick={() => setStep(3)}
-        disabled={beforePhotos.length === 0}
-      >
-        {t("common.continue")} <ArrowRight className="w-4 h-4 ml-2" />
-      </Button>
-    </Card>
-  );
-
-  const renderStartStep = () => (
-    <Card className="p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Key className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold">{t("rental.step3Title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("rental.step3Desc")}</p>
-        </div>
-      </div>
-
       <div className="space-y-4 mb-6">
-        <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
-          <Unlock className="w-5 h-5 text-green-500 mt-0.5" />
-          <div>
-            <p className="font-medium">{t("rental.doorsUnlockedCheck")}</p>
-            <p className="text-sm text-muted-foreground">{t("rental.doorsUnlockedCheckDesc")}</p>
+        {!userLocation ? (
+          <div className="flex items-center gap-3 p-4 bg-muted rounded-lg text-sm text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+            {t("rental.waitingLocation")}
           </div>
-        </div>
-
-        <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
-          <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
-          <div>
-            <p className="font-medium">{t("rental.photosTaken")}</p>
-            <p className="text-sm text-muted-foreground">{t("rental.photosCount", { count: beforePhotos.length })}</p>
-          </div>
-        </div>
-
-        {damageNotes && (
-          <div className="flex items-start gap-3 p-4 bg-amber-500/10 rounded-lg">
-            <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5" />
+        ) : hasCarPosition && distanceToCarMeters !== null ? (
+          <div
+            className={`flex items-center gap-3 p-4 rounded-lg ${
+              nearCar ? "bg-green-500/10" : "bg-amber-500/10"
+            }`}
+          >
+            <MapPin className={`w-5 h-5 shrink-0 ${nearCar ? "text-green-600" : "text-amber-600"}`} />
             <div>
-              <p className="font-medium">{t("rental.damageNoteAdded")}</p>
-              <p className="text-sm text-muted-foreground">{damageNotes}</p>
+              <p className={`font-medium ${nearCar ? "text-green-700 dark:text-green-400" : "text-amber-700 dark:text-amber-400"}`}>
+                {nearCar ? t("rental.atCar") : t("rental.approachCar")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t("rental.distanceToCar", { meters: Math.round(distanceToCarMeters) })}
+              </p>
             </div>
           </div>
-        )}
-
-        {carLocation && (
-          <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
-            <MapPin className="w-5 h-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-medium">{t("rental.locationSaved")}</p>
-              <p className="text-sm text-muted-foreground">{carLocation}</p>
-            </div>
+        ) : (
+          <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+            <MapPin className="w-5 h-5 text-primary shrink-0" />
+            <p className="text-sm text-muted-foreground">{t("rental.nearCar")}</p>
           </div>
         )}
       </div>
@@ -771,7 +660,7 @@ const StartRental = () => {
         size="lg"
         className="w-full gap-2 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--accent)))] shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)] hover:opacity-95"
         onClick={handleStartRental}
-        disabled={loading || !locationSharingConsent}
+        disabled={loading || !locationSharingConsent || !nearCar}
       >
         {loading ? (
           <>
@@ -780,11 +669,17 @@ const StartRental = () => {
           </>
         ) : (
           <>
-            <Car className="w-5 h-5" />
+            <Key className="w-5 h-5" />
             {t("rental.startRental")}
           </>
         )}
       </Button>
+
+      {hasCarPosition && !nearCar && userLocation && (
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          {t("rental.startWhenNear", { meters: NEAR_CAR_DISTANCE_METERS })}
+        </p>
+      )}
     </Card>
   );
 
@@ -821,16 +716,38 @@ const StartRental = () => {
             {t("rental.lockDoors")}
           </Button>
         </div>
+        {timeExpired && (rentalInfo.rentalType === "minute" || rentalInfo.rentalType === "hour") && (
+          <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            {t("rental.timeExpiredBanner")}
+          </div>
+        )}
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div className="p-3 bg-background rounded-lg border border-border">
             <p className="text-muted-foreground">{t("rental.elapsedTime")}</p>
             <p className="text-lg font-semibold">{elapsedMinutes} {t("rental.minutes")}</p>
           </div>
-          <div className="p-3 bg-background rounded-lg border border-border">
-            <p className="text-muted-foreground">{t("rental.totalDistance")}</p>
-            <p className="text-lg font-semibold">{distanceKm.toFixed(2)} {t("rental.km")}</p>
-          </div>
+          {prepaidEndTime && (rentalInfo.rentalType === "minute" || rentalInfo.rentalType === "hour") ? (
+            <div className={`p-3 rounded-lg border ${timeExpired ? "border-destructive/50 bg-destructive/5" : "border-border bg-background"}`}>
+              <p className="text-muted-foreground">{t("rental.remainingTime")}</p>
+              <p className={`text-lg font-semibold ${timeExpired ? "text-destructive" : ""}`}>
+                {remainingMinutes} {t("rental.minutes")}
+              </p>
+            </div>
+          ) : (
+            <div className="p-3 bg-background rounded-lg border border-border">
+              <p className="text-muted-foreground">{t("rental.totalDistance")}</p>
+              <p className="text-lg font-semibold">{distanceKm.toFixed(2)} {t("rental.km")}</p>
+            </div>
+          )}
         </div>
+        {prepaidEndTime && (rentalInfo.rentalType === "minute" || rentalInfo.rentalType === "hour") && (
+          <div className="mt-4 grid grid-cols-1 gap-4 text-sm">
+            <div className="p-3 bg-background rounded-lg border border-border">
+              <p className="text-muted-foreground">{t("rental.totalDistance")}</p>
+              <p className="text-lg font-semibold">{distanceKm.toFixed(2)} {t("rental.km")}</p>
+            </div>
+          </div>
+        )}
       </Card>
 
       <Card className="p-6">
@@ -957,37 +874,11 @@ const StartRental = () => {
               ? t("rental.titleCompleted")
               : rentalStarted
                 ? t("rental.titleActive")
-                : step === 1
-                  ? t("rental.titleUnlock")
-                  : t("rental.titleStart")}
+                : t("rental.titleStart")}
           </h1>
           <p className="text-muted-foreground mb-8">{rentalInfo.carName}</p>
 
-          {/* Progress Steps */}
-          {!rentalStarted && !rentalEnded && (
-            <div className="flex items-center justify-between mb-8">
-              {[1, 2, 3].map((s) => (
-                <div key={s} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step >= s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {step > s ? <CheckCircle className="w-4 h-4" /> : s}
-                  </div>
-                  {s < 3 && (
-                    <div className={`w-16 h-1 mx-2 ${step > s ? 'bg-primary' : 'bg-muted'}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {rentalEnded ? renderCompleted() : rentalStarted ? renderActiveRental() : (
-            <>
-              {step === 1 && renderUnlockStep()}
-              {step === 2 && renderPhotoStep()}
-              {step === 3 && renderStartStep()}
-            </>
-          )}
+          {rentalEnded ? renderCompleted() : rentalStarted ? renderActiveRental() : renderReadyToStart()}
         </div>
       </main>
 

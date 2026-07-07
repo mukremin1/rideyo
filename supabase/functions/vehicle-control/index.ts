@@ -140,7 +140,27 @@ serve(async (req) => {
         if (error) throw error;
 
         if (bookingId) {
-          await supabase.from("bookings").update({ payment_status: "in_progress" }).eq("id", bookingId);
+          const { data: booking } = await supabase
+            .from("bookings")
+            .select("start_time, end_time")
+            .eq("id", bookingId)
+            .maybeSingle();
+
+          const now = new Date();
+          let bookingUpdate: Record<string, unknown> = {
+            payment_status: "in_progress",
+            start_time: now.toISOString(),
+          };
+
+          if (booking?.start_time && booking?.end_time) {
+            const prepaidMs =
+              new Date(booking.end_time).getTime() - new Date(booking.start_time).getTime();
+            if (prepaidMs > 0) {
+              bookingUpdate.end_time = new Date(now.getTime() + prepaidMs).toISOString();
+            }
+          }
+
+          await supabase.from("bookings").update(bookingUpdate).eq("id", bookingId);
         }
 
         await supabase.from("vehicle_actions").insert({

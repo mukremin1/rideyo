@@ -8,19 +8,14 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 
+import { applyPendingOAuthProfile } from "@/lib/socialAuth";
+
+
 import {
-
   hasAuthCallbackParams,
-
   isPkceVerifierError,
-
   parseAuthCallbackParams,
-
 } from "@/lib/authCallback";
-
-
-
-/** Completes email verification / password-reset callbacks from mail links. */
 
 const AuthEmailCallback = () => {
 
@@ -92,9 +87,9 @@ const AuthEmailCallback = () => {
 
           if (isPkceVerifierError(error.message)) {
 
-            toast.error(t("auth.toast.resetLinkPkceError"));
+            toast.error(t(isRecovery ? "auth.toast.resetLinkPkceError" : "auth.toast.oauthPkceError"));
 
-            navigate("/auth?forgot=1", { replace: true });
+            navigate(isRecovery ? "/auth?forgot=1" : "/auth", { replace: true });
 
           } else {
 
@@ -153,6 +148,10 @@ const AuthEmailCallback = () => {
 
 
       if (session) {
+
+        await applyPendingOAuthProfile(session);
+
+        toast.success(t("auth.toast.signInSuccess"));
 
         navigate("/", { replace: true });
 

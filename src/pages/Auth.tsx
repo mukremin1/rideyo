@@ -18,6 +18,8 @@ import { z } from "zod";
 import { getAuthRedirectUrl, getAuthErrorMessage } from "@/lib/authRedirect";
 import { isDuplicateSignupUser, sendVerificationEmail } from "@/lib/verificationEmail";
 import { authPageScroll, authPageShell } from "@/lib/mobileLayout";
+import SocialAuthButtons from "@/components/SocialAuthButtons";
+import PhoneAuthSection from "@/components/PhoneAuthSection";
 
 const createSignInSchema = (t: TFunction) =>
   z.object({
@@ -496,6 +498,9 @@ const Auth = () => {
                 </form>
               ) : (
               <form onSubmit={handleSignIn} className="space-y-3 sm:space-y-4">
+                <PhoneAuthSection />
+                <SocialAuthButtons disabled={loading} />
+
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">{t("auth.fields.email")}</Label>
                   <Input

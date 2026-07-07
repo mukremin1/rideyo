@@ -1014,6 +1014,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_oauth_signup_role: {
+        Args: { p_user_type: string }
+        Returns: undefined
+      }
+      get_auth_user_id_by_phone: {
+        Args: { p_phone: string }
+        Returns: string
+      }
       check_driver_eligibility: {
         Args: { p_user_id: string }
         Returns: {

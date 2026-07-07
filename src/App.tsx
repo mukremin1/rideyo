@@ -10,6 +10,7 @@ import BottomNav from "@/components/BottomNav";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import NfcLoginVerificationPrompt from "@/components/NfcLoginVerificationPrompt";
 import AuthEmailCallback from "@/components/AuthEmailCallback";
+import OAuthDeepLinkHandler from "@/components/OAuthDeepLinkHandler";
 import Index from "./pages/Index";
 import Cars from "./pages/Cars";
 import CarDetail from "./pages/CarDetail";
@@ -62,6 +63,7 @@ const App = () => (
           <Chatbot />
           <GeolocationProvider>
           <AuthEmailCallback />
+          <OAuthDeepLinkHandler />
           <NfcLoginVerificationPrompt />
           <Routes>
             <Route path="/" element={<Index />} />

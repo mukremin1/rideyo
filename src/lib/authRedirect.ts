@@ -36,6 +36,15 @@ export function getAuthErrorMessage(error: { message: string }, t: (key: string)
   if (msg.includes("rate limit") || msg.includes("too many")) {
     return t("auth.toast.emailRateLimit");
   }
+  if (msg.includes("invalid") && msg.includes("otp")) {
+    return t("auth.phoneSignIn.invalidOtp");
+  }
+  if (msg.includes("phone") && (msg.includes("invalid") || msg.includes("format"))) {
+    return t("auth.phoneSignIn.invalidPhone");
+  }
+  if (msg.includes("sms") && msg.includes("not enabled")) {
+    return t("auth.phoneSignIn.smsNotEnabled");
+  }
   if (msg.includes("already confirmed") || msg.includes("email address has already been verified")) {
     return t("auth.toast.emailAlreadyConfirmed");
   }
