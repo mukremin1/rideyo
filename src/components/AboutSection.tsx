@@ -1,11 +1,10 @@
-import { Shield, Users, Clock, Award } from "lucide-react";
+import { Shield, Clock, Award } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const AboutSection = () => {
   const { t } = useTranslation();
 
   const stats = [
-    { icon: Users, value: "50.000+", labelKey: "users" },
     { icon: Shield, value: "%100", labelKey: "secure" },
     { icon: Clock, value: "7/24", labelKey: "support" },
     { icon: Award, value: "5 Yıl", labelKey: "experience" },
@@ -23,7 +22,7 @@ const AboutSection = () => {
           </p>
         </div>
 
-        <div className="mb-12 grid grid-cols-2 gap-6 md:grid-cols-4">
+        <div className="mb-12 grid grid-cols-2 gap-6 md:grid-cols-3">
           {stats.map((stat) => (
             <div
               key={stat.labelKey}
