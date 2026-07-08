@@ -20,7 +20,7 @@ interface InsurancePackagesProps {
 const InsurancePackages = ({ onSelect, selectedPackage, rentalType }: InsurancePackagesProps) => {
   const { t } = useTranslation();
 
-  if (rentalType !== "day") {
+  if (rentalType !== "day" && rentalType !== "month") {
     return null;
   }
 

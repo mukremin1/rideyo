@@ -11,6 +11,7 @@ import { MapPin, Fuel } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { resolveCoordinatesFromLocation, type LatLngTuple } from "@/lib/locationGeocoding";
 import { cn } from "@/lib/utils";
+import { carIsVisibleInListings } from "@/lib/carGps";
 
 // Fix for default marker icon
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -99,10 +100,10 @@ const CarsMap = ({
     const fetchCars = async () => {
       const { data, error } = await supabase
         .from("cars")
-        .select("id, name, latitude, longitude, location, type, price_per_hour, fuel_type, available")
+        .select("id, name, latitude, longitude, location, type, price_per_hour, fuel_type, available, gps_device_id, last_gps_update")
         .eq("available", true);
 
-      if (!error && data) setCars(data);
+      if (!error && data) setCars(data.filter(carIsVisibleInListings));
       setLoading(false);
     };
 

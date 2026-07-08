@@ -256,6 +256,7 @@ serve(async (req) => {
         iyzico_conversation_id: conversationId,
         rental_amount: rentalAmount || chargeAmount,
         provision_fee: provisionFee,
+        ...(body.savedCardId ? { payment_saved_card_id: body.savedCardId } : {}),
       })
       .eq("id", row.id);
 

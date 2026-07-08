@@ -319,6 +319,28 @@ const MyBookings = () => {
                   </Button>
                 )}
 
+                {booking.payment_status === "in_progress" && (
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      navigate(`/start-rental?bookingId=${booking.id}`, {
+                        state: {
+                          bookingId: booking.id,
+                          carId: booking.car_id,
+                          carName: booking.cars?.name,
+                          rentalType:
+                            booking.rental_type === "hour" || booking.rental_type === "day"
+                              ? booking.rental_type
+                              : "minute",
+                        },
+                      })
+                    }
+                  >
+                    <Play className="w-4 h-4 mr-1" />
+                    {t("bookings.continueRental")}
+                  </Button>
+                )}
+
                 {isBookingPaid(booking.payment_status) &&
                   !isPast(parseISO(booking.end_time)) &&
                   booking.payment_status !== "in_progress" && (

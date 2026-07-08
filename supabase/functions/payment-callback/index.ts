@@ -101,7 +101,13 @@ serve(async (req) => {
     const cardUserKey = authRes.cardUserKey as string | undefined;
     const cardToken = authRes.cardToken as string | undefined;
     if (cardUserKey && cardToken && booking?.user_id) {
-      await saveCardToken(adminClient, booking.user_id, authRes);
+      const savedCardId = await saveCardToken(adminClient, booking.user_id, authRes);
+      if (savedCardId) {
+        await adminClient
+          .from("bookings")
+          .update({ payment_saved_card_id: savedCardId })
+          .eq("id", resolvedBookingId);
+      }
     }
 
     const returnUrl = getAppReturnUrl(resolvedBookingId) + "&status=success";
@@ -181,7 +187,7 @@ async function saveCardToken(
   adminClient: ReturnType<typeof createClient>,
   userId: string,
   authRes: Record<string, unknown>,
-) {
+): Promise<string | null> {
   const cardUserKey = authRes.cardUserKey as string;
   const cardToken = authRes.cardToken as string;
   const lastFour = (authRes.lastFourDigits as string) ?? "0000";
@@ -199,20 +205,26 @@ async function saveCardToken(
     .eq("iyzico_card_token", cardToken)
     .maybeSingle();
 
-  if (existing) return;
+  if (existing) return existing.id;
 
-  await adminClient.from("saved_cards").insert({
-    user_id: userId,
-    card_holder_name: "Kayıtlı Kart",
-    card_type: association,
-    expiry_month: 12,
-    expiry_year: 2030,
-    last_four_digits: lastFour,
-    encrypted_card_token: cardToken,
-    iyzico_card_token: cardToken,
-    iyzico_card_user_key: cardUserKey,
-    is_default: false,
-  });
+  const { data: inserted } = await adminClient
+    .from("saved_cards")
+    .insert({
+      user_id: userId,
+      card_holder_name: "Kayıtlı Kart",
+      card_type: association,
+      expiry_month: 12,
+      expiry_year: 2030,
+      last_four_digits: lastFour,
+      encrypted_card_token: cardToken,
+      iyzico_card_token: cardToken,
+      iyzico_card_user_key: cardUserKey,
+      is_default: false,
+    })
+    .select("id")
+    .single();
+
+  return inserted?.id ?? null;
 }
 
 function redirectWithError(message: string): Response {

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { MapPin, Users, Fuel, Settings, Shield, Clock, ArrowLeft, Star, Lock, Unlock, Navigation, Calendar, TrendingUp, UserPlus } from "lucide-react";
+import { MapPin, Users, Fuel, Settings, Shield, Clock, ArrowLeft, Star, Lock, Unlock, Navigation, Calendar, TrendingUp, UserPlus, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,10 +15,32 @@ import InsurancePackages from "@/components/InsurancePackages";
 import CarLocationMap from "@/components/CarLocationMap";
 import { checkRentalEligibility } from "@/lib/rentalEligibility";
 import { fetchActiveCampaignForCarType, type ActiveCampaign } from "@/lib/campaigns";
-import { computeRentalPricing, ADDITIONAL_DRIVER_DAILY_FEE, MINUTE_RENTAL_OPTIONS } from "@/lib/rentalPricing";
+import {
+  computeRentalPricing,
+  ADDITIONAL_DRIVER_DAILY_FEE,
+  MINUTE_RENTAL_OPTIONS,
+  HOUR_RENTAL_OPTIONS,
+  computeHourlyRentalBase,
+  HALF_HOUR_MIN_PRICE,
+  KM_PRICE_PER_UNIT,
+  resolveIncludedKm,
+  computeKmPackagePrice,
+} from "@/lib/rentalPricing";
 import { createBookingRecord } from "@/lib/bookings";
+import KmPackagePicker from "@/components/KmPackagePicker";
+import LongTermDeliveryPicker from "@/components/LongTermDeliveryPicker";
 import { Checkbox } from "@/components/ui/checkbox";
-import carCompact from "@/assets/car-compact.jpg";
+import {
+  carHasGpsDevice,
+  carHasRecentGpsSignal,
+} from "@/lib/carGps";
+import {
+  computeLongTermEndTime,
+  getDefaultScheduledDate,
+  getDefaultScheduledTime,
+  resolveLongTermStartTime,
+  type LongTermDeliveryMode,
+} from "@/lib/longTermDelivery";
 import carSedan from "@/assets/car-sedan.jpg";
 import carSuv from "@/assets/car-suv.jpg";
 
@@ -43,6 +65,8 @@ interface Car {
   lock_status: string | null;
   latitude: number | null;
   longitude: number | null;
+  gps_device_id: string | null;
+  last_gps_update: string | null;
 }
 interface SubscriptionInfo {
   tier: string;
@@ -63,7 +87,8 @@ const CarDetail = () => {
   const { user } = useAuth();
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPricing, setSelectedPricing] = useState<"minute" | "hour" | "day" | null>("minute");
+  const [selectedPricing, setSelectedPricing] = useState<"minute" | "hour" | "day" | "month" | null>("minute");
+  const [activeRentalTab, setActiveRentalTab] = useState<"minute" | "hour" | "day" | "month">("minute");
   const [selectedKmPackage, setSelectedKmPackage] = useState<string | null>(null);
   const [selectedInsurance, setSelectedInsurance] = useState<string | null>(null);
   const [insurancePrice, setInsurancePrice] = useState(0);
@@ -72,6 +97,7 @@ const CarDetail = () => {
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [trafficDelayMinutes, setTrafficDelayMinutes] = useState(10);
   const [rentalDays, setRentalDays] = useState(1);
+  const [rentalMonths, setRentalMonths] = useState(1);
   const [rentalHours, setRentalHours] = useState(0.5);
   const [rentalMinutes, setRentalMinutes] = useState(15);
   const [serviceZones, setServiceZones] = useState<ServiceZone[]>([]);
@@ -83,21 +109,91 @@ const CarDetail = () => {
   const [additionalDriverEnabled, setAdditionalDriverEnabled] = useState(false);
   const [additionalDriverName, setAdditionalDriverName] = useState("");
   const [additionalDriverLicense, setAdditionalDriverLicense] = useState("");
-  const KM_PRICE_PER_UNIT = 15;
-  const kmPackages = [
-    { id: "100", label: t("carDetail.kmPackage100"), price: 1000 },
-    { id: "200", label: t("carDetail.kmPackage200"), price: 2000 },
-    { id: "none", label: t("carDetail.kmPackageNone", { price: KM_PRICE_PER_UNIT }), price: 0 },
-  ];
-  const selectedKmPackageData = kmPackages.find((pkg) => pkg.id === selectedKmPackage) || null;
-  const kmPackagePrice = selectedKmPackageData?.price ?? 0;
+  const [deliveryMode, setDeliveryMode] = useState<LongTermDeliveryMode>("immediate");
+  const [scheduledPickupDate, setScheduledPickupDate] = useState("");
+  const [scheduledPickupTime, setScheduledPickupTime] = useState("");
+  const kmPackagePrice =
+    selectedKmPackage && selectedKmPackage !== "none"
+      ? computeKmPackagePrice(selectedKmPackage)
+      : 0;
+  const selectedKmPackageLabel =
+    selectedKmPackage === "none"
+      ? t("carDetail.kmPackageNoneTitle")
+      : selectedKmPackage
+        ? t(`carDetail.kmPackage${selectedKmPackage}` as "carDetail.kmPackage50")
+        : null;
 
   useEffect(() => {
     const rental = searchParams.get("rental");
-    if (rental === "minute" || rental === "hour" || rental === "day") {
-      setSelectedPricing(rental);
+    if (rental === "minute") {
+      setSelectedPricing("minute");
+      setActiveRentalTab("minute");
+    } else if (rental === "hour") {
+      setSelectedPricing("hour");
+      setActiveRentalTab("hour");
+    } else if (rental === "day") {
+      setSelectedPricing("day");
+      setActiveRentalTab("day");
+    } else if (rental === "month") {
+      setSelectedPricing("month");
+      setActiveRentalTab("month");
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    setSelectedKmPackage(null);
+    setDeliveryMode("immediate");
+    setScheduledPickupDate("");
+    setScheduledPickupTime("");
+  }, [selectedPricing]);
+
+  const handleDeliveryModeChange = (mode: LongTermDeliveryMode) => {
+    setDeliveryMode(mode);
+    if (mode === "scheduled" && !scheduledPickupDate) {
+      setScheduledPickupDate(getDefaultScheduledDate());
+      setScheduledPickupTime(getDefaultScheduledTime());
+    }
+  };
+
+  const isLongTermRental = selectedPricing === "day" || selectedPricing === "month";
+  const longTermDays =
+    selectedPricing === "month" ? rentalMonths * 30 : rentalDays;
+
+  const deliveryPicker = (
+    <div className="mt-4">
+      <LongTermDeliveryPicker
+        mode={deliveryMode}
+        onModeChange={handleDeliveryModeChange}
+        scheduledDate={scheduledPickupDate}
+        scheduledTime={scheduledPickupTime}
+        onScheduledDateChange={setScheduledPickupDate}
+        onScheduledTimeChange={setScheduledPickupTime}
+      />
+    </div>
+  );
+
+  const validateDeliveryStart = (): Date | null => {
+    const startResult = resolveLongTermStartTime(
+      deliveryMode,
+      scheduledPickupDate,
+      scheduledPickupTime,
+    );
+    if (!startResult.start) {
+      const descKey =
+        startResult.error === "past"
+          ? "carDetail.deliveryPastError"
+          : startResult.error === "invalid"
+            ? "carDetail.deliveryInvalidError"
+            : "carDetail.deliveryMissingError";
+      toast({
+        title: t("carDetail.deliveryErrorTitle"),
+        description: t(descKey),
+        variant: "destructive",
+      });
+      return null;
+    }
+    return startResult.start;
+  };
 
   const normalizeText = (value: string) => value.toLocaleLowerCase("tr");
 
@@ -308,6 +404,9 @@ const CarDetail = () => {
     );
   }
 
+  const hasGpsDevice = carHasGpsDevice(car);
+  const hasLiveGpsSignal = carHasRecentGpsSignal(car);
+
   const handleReserve = async () => {
     if (!user) {
       toast({
@@ -331,6 +430,15 @@ const CarDetail = () => {
       return;
     }
 
+    if (!hasGpsDevice) {
+      toast({
+        title: t("carDetail.gpsRequiredTitle"),
+        description: t("carDetail.gpsRequiredDesc"),
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedPricing) {
       toast({
         title: t("carDetail.pricingRequired"),
@@ -340,7 +448,10 @@ const CarDetail = () => {
       return;
     }
 
-    if (selectedPricing === "day" && (!pickupAddress.trim() || !dropoffAddress.trim())) {
+    const resolvedStart = validateDeliveryStart();
+    if (!resolvedStart) return;
+
+    if (isLongTermRental && (!pickupAddress.trim() || !dropoffAddress.trim())) {
       toast({
         title: t("carDetail.missingInfo"),
         description: t("carDetail.missingInfoDesc"),
@@ -349,7 +460,7 @@ const CarDetail = () => {
       return;
     }
 
-    if (selectedPricing === "day" && !selectedInsurance) {
+    if (isLongTermRental && !selectedInsurance) {
       toast({
         title: t("carDetail.insuranceRequired"),
         description: t("carDetail.insuranceRequiredDesc"),
@@ -358,7 +469,7 @@ const CarDetail = () => {
       return;
     }
 
-    if (selectedPricing === "day" && additionalDriverEnabled) {
+    if (isLongTermRental && additionalDriverEnabled) {
       if (!additionalDriverName.trim() || !additionalDriverLicense.trim()) {
         toast({
           title: t("carDetail.additionalDriverMissing"),
@@ -369,16 +480,23 @@ const CarDetail = () => {
       }
     }
 
-    const startTime = new Date();
-    const endTime = new Date();
     const simulatedTrafficDelay = Math.floor(Math.random() * 11);
     setTrafficDelayMinutes(simulatedTrafficDelay);
 
-    if (selectedPricing === "hour") {
+    const startTime = resolvedStart;
+    let endTime: Date;
+
+    if (selectedPricing === "month" || selectedPricing === "day") {
+      endTime = computeLongTermEndTime(startTime, {
+        rentalDays,
+        rentalMonths,
+        isMonthly: selectedPricing === "month",
+      });
+    } else if (selectedPricing === "hour") {
+      endTime = new Date(startTime);
       endTime.setHours(endTime.getHours() + rentalHours);
-    } else if (selectedPricing === "day") {
-      endTime.setDate(endTime.getDate() + rentalDays);
     } else {
+      endTime = new Date(startTime);
       endTime.setMinutes(endTime.getMinutes() + rentalMinutes);
     }
 
@@ -390,15 +508,19 @@ const CarDetail = () => {
       rentalMinutes,
       rentalHours,
       rentalDays,
+      rentalMonths,
       insurancePrice,
       kmPackagePrice,
       pickupZoneId,
       dropoffZoneId,
       subscriptionDiscountPercent: subscription?.discount_percentage,
       campaignDiscountPercent: campaign?.discount_percentage,
-      additionalDriverEnabled: selectedPricing === "day" && additionalDriverEnabled,
-      additionalDriverDays: rentalDays,
+      additionalDriverEnabled: isLongTermRental && additionalDriverEnabled,
+      additionalDriverDays: longTermDays,
     });
+
+    const persistedRentalType =
+      selectedPricing === "month" ? "day" : selectedPricing;
 
     try {
       const { data: bookingData, error: bookingError } = await createBookingRecord({
@@ -407,28 +529,31 @@ const CarDetail = () => {
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
         total_price: pricing.totalPrice,
-        rental_type: selectedPricing,
+        rental_type: persistedRentalType,
         driver_history_checked: true,
         driver_risk_level: "low",
         traffic_delay_minutes: simulatedTrafficDelay,
-        pickup_zone_id: selectedPricing === "day" ? (pickupZoneId || null) : null,
-        dropoff_zone_id: selectedPricing === "day" ? (dropoffZoneId || null) : null,
-        pickup_address: selectedPricing === "day" ? (pickupAddress || null) : null,
-        dropoff_address: selectedPricing === "day" ? (dropoffAddress || null) : null,
+        pickup_zone_id: isLongTermRental ? (pickupZoneId || null) : null,
+        dropoff_zone_id: isLongTermRental ? (dropoffZoneId || null) : null,
+        pickup_address: isLongTermRental ? (pickupAddress || null) : null,
+        dropoff_address: isLongTermRental ? (dropoffAddress || null) : null,
         different_zone_fee: pricing.zoneFee,
         payment_status: "pending",
         rental_amount: pricing.totalPrice - pricing.provisionFee,
         provision_fee: pricing.provisionFee,
-        additional_driver_enabled: selectedPricing === "day" && additionalDriverEnabled,
+        additional_driver_enabled: isLongTermRental && additionalDriverEnabled,
         additional_driver_name:
-          selectedPricing === "day" && additionalDriverEnabled
+          isLongTermRental && additionalDriverEnabled
             ? additionalDriverName.trim()
             : null,
         additional_driver_license:
-          selectedPricing === "day" && additionalDriverEnabled
+          isLongTermRental && additionalDriverEnabled
             ? additionalDriverLicense.trim().toUpperCase()
             : null,
         additional_driver_fee: pricing.additionalDriverFee,
+        km_package_id: selectedKmPackage,
+        km_package_included_km: resolveIncludedKm(selectedKmPackage),
+        km_package_price: kmPackagePrice,
       });
 
       if (bookingError || !bookingData) throw new Error(bookingError ?? t("carDetail.reservationCreateFailed"));
@@ -443,8 +568,8 @@ const CarDetail = () => {
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString(),
           rentalAmount: pricing.rentalBase,
-          kmPackageLabel: selectedKmPackageData?.label,
-          kmPackagePrice: selectedKmPackageData ? kmPackagePrice : undefined,
+          kmPackageLabel: selectedKmPackageLabel ?? undefined,
+          kmPackagePrice: kmPackagePrice > 0 ? kmPackagePrice : undefined,
           insurancePrice: selectedInsurance ? insurancePrice : undefined,
           provisionFee: pricing.provisionFee,
           zoneFee: pricing.zoneFee,
@@ -452,7 +577,7 @@ const CarDetail = () => {
           subscriptionDiscount: pricing.subscriptionDiscount,
           additionalDriverFee: pricing.additionalDriverFee,
           additionalDriverName:
-            selectedPricing === "day" && additionalDriverEnabled
+            isLongTermRental && additionalDriverEnabled
               ? additionalDriverName.trim()
               : undefined,
         }
@@ -477,14 +602,15 @@ const CarDetail = () => {
         rentalMinutes,
         rentalHours,
         rentalDays,
+        rentalMonths,
         insurancePrice,
         kmPackagePrice,
         pickupZoneId,
         dropoffZoneId,
         subscriptionDiscountPercent: subscription?.discount_percentage,
         campaignDiscountPercent: campaign?.discount_percentage,
-        additionalDriverEnabled: selectedPricing === "day" && additionalDriverEnabled,
-        additionalDriverDays: rentalDays,
+        additionalDriverEnabled: isLongTermRental && additionalDriverEnabled,
+        additionalDriverDays: longTermDays,
       })
     : null;
 
@@ -681,10 +807,12 @@ const CarDetail = () => {
                 <div className="border-t border-border pt-6 mb-6">
                   <h3 className="font-semibold text-foreground mb-4 text-lg">{t("carDetail.packagesTitle")}</h3>
                   
-                  <Tabs defaultValue="minute" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
+                  <Tabs value={activeRentalTab} onValueChange={(v) => setActiveRentalTab(v as "minute" | "hour" | "day" | "month")} className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger value="minute">{t("carDetail.tabMinute")}</TabsTrigger>
+                      <TabsTrigger value="hour">{t("carDetail.tabHour")}</TabsTrigger>
                       <TabsTrigger value="day">{t("carDetail.tabDay")}</TabsTrigger>
+                      <TabsTrigger value="month">{t("carDetail.tabMonth")}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="minute" className="space-y-4 mt-4">
@@ -710,6 +838,7 @@ const CarDetail = () => {
                               onClick={() => {
                                 setRentalMinutes(minutes);
                                 setSelectedPricing("minute");
+                                setActiveRentalTab("minute");
                               }}
                               className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 transition-colors ${
                                 selectedPricing === "minute" && rentalMinutes === minutes
@@ -730,24 +859,34 @@ const CarDetail = () => {
                         <Button
                           variant={selectedPricing === "minute" ? "default" : "outline"}
                           className="w-full mt-4"
-                          onClick={() => setSelectedPricing("minute")}
+                          onClick={() => {
+                                setSelectedPricing("minute");
+                                setActiveRentalTab("minute");
+                              }}
                         >
                           {selectedPricing === "minute" ? t("carDetail.selected") : t("carDetail.select")}
                         </Button>
                       </div>
-                      <div className="bg-background border border-border rounded-xl p-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-lg">{t("carDetail.hourlyRental")}</h4>
-                            <p className="text-sm text-muted-foreground">{t("carDetail.hourlyDesc")}</p>
+                      {deliveryPicker}
+                    </TabsContent>
+
+                    <TabsContent value="hour" className="space-y-4 mt-4">
+                      <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-8 h-8 text-primary" />
+                            <div>
+                              <h4 className="font-bold text-xl">{t("carDetail.hourlyRental")}</h4>
+                              <p className="text-sm text-muted-foreground">{t("carDetail.hourlyDesc")}</p>
+                            </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-2xl font-bold text-primary">{car.price_per_hour}₺</div>
-                            <div className="text-xs text-muted-foreground">{t("carDetail.perHour")}</div>
+                            <div className="text-3xl font-bold text-primary">{HALF_HOUR_MIN_PRICE}₺</div>
+                            <div className="text-xs text-muted-foreground">{t("carDetail.perHalfHour")}</div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-4 gap-2">
-                          {[0.5, 1, 2, 3, 4, 6, 8, 10, 12].map((hour) => (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          {HOUR_RENTAL_OPTIONS.map((hour) => (
                             <Button
                               key={hour}
                               type="button"
@@ -755,50 +894,38 @@ const CarDetail = () => {
                               onClick={() => {
                                 setRentalHours(hour);
                                 setSelectedPricing("hour");
+                                setActiveRentalTab("hour");
                               }}
+                              className="flex flex-col h-auto py-2 gap-0.5"
                             >
-                              {hour === 0.5 ? t("carDetail.halfHour") : t("carDetail.hours", { count: hour })}
+                              <span>
+                                {hour === 0.5 ? t("carDetail.halfHour") : t("carDetail.hours", { count: hour })}
+                              </span>
+                              <span className="text-xs opacity-80">
+                                {computeHourlyRentalBase(car.price_per_hour, hour).toFixed(0)}₺
+                              </span>
                             </Button>
                           ))}
                         </div>
                         <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
                           <span>{t("carDetail.total")}</span>
                           <span className="font-semibold text-foreground">
-                            {(car.price_per_hour * rentalHours).toFixed(2)}₺
+                            {computeHourlyRentalBase(car.price_per_hour, rentalHours).toFixed(2)}₺
                           </span>
                         </div>
+                        <Button
+                          variant={selectedPricing === "hour" ? "default" : "outline"}
+                          className="w-full mt-4"
+                          onClick={() => {
+                            setSelectedPricing("hour");
+                            setActiveRentalTab("hour");
+                          }}
+                        >
+                          {selectedPricing === "hour" ? t("carDetail.selected") : t("carDetail.select")}
+                        </Button>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
-                          <Badge variant="secondary">{t("carDetail.kmBadge")}</Badge>
-                          {t("carDetail.kmPackages")}
-                        </h4>
-                        <p className="text-xs text-muted-foreground mb-3">{t("carDetail.kmNoPackage", { price: KM_PRICE_PER_UNIT })}</p>
-                        <div className="grid grid-cols-2 gap-3">
-                          {kmPackages.map((pkg) => (
-                            <button
-                              type="button"
-                              key={pkg.id}
-                              className={`border rounded-xl p-4 text-left transition-all ${
-                                selectedKmPackage === pkg.id
-                                  ? "border-primary bg-primary/5 shadow-md"
-                                  : "border-border hover:border-primary/50"
-                              }`}
-                              onClick={() => setSelectedKmPackage(selectedKmPackage === pkg.id ? null : pkg.id)}
-                            >
-                              <div className="text-xl font-bold text-foreground">{pkg.label}</div>
-                              <div className="text-lg font-semibold text-primary">
-                                {pkg.price > 0 ? `${pkg.price}₺` : t("carDetail.select")}
-                              </div>
-                              {selectedKmPackage === pkg.id && (
-                                <div className="mt-2 text-xs font-semibold text-primary">{t("carDetail.selected")}</div>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      {deliveryPicker}
                     </TabsContent>
-
 
                     <TabsContent value="day" className="space-y-4 mt-4">
                       <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
@@ -859,45 +986,102 @@ const CarDetail = () => {
                         <Button
                           variant={selectedPricing === "day" ? "default" : "outline"}
                           className="w-full"
-                          onClick={() => setSelectedPricing("day")}
+                          onClick={() => {
+                            setSelectedPricing("day");
+                            setActiveRentalTab("day");
+                          }}
                         >
                           {selectedPricing === "day" ? t("carDetail.selected") : t("carDetail.select")}
                         </Button>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
-                          <Badge variant="secondary">{t("carDetail.kmBadge")}</Badge>
-                          {t("carDetail.kmPackages")}
-                        </h4>
-                        <p className="text-xs text-muted-foreground mb-3">{t("carDetail.kmNoPackage", { price: KM_PRICE_PER_UNIT })}</p>
-                        <div className="grid grid-cols-2 gap-3">
-                          {kmPackages.map((pkg) => (
-                            <button
-                              type="button"
-                              key={pkg.id}
-                              className={`border rounded-xl p-4 text-left transition-all ${
-                                selectedKmPackage === pkg.id
-                                  ? "border-primary bg-primary/5 shadow-md"
-                                  : "border-border hover:border-primary/50"
-                              }`}
-                              onClick={() => setSelectedKmPackage(selectedKmPackage === pkg.id ? null : pkg.id)}
-                            >
-                              <div className="text-xl font-bold text-foreground">{pkg.label}</div>
-                              <div className="text-lg font-semibold text-primary">
-                                {pkg.price > 0 ? `${pkg.price}₺` : t("carDetail.select")}
-                              </div>
-                              {selectedKmPackage === pkg.id && (
-                                <div className="mt-2 text-xs font-semibold text-primary">{t("carDetail.selected")}</div>
-                              )}
-                            </button>
-                          ))}
+                      {deliveryPicker}
+                    </TabsContent>
+
+                    <TabsContent value="month" className="space-y-4 mt-4">
+                      <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <Crown className="w-8 h-8 text-primary" />
+                            <div>
+                              <h4 className="font-bold text-xl">{t("carDetail.monthlyRental")}</h4>
+                              <p className="text-sm text-muted-foreground">{t("carDetail.monthlyDesc")}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-bold text-primary">
+                              {(car.price_per_day * 30).toFixed(0)}₺
+                            </div>
+                            <div className="text-xs text-muted-foreground">{t("carDetail.perMonth")}</div>
+                          </div>
                         </div>
+
+                        <div className="mb-6 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-foreground">{t("carDetail.monthCount")}</label>
+                            <div className="text-2xl font-bold text-primary">
+                              {t("carDetail.months", { count: rentalMonths })}
+                            </div>
+                          </div>
+                          <Slider
+                            value={[rentalMonths]}
+                            onValueChange={(value) => setRentalMonths(value[0])}
+                            min={1}
+                            max={12}
+                            step={1}
+                            className="w-full"
+                          />
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{t("carDetail.monthMin")}</span>
+                            <span>{t("carDetail.monthMax")}</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-background border border-border rounded-lg p-4 mb-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="text-sm text-muted-foreground">{t("carDetail.totalAmount")}</div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {t("carDetail.monthsMultiplier", {
+                                  months: rentalMonths,
+                                  days: 30,
+                                  price: car.price_per_day,
+                                })}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-2xl font-bold text-primary">
+                                {(car.price_per_day * 30 * rentalMonths).toFixed(2)}₺
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button
+                          variant={selectedPricing === "month" ? "default" : "outline"}
+                          className="w-full"
+                          onClick={() => {
+                            setSelectedPricing("month");
+                            setActiveRentalTab("month");
+                          }}
+                        >
+                          {selectedPricing === "month" ? t("carDetail.selected") : t("carDetail.select")}
+                        </Button>
                       </div>
+                      {deliveryPicker}
                     </TabsContent>
                   </Tabs>
+
+                  {selectedPricing && (
+                    <div className="border-t border-border pt-6 mt-6">
+                      <KmPackagePicker
+                        selectedId={selectedKmPackage}
+                        onSelect={setSelectedKmPackage}
+                      />
+                    </div>
+                  )}
                 </div>
 
-                {selectedPricing === "day" && (
+                {isLongTermRental && (
                   <div className="border-t border-border pt-6 mb-6">
                     <h3 className="font-semibold text-foreground mb-4 text-lg flex items-center gap-2">
                       <UserPlus className="w-5 h-5" />
@@ -924,8 +1108,8 @@ const CarDetail = () => {
                           <p className="text-sm text-muted-foreground mt-1">
                             {t("carDetail.additionalDriverFee", {
                               fee: ADDITIONAL_DRIVER_DAILY_FEE,
-                              days: rentalDays,
-                              total: (ADDITIONAL_DRIVER_DAILY_FEE * rentalDays).toLocaleString(),
+                              days: longTermDays,
+                              total: (ADDITIONAL_DRIVER_DAILY_FEE * longTermDays).toLocaleString(),
                             })}
                           </p>
                         </div>
@@ -962,13 +1146,13 @@ const CarDetail = () => {
                   </div>
                 )}
 
-                {selectedPricing === "day" && (
+                {isLongTermRental && (
                   <div className="border-t border-border pt-6 mb-6">
                     <h3 className="font-semibold text-foreground mb-4 text-lg flex items-center gap-2">
                       <MapPin className="w-5 h-5" />
                       {t("carDetail.pickupDropoff")}
                     </h3>
-  
+
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm font-medium text-foreground mb-2 block">
@@ -982,7 +1166,7 @@ const CarDetail = () => {
                           className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                         />
                       </div>
-  
+
                       <div>
                         <label className="text-sm font-medium text-foreground mb-2 block">
                           {t("carDetail.dropoffPoint")}
@@ -1049,7 +1233,7 @@ const CarDetail = () => {
                     {pricingBreakdown.additionalDriverFee > 0 && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                          {t("carDetail.additionalDriverLine", { days: rentalDays, fee: ADDITIONAL_DRIVER_DAILY_FEE })}
+                          {t("carDetail.additionalDriverLine", { days: longTermDays, fee: ADDITIONAL_DRIVER_DAILY_FEE })}
                         </span>
                         <span>{pricingBreakdown.additionalDriverFee.toFixed(2)} ₺</span>
                       </div>
@@ -1073,14 +1257,32 @@ const CarDetail = () => {
                   </div>
                 )}
 
+                {!hasGpsDevice && (
+                  <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 mb-6 text-sm text-destructive">
+                    <p className="font-semibold">{t("carDetail.gpsRequiredTitle")}</p>
+                    <p className="mt-1">{t("carDetail.gpsRequiredDesc")}</p>
+                  </div>
+                )}
+
+                {hasGpsDevice && !hasLiveGpsSignal && (
+                  <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 mb-6 text-sm text-amber-800 dark:text-amber-200">
+                    <p className="font-semibold">{t("carDetail.gpsSignalStaleTitle")}</p>
+                    <p className="mt-1">{t("carDetail.gpsSignalStaleDesc")}</p>
+                  </div>
+                )}
+
                 <Button 
                   size="lg"
                   className="w-full text-lg h-14 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--accent)))] shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)] hover:opacity-95"
-                  disabled={!car.available}
+                  disabled={!car.available || !hasGpsDevice || !selectedPricing}
                   onClick={handleReserve}
                 >
                   {!car.available 
-                    ? t("carDetail.notAvailableNow") 
+                    ? t("carDetail.notAvailableNow")
+                    : !hasGpsDevice
+                      ? t("carDetail.gpsNotRentalReady")
+                    : !selectedPricing
+                      ? t("carDetail.pricingRequired")
                     : t("carDetail.createReservation")}
                 </Button>
               </div>

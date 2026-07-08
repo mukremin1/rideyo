@@ -4,6 +4,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
+const isCapacitorBuild = Boolean(process.env.CAPACITOR);
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   // Capacitor needs relative paths; web deploy (GitHub Pages / ride-yo.com) uses root.
@@ -30,6 +32,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    !isCapacitorBuild &&
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["robots.txt", "favicon.ico", "favicon-32x32.png", "logo.png", "logo-horizontal.svg", "logo-mark.svg", "logo-mark.png", "logo-512x512.png", "icon-512x512.png", "icon-192x192.png", "apple-touch-icon.png", "manifest.webmanifest"],

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -17,7 +17,8 @@ import {
   Key,
   Loader2,
   Navigation,
-  Bell
+  Bell,
+  Timer,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,8 +29,20 @@ import { useTranslation } from "react-i18next";
 import VehiclePhotoCapture from "@/components/VehiclePhotoCapture";
 import CarLocationMap from "@/components/CarLocationMap";
 import { getRegionErrorKey, validateDropoffCoords } from "@/lib/allowedRegions";
+import {
+  computeOvertimeAmount,
+  computeOvertimeMinutes,
+  computeChargeableKm,
+  computeKmChargeAmount,
+  OVERTIME_RATE_PER_MINUTE,
+  KM_PRICE_PER_UNIT,
+} from "@/lib/rentalPricing";
 import { useRentalLocationBroadcast } from "@/hooks/useRentalLocationBroadcast";
 import { Checkbox } from "@/components/ui/checkbox";
+import RentalExtensionDialog from "@/components/RentalExtensionDialog";
+import type { CarExtensionPricing } from "@/lib/rentalExtension";
+import type { ExtensionUnits } from "@/lib/rentalExtension";
+import { carIsGpsReadyForRental, type CarGpsFields } from "@/lib/carGps";
 
 interface RentalState {
   bookingId: string;
@@ -42,11 +55,40 @@ interface VehicleControlResponse {
   success?: boolean;
   message?: string;
   error?: string;
+  overtimeMinutes?: number;
+  overtimeAmount?: number;
+  overtimeRatePerMinute?: number;
+  overtimeCharged?: boolean;
+  overtimeChargeFailed?: boolean;
+  overtimeError?: string;
+  chargeableKm?: number;
+  kmAmount?: number;
+  kmRatePerKm?: number;
+  totalDistanceKm?: number;
+  kmCharged?: boolean;
+  kmChargeFailed?: boolean;
+  kmError?: string;
+  extensionAmount?: number;
+  newEndTime?: string;
+  extensionCharged?: boolean;
+  extensionChargeFailed?: boolean;
+  extensionError?: string;
 }
 
 const supabaseInvoke = createSupabaseInvoker((name, options) =>
   supabase.functions.invoke(name, options),
 );
+
+const formatCountdown = (totalSeconds: number) => {
+  const safe = Math.max(0, totalSeconds);
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+  const seconds = safe % 60;
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+};
 
 const StartRental = () => {
   const navigate = useNavigate();
@@ -75,14 +117,23 @@ const StartRental = () => {
   const [lastGPSData, setLastGPSData] = useState<{ latitude: number; longitude: number } | null>(null);
   const [rentalStartTime, setRentalStartTime] = useState<Date | null>(null);
   const [prepaidEndTime, setPrepaidEndTime] = useState<Date | null>(null);
-  const [elapsedMinutes, setElapsedMinutes] = useState(0);
-  const [remainingMinutes, setRemainingMinutes] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [overtimeSeconds, setOvertimeSeconds] = useState(0);
   const [timeExpired, setTimeExpired] = useState(false);
   const warnedThresholds = useRef<Set<number>>(new Set());
   const [distanceKm, setDistanceKm] = useState(0);
+  const [includedKm, setIncludedKm] = useState(0);
   const [bookingValidationLoading, setBookingValidationLoading] = useState(true);
   const [bookingValidated, setBookingValidated] = useState(false);
   const [locationSharingConsent, setLocationSharingConsent] = useState(false);
+  const [carPricing, setCarPricing] = useState<CarExtensionPricing | null>(null);
+  const [extendDialogOpen, setExtendDialogOpen] = useState(false);
+  const [extending, setExtending] = useState(false);
+  const [carGps, setCarGps] = useState<CarGpsFields | null>(null);
+
+  const isFlexibleTimer =
+    rentalInfo?.rentalType === "minute" || rentalInfo?.rentalType === "hour";
 
   useRentalLocationBroadcast({
     bookingId: rentalInfo?.bookingId ?? null,
@@ -166,9 +217,20 @@ const StartRental = () => {
           filter: `id=eq.${carId}`,
         },
         (payload) => {
-          const newData = payload.new as { latitude?: number | null; longitude?: number | null };
+          const newData = payload.new as {
+            latitude?: number | null;
+            longitude?: number | null;
+            last_gps_update?: string | null;
+            gps_device_id?: string | null;
+          };
           if (newData.latitude && newData.longitude) {
             setCarGPSData({ latitude: newData.latitude, longitude: newData.longitude });
+          }
+          if (newData.last_gps_update || newData.gps_device_id) {
+            setCarGps((prev) => ({
+              gps_device_id: newData.gps_device_id ?? prev?.gps_device_id ?? null,
+              last_gps_update: newData.last_gps_update ?? prev?.last_gps_update ?? null,
+            }));
           }
         }
       )
@@ -198,36 +260,41 @@ const StartRental = () => {
 
     const tick = () => {
       const diffMs = Date.now() - rentalStartTime.getTime();
-      setElapsedMinutes(Math.max(0, Math.floor(diffMs / 60000)));
+      setElapsedSeconds(Math.max(0, Math.floor(diffMs / 1000)));
 
       if (prepaidEndTime) {
         const remainingMs = prepaidEndTime.getTime() - Date.now();
-        const remaining = Math.max(0, Math.ceil(remainingMs / 60000));
-        setRemainingMinutes(remaining);
+        const remaining = Math.max(0, Math.floor(remainingMs / 1000));
+        setRemainingSeconds(remaining);
         const expired = remainingMs <= 0;
         setTimeExpired(expired);
 
-        if (rentalInfo?.rentalType === "minute" || rentalInfo?.rentalType === "hour") {
-          if (remaining === 5 && !warnedThresholds.current.has(5)) {
-            warnedThresholds.current.add(5);
-            toast.warning(t("rental.timeWarning5"));
-          }
-          if (remaining === 1 && !warnedThresholds.current.has(1)) {
-            warnedThresholds.current.add(1);
-            toast.warning(t("rental.timeWarning1"));
-          }
-          if (expired && !warnedThresholds.current.has(0)) {
-            warnedThresholds.current.add(0);
-            toast.error(t("rental.timeExpired"));
-          }
+        if (expired) {
+          const overtime = Math.max(0, Math.floor((Date.now() - prepaidEndTime.getTime()) / 1000));
+          setOvertimeSeconds(overtime);
+        } else {
+          setOvertimeSeconds(0);
+        }
+
+        if (isFlexibleTimer) {
+          const warnOnce = (thresholdSeconds: number, message: string, type: "warning" | "error" = "warning") => {
+            if (remaining <= thresholdSeconds && !warnedThresholds.current.has(thresholdSeconds)) {
+              warnedThresholds.current.add(thresholdSeconds);
+              if (type === "error") toast.error(message);
+              else toast.warning(message);
+            }
+          };
+          warnOnce(300, t("rental.timeWarning5"));
+          warnOnce(60, t("rental.timeWarning1"));
+          if (expired) warnOnce(0, t("rental.timeExpired"), "error");
         }
       }
     };
 
     tick();
-    const timer = setInterval(tick, 10000);
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [rentalStarted, rentalStartTime, prepaidEndTime, rentalInfo?.rentalType, t]);
+  }, [rentalStarted, rentalStartTime, prepaidEndTime, rentalInfo?.rentalType, isFlexibleTimer, t]);
 
   useEffect(() => {
     const validateAndLoadBooking = async () => {
@@ -246,7 +313,7 @@ const StartRental = () => {
       setBookingValidationLoading(true);
       const { data, error } = await supabase
         .from("bookings")
-        .select("id, user_id, payment_status, car_id, rental_type, start_time, end_time, cars(name)")
+        .select("id, user_id, payment_status, car_id, rental_type, start_time, end_time, km_package_included_km, cars(name, price_per_minute, price_per_hour, price_per_day, gps_device_id, last_gps_update)")
         .eq("id", activeBookingId)
         .eq("user_id", user.id)
         .maybeSingle();
@@ -283,6 +350,18 @@ const StartRental = () => {
         rentalType,
       });
       setBookingValidated(true);
+      setIncludedKm(data.km_package_included_km ?? 0);
+      if (data.cars) {
+        setCarPricing({
+          pricePerMinute: Number(data.cars.price_per_minute),
+          pricePerHour: Number(data.cars.price_per_hour),
+          pricePerDay: Number(data.cars.price_per_day),
+        });
+        setCarGps({
+          gps_device_id: data.cars.gps_device_id,
+          last_gps_update: data.cars.last_gps_update,
+        });
+      }
 
       if (isRentalActive(data.payment_status)) {
         setRentalStarted(true);
@@ -450,6 +529,11 @@ const StartRental = () => {
       return;
     }
 
+    if (!carGps || !carIsGpsReadyForRental(carGps)) {
+      toast.error(t("rental.gpsRequiredStart"));
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -495,6 +579,43 @@ const StartRental = () => {
       toast.error(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExtendRental = async (units: ExtensionUnits) => {
+    if (!user || !rentalInfo || !carPricing) return;
+
+    setExtending(true);
+    try {
+      const data = await callVehicleControl({
+        action: "extend_rental",
+        carId: rentalInfo.carId,
+        bookingId: rentalInfo.bookingId,
+        userId: user.id,
+        ...units,
+      });
+
+      if (data.success && data.extensionCharged && data.newEndTime) {
+        setPrepaidEndTime(new Date(data.newEndTime));
+        setTimeExpired(false);
+        setOvertimeSeconds(0);
+        warnedThresholds.current.clear();
+        toast.success(
+          t("rental.extendSuccess", {
+            amount: (data.extensionAmount ?? 0).toFixed(2),
+          }),
+        );
+        setExtendDialogOpen(false);
+      } else if (data.success && data.extensionChargeFailed) {
+        toast.error(data.extensionError ?? t("rental.extendChargeFailed"));
+      } else {
+        throw new Error(data.error ?? t("rental.extendFailed"));
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : t("rental.extendFailed");
+      toast.error(message);
+    } finally {
+      setExtending(false);
     }
   };
 
@@ -568,11 +689,34 @@ const StartRental = () => {
         neighborhood: dropoff.parsed.mahalle || undefined,
         dropoffAddress: dropoff.address,
         notes: endNotes,
+        distanceKm,
       });
 
       const response = data;
       if (response.success) {
-        toast.success(t("rental.endSuccess"));
+        if (response.overtimeCharged && response.overtimeAmount) {
+          toast.success(
+            t("rental.overtimeCharged", {
+              minutes: response.overtimeMinutes ?? 0,
+              amount: response.overtimeAmount.toFixed(2),
+            }),
+          );
+        } else if (response.overtimeChargeFailed) {
+          toast.error(response.overtimeError ?? t("rental.overtimeChargeFailed"));
+        }
+        if (response.kmCharged && response.kmAmount) {
+          toast.success(
+            t("rental.kmCharged", {
+              km: response.chargeableKm?.toFixed(2) ?? "0",
+              amount: response.kmAmount.toFixed(2),
+            }),
+          );
+        } else if (response.kmChargeFailed) {
+          toast.error(response.kmError ?? t("rental.kmChargeFailed"));
+        }
+        if (!response.overtimeCharged && !response.overtimeChargeFailed && !response.kmCharged && !response.kmChargeFailed) {
+          toast.success(t("rental.endSuccess"));
+        }
         setRentalEnded(true);
       } else {
         const err = response as VehicleControlResponse & { reason?: string };
@@ -656,11 +800,18 @@ const StartRental = () => {
         </div>
       </div>
 
+      {carGps && !carIsGpsReadyForRental(carGps) && (
+        <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          <p className="font-semibold">{t("rental.gpsRequiredStartTitle")}</p>
+          <p className="mt-1">{t("rental.gpsRequiredStart")}</p>
+        </div>
+      )}
+
       <Button
         size="lg"
         className="w-full gap-2 bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--accent)))] shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)] hover:opacity-95"
         onClick={handleStartRental}
-        disabled={loading || !locationSharingConsent || !nearCar}
+        disabled={loading || !locationSharingConsent || !nearCar || !carGps || !carIsGpsReadyForRental(carGps)}
       >
         {loading ? (
           <>
@@ -683,8 +834,62 @@ const StartRental = () => {
     </Card>
   );
 
+  const showPrepaidTimer = Boolean(prepaidEndTime);
+
+  const overtimeMinutesBillable = prepaidEndTime ? computeOvertimeMinutes(prepaidEndTime) : 0;
+  const estimatedOvertimeCost = computeOvertimeAmount(overtimeMinutesBillable);
+  const chargeableKm = computeChargeableKm(distanceKm, includedKm);
+  const estimatedKmCost = computeKmChargeAmount(chargeableKm);
+
   const renderActiveRental = () => (
     <div className="space-y-6">
+      {showPrepaidTimer && (
+        <Card
+          className={`p-6 text-center ${
+            timeExpired
+              ? "border-destructive/50 bg-destructive/10"
+              : remainingSeconds <= 60
+                ? "border-amber-500/50 bg-amber-500/10"
+                : "border-primary/30 bg-primary/5"
+          }`}
+        >
+          {timeExpired && isFlexibleTimer ? (
+            <>
+              <p className="text-sm text-muted-foreground mb-1">{t("rental.overtimeTitle")}</p>
+              <p className="text-4xl font-bold tabular-nums tracking-tight text-destructive">
+                +{formatCountdown(overtimeSeconds)}
+              </p>
+              <p className="mt-2 text-sm font-medium text-destructive">
+                {t("rental.overtimeRate", { rate: OVERTIME_RATE_PER_MINUTE })}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("rental.overtimeEstimated", {
+                  minutes: overtimeMinutesBillable,
+                  amount: estimatedOvertimeCost.toFixed(2),
+                })}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground mb-1">{t("rental.remainingTime")}</p>
+              <p
+                className={`text-4xl font-bold tabular-nums tracking-tight ${
+                  remainingSeconds <= 60 ? "text-amber-600 dark:text-amber-400" : "text-primary"
+                }`}
+              >
+                {formatCountdown(remainingSeconds)}
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {t("rental.elapsedTime")}: {formatCountdown(elapsedSeconds)}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("rental.overtimeHint", { rate: OVERTIME_RATE_PER_MINUTE })}
+              </p>
+            </>
+          )}
+        </Card>
+      )}
+
       <Card className="p-6 border-green-500/20 bg-green-500/5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
@@ -721,33 +926,58 @@ const StartRental = () => {
             {t("rental.timeExpiredBanner")}
           </div>
         )}
+
+        {carPricing && (
+          <>
+            <Button
+              variant="secondary"
+              className="w-full mt-4 gap-2"
+              onClick={() => setExtendDialogOpen(true)}
+            >
+              <Timer className="w-4 h-4" />
+              {t("rental.extendRental")}
+            </Button>
+            <RentalExtensionDialog
+              open={extendDialogOpen}
+              onOpenChange={setExtendDialogOpen}
+              rentalType={rentalInfo.rentalType}
+              carPricing={carPricing}
+              loading={extending}
+              onConfirm={handleExtendRental}
+            />
+          </>
+        )}
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div className="p-3 bg-background rounded-lg border border-border">
             <p className="text-muted-foreground">{t("rental.elapsedTime")}</p>
-            <p className="text-lg font-semibold">{elapsedMinutes} {t("rental.minutes")}</p>
+            <p className="text-lg font-semibold tabular-nums">{formatCountdown(elapsedSeconds)}</p>
           </div>
-          {prepaidEndTime && (rentalInfo.rentalType === "minute" || rentalInfo.rentalType === "hour") ? (
-            <div className={`p-3 rounded-lg border ${timeExpired ? "border-destructive/50 bg-destructive/5" : "border-border bg-background"}`}>
-              <p className="text-muted-foreground">{t("rental.remainingTime")}</p>
-              <p className={`text-lg font-semibold ${timeExpired ? "text-destructive" : ""}`}>
-                {remainingMinutes} {t("rental.minutes")}
+          <div className="p-3 bg-background rounded-lg border border-border">
+            <p className="text-muted-foreground">{t("rental.totalDistance")}</p>
+            <p className="text-lg font-semibold">{distanceKm.toFixed(2)} {t("rental.km")}</p>
+            {includedKm > 0 ? (
+              <p className="text-xs text-muted-foreground mt-1">
+                {t("rental.kmPackageRemaining", {
+                  remaining: Math.max(0, includedKm - distanceKm).toFixed(2),
+                  included: includedKm,
+                })}
               </p>
-            </div>
-          ) : (
-            <div className="p-3 bg-background rounded-lg border border-border">
-              <p className="text-muted-foreground">{t("rental.totalDistance")}</p>
-              <p className="text-lg font-semibold">{distanceKm.toFixed(2)} {t("rental.km")}</p>
-            </div>
-          )}
-        </div>
-        {prepaidEndTime && (rentalInfo.rentalType === "minute" || rentalInfo.rentalType === "hour") && (
-          <div className="mt-4 grid grid-cols-1 gap-4 text-sm">
-            <div className="p-3 bg-background rounded-lg border border-border">
-              <p className="text-muted-foreground">{t("rental.totalDistance")}</p>
-              <p className="text-lg font-semibold">{distanceKm.toFixed(2)} {t("rental.km")}</p>
-            </div>
+            ) : (
+              <p className="text-xs text-muted-foreground mt-1">
+                {t("rental.kmNoPackageRate", { rate: KM_PRICE_PER_UNIT })}
+              </p>
+            )}
+            {chargeableKm > 0 && (
+              <p className="text-xs font-medium text-destructive mt-1">
+                {t("rental.kmEstimatedCharge", {
+                  km: chargeableKm.toFixed(2),
+                  amount: estimatedKmCost.toFixed(2),
+                  rate: KM_PRICE_PER_UNIT,
+                })}
+              </p>
+            )}
           </div>
-        )}
+        </div>
       </Card>
 
       <Card className="p-6">

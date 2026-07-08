@@ -162,7 +162,26 @@
         "deleteSuccess": "Araç başarıyla silindi",
         "statusError": "Durum güncellenemedi",
         "disabled": "Araç kullanıma kapatıldı",
-        "enabled": "Araç kullanıma açıldı"
+        "enabled": "Araç kullanıma açıldı",
+        "gpsRequired": "Kiralamaya açmak için önce GPS cihazı bağlamalısınız"
+      },
+      "gps": {
+        "bannerTitle": "{{count}} aracınızda GPS cihazı yok",
+        "bannerDesc": "Km sayacı ve canlı takip için her araca GPS cihazı bağlayın. GPS'siz araçlar listede görünmez ve kiralanamaz.",
+        "connectTitle": "GPS Cihazı Bağla",
+        "connectDesc": "Telematik cihazınızın ID'sini girin. Cihaz update-gps API'si ile konum göndermelidir.",
+        "devicePlaceholder": "GPS cihaz ID (ör. TRK-12345)",
+        "saveDevice": "GPS Cihazını Kaydet",
+        "saving": "Kaydediliyor...",
+        "deviceRequired": "GPS cihaz ID girin",
+        "saveSuccess": "GPS cihazı kaydedildi",
+        "saveError": "GPS cihazı kaydedilemedi",
+        "statusLive": "Canlı sinyal",
+        "statusLinked": "Cihaz bağlı",
+        "statusMissing": "GPS yok",
+        "staleSignal": "Son sinyal {{minutes}} dk önce — cihazı kontrol edin",
+        "noSignalYet": "Henüz canlı sinyal alınmadı",
+        "liveSignal": "GPS sinyali aktif — araç kiralanabilir"
       }
     },
     "dashboard": {
@@ -195,7 +214,10 @@
       "allRentalsDesc": "Geçmiş ve aktif kiralama işlemleri",
       "startDate": "Başlangıç",
       "endDate": "Bitiş",
-      "rentalType": "Kiralama Türü"
+      "rentalType": "Kiralama Türü",
+      "gpsBannerTitle": "{{count}} aracınızda GPS bağlı değil",
+      "gpsBannerDesc": "GPS cihazı olmayan araçlar müşteri listesinde görünmez ve kiralanamaz.",
+      "gpsConnectCta": "GPS Bağla"
     },
     "availability": {
       "title": "Müsaitlik Takvimi",

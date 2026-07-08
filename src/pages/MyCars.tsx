@@ -8,8 +8,14 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, MapPin, Trash2, Users, Fuel, Settings } from "lucide-react";
+import { Plus, MapPin, Trash2, Users, Fuel, Settings, Navigation, AlertTriangle, Save } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import {
+  carHasGpsDevice,
+  carHasRecentGpsSignal,
+  getGpsSignalAgeMinutes,
+} from "@/lib/carGps";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +45,8 @@ interface Car {
   plate_number: string | null;
   year: number | null;
   description: string | null;
+  gps_device_id: string | null;
+  last_gps_update: string | null;
 }
 
 const MyCars = () => {
@@ -47,6 +55,8 @@ const MyCars = () => {
   const navigate = useNavigate();
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gpsDrafts, setGpsDrafts] = useState<Record<string, string>>({});
+  const [savingGpsId, setSavingGpsId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -71,6 +81,11 @@ const MyCars = () => {
       }
 
       setCars((data || []) as Car[]);
+      const drafts: Record<string, string> = {};
+      for (const car of data ?? []) {
+        drafts[car.id] = car.gps_device_id ?? "";
+      }
+      setGpsDrafts(drafts);
     } catch (error) {
       console.error("Cars load error:", error);
       toast.error(t("owner.common.error"));
@@ -98,6 +113,12 @@ const MyCars = () => {
   };
 
   const toggleAvailability = async (carId: string, currentStatus: boolean) => {
+    const car = cars.find((c) => c.id === carId);
+    if (!currentStatus && car && !carHasGpsDevice(car)) {
+      toast.error(t("owner.myCars.toast.gpsRequired"));
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from("cars")
@@ -117,6 +138,34 @@ const MyCars = () => {
       toast.error(t("owner.common.error"));
     }
   };
+
+  const handleSaveGpsDevice = async (carId: string) => {
+    const deviceId = gpsDrafts[carId]?.trim() ?? "";
+    if (!deviceId) {
+      toast.error(t("owner.myCars.gps.deviceRequired"));
+      return;
+    }
+
+    setSavingGpsId(carId);
+    try {
+      const { error } = await supabase
+        .from("cars")
+        .update({ gps_device_id: deviceId })
+        .eq("id", carId);
+
+      if (error) throw error;
+
+      toast.success(t("owner.myCars.gps.saveSuccess"));
+      fetchMyCars();
+    } catch (error) {
+      console.error("GPS device save error:", error);
+      toast.error(t("owner.myCars.gps.saveError"));
+    } finally {
+      setSavingGpsId(null);
+    }
+  };
+
+  const carsWithoutGps = cars.filter((car) => !carHasGpsDevice(car)).length;
 
   if (!user) return null;
 
@@ -141,6 +190,22 @@ const MyCars = () => {
             </div>
           </div>
 
+          {carsWithoutGps > 0 && (
+            <Card className="mb-6 border-amber-500/40 bg-amber-500/10 p-4">
+              <div className="flex gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-amber-900 dark:text-amber-100">
+                    {t("owner.myCars.gps.bannerTitle", { count: carsWithoutGps })}
+                  </p>
+                  <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+                    {t("owner.myCars.gps.bannerDesc")}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {loading ? (
             <div className="text-center py-12">
               <p className="text-xl text-muted-foreground">{t("owner.common.loading")}</p>
@@ -160,7 +225,12 @@ const MyCars = () => {
             </Card>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cars.map((car) => (
+              {cars.map((car) => {
+                const hasGpsDevice = carHasGpsDevice(car);
+                const hasLiveSignal = carHasRecentGpsSignal(car);
+                const signalAgeMinutes = getGpsSignalAgeMinutes(car);
+
+                return (
                 <Card key={car.id} className="overflow-hidden">
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -171,9 +241,59 @@ const MyCars = () => {
                           <span>{car.location}</span>
                         </div>
                       </div>
-                      <Badge variant={car.available ? "default" : "destructive"}>
-                        {car.available ? t("owner.common.available") : t("owner.common.inUse")}
-                      </Badge>
+                      <div className="flex flex-col items-end gap-2">
+                        <Badge variant={car.available ? "default" : "destructive"}>
+                          {car.available ? t("owner.common.available") : t("owner.common.inUse")}
+                        </Badge>
+                        {hasGpsDevice ? (
+                          <Badge variant="outline" className="gap-1">
+                            <Navigation className="w-3 h-3" />
+                            {hasLiveSignal
+                              ? t("owner.myCars.gps.statusLive")
+                              : t("owner.myCars.gps.statusLinked")}
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            {t("owner.myCars.gps.statusMissing")}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-border bg-muted/30 p-4 mb-4 space-y-3">
+                      <p className="text-sm font-semibold">{t("owner.myCars.gps.connectTitle")}</p>
+                      <p className="text-xs text-muted-foreground">{t("owner.myCars.gps.connectDesc")}</p>
+                      <Input
+                        value={gpsDrafts[car.id] ?? ""}
+                        onChange={(e) =>
+                          setGpsDrafts((prev) => ({ ...prev, [car.id]: e.target.value }))
+                        }
+                        placeholder={t("owner.myCars.gps.devicePlaceholder")}
+                      />
+                      <Button
+                        size="sm"
+                        className="w-full gap-2"
+                        onClick={() => handleSaveGpsDevice(car.id)}
+                        disabled={savingGpsId === car.id}
+                      >
+                        <Save className="w-4 h-4" />
+                        {savingGpsId === car.id
+                          ? t("owner.myCars.gps.saving")
+                          : t("owner.myCars.gps.saveDevice")}
+                      </Button>
+                      {hasGpsDevice && !hasLiveSignal && (
+                        <p className="text-xs text-amber-700 dark:text-amber-300">
+                          {signalAgeMinutes != null
+                            ? t("owner.myCars.gps.staleSignal", { minutes: signalAgeMinutes })
+                            : t("owner.myCars.gps.noSignalYet")}
+                        </p>
+                      )}
+                      {hasLiveSignal && (
+                        <p className="text-xs text-green-700 dark:text-green-300">
+                          {t("owner.myCars.gps.liveSignal")}
+                        </p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-4">
@@ -249,7 +369,8 @@ const MyCars = () => {
                     </div>
                   </div>
                 </Card>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>

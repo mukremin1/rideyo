@@ -10,6 +10,8 @@ import {
   Star,
   Clock,
   Users,
+  AlertTriangle,
+  Navigation,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -21,6 +23,7 @@ import { isBookingPaid } from "@/lib/paymentStatus";
 import { useTranslation } from "react-i18next";
 import { format, isWithinInterval, parseISO } from "date-fns";
 import { useDateLocale } from "@/hooks/useDateLocale";
+import { carHasGpsDevice } from "@/lib/carGps";
 
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
@@ -62,6 +65,7 @@ const OwnerDashboard = () => {
   });
   const [recentRentals, setRecentRentals] = useState<OwnerRental[]>([]);
   const [cars, setCars] = useState<OwnerCar[]>([]);
+  const [carsWithoutGps, setCarsWithoutGps] = useState(0);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -78,10 +82,11 @@ const OwnerDashboard = () => {
     try {
       const { data: ownerCars } = await supabase
         .from("cars")
-        .select("id, name, type, plate_number, available")
+        .select("id, name, type, plate_number, available, gps_device_id, last_gps_update")
         .eq("owner_id", user.id);
 
       const carList = ownerCars ?? [];
+      setCarsWithoutGps(carList.filter((car) => !carHasGpsDevice(car)).length);
       const carIds = carList.map((c) => c.id);
 
       if (carIds.length === 0) {
@@ -267,6 +272,28 @@ const OwnerDashboard = () => {
               </Link>
             </div>
           </div>
+
+          {carsWithoutGps > 0 && (
+            <Card className="mb-8 border-amber-500/40 bg-amber-500/10">
+              <CardContent className="pt-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">{t("owner.dashboard.gpsBannerTitle", { count: carsWithoutGps })}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{t("owner.dashboard.gpsBannerDesc")}</p>
+                    </div>
+                  </div>
+                  <Link to="/my-cars">
+                    <Button variant="outline" className="gap-2">
+                      <Navigation className="w-4 h-4" />
+                      {t("owner.dashboard.gpsConnectCta")}
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
             <Card>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveCoordinatesFromLocation } from "@/lib/locationGeocoding";
+import { carIsVisibleInListings } from "@/lib/carGps";
 
 export interface NearbyCar {
   id: string;
@@ -45,7 +46,7 @@ export function useNearbyCars(
       const { data, error } = await supabase
         .from("cars")
         .select(
-          "id, name, type, location, latitude, longitude, price_per_hour, price_per_minute, fuel_type, image_url",
+          "id, name, type, location, latitude, longitude, price_per_hour, price_per_minute, fuel_type, image_url, gps_device_id, last_gps_update",
         )
         .eq("available", true);
 
@@ -56,7 +57,7 @@ export function useNearbyCars(
         return;
       }
 
-      const rows = data ?? [];
+      const rows = (data ?? []).filter(carIsVisibleInListings);
 
       if (rows.length && latitude !== null && longitude !== null) {
         const carsWithDistance = await Promise.all(

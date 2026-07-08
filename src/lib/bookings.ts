@@ -30,6 +30,9 @@ export async function createBookingRecord(
     additional_driver_fee: _fee,
     rental_amount: _rentalAmount,
     provision_fee: _provisionFee,
+    km_package_id: _kmPackageId,
+    km_package_included_km: _kmIncludedKm,
+    km_package_price: _kmPackagePrice,
     ...corePayload
   } = payload;
 

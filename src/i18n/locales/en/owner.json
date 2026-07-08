@@ -162,7 +162,26 @@
         "deleteSuccess": "Car deleted successfully",
         "statusError": "Could not update status",
         "disabled": "Car disabled for rental",
-        "enabled": "Car enabled for rental"
+        "enabled": "Car enabled for rental",
+        "gpsRequired": "Link a GPS device before enabling rental"
+      },
+      "gps": {
+        "bannerTitle": "{{count}} of your cars have no GPS device",
+        "bannerDesc": "Link a GPS device to each car for km tracking and live location. Cars without GPS are hidden and cannot be rented.",
+        "connectTitle": "Connect GPS Device",
+        "connectDesc": "Enter your telematics device ID. The device must send location via the update-gps API.",
+        "devicePlaceholder": "GPS device ID (e.g. TRK-12345)",
+        "saveDevice": "Save GPS Device",
+        "saving": "Saving...",
+        "deviceRequired": "Enter a GPS device ID",
+        "saveSuccess": "GPS device saved",
+        "saveError": "Could not save GPS device",
+        "statusLive": "Live signal",
+        "statusLinked": "Device linked",
+        "statusMissing": "No GPS",
+        "staleSignal": "Last signal {{minutes}} min ago — check the device",
+        "noSignalYet": "No live signal received yet",
+        "liveSignal": "GPS signal active — car is rentable"
       }
     },
     "dashboard": {
@@ -195,7 +214,10 @@
       "allRentalsDesc": "Past and active rental transactions",
       "startDate": "Start",
       "endDate": "End",
-      "rentalType": "Rental Type"
+      "rentalType": "Rental Type",
+      "gpsBannerTitle": "{{count}} of your cars have no GPS linked",
+      "gpsBannerDesc": "Cars without a GPS device are hidden from customers and cannot be rented.",
+      "gpsConnectCta": "Connect GPS"
     },
     "availability": {
       "title": "Availability Calendar",

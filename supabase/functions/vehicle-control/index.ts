@@ -1,6 +1,9 @@
-﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getIyzicoConfig, iyzicoPost, isIyzicoSuccess } from "../_shared/iyzico.ts";
+import { chargeOvertimeIfNeeded } from "../_shared/overtime.ts";
+import { extendActiveRental } from "../_shared/rentalExtension.ts";
+import { carIsGpsReadyForRental } from "../_shared/carGps.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,8 +50,23 @@ serve(async (req) => {
   }
 
   try {
-    const { action, carId, bookingId, userId, latitude, longitude, notes, city, district, neighborhood, dropoffAddress } =
-      await req.json();
+    const {
+      action,
+      carId,
+      bookingId,
+      userId,
+      latitude,
+      longitude,
+      notes,
+      city,
+      district,
+      neighborhood,
+      dropoffAddress,
+      distanceKm,
+      extensionMinutes,
+      extensionHours,
+      extensionDays,
+    } = await req.json();
 
     console.log(`[vehicle-control] Action: ${action} for car: ${carId}`);
 
@@ -72,7 +90,30 @@ serve(async (req) => {
       );
     }
 
-    const result: { success: boolean; action: string; message: string; lockStatus: string | null } = {
+    const result: {
+      success: boolean;
+      action: string;
+      message: string;
+      lockStatus: string | null;
+      overtimeMinutes?: number;
+      overtimeAmount?: number;
+      overtimeRatePerMinute?: number;
+      overtimeCharged?: boolean;
+      overtimeChargeFailed?: boolean;
+      overtimeError?: string;
+      chargeableKm?: number;
+      kmAmount?: number;
+      kmRatePerKm?: number;
+      totalDistanceKm?: number;
+      kmCharged?: boolean;
+      kmChargeFailed?: boolean;
+      kmError?: string;
+      extensionAmount?: number;
+      newEndTime?: string;
+      extensionCharged?: boolean;
+      extensionChargeFailed?: boolean;
+      extensionError?: string;
+    } = {
       success: true,
       action,
       message: "",
@@ -129,6 +170,16 @@ serve(async (req) => {
         if (!paidCheck.ok) {
           return new Response(
             JSON.stringify({ success: false, error: paidCheck.error }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+
+        if (!carIsGpsReadyForRental(car)) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: "Kiralama baslatmak icin aracta aktif GPS sinyali gerekli (cihaz kaydi veya son 5 dk konum).",
+            }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } },
           );
         }
@@ -260,17 +311,56 @@ serve(async (req) => {
         if (bookingId) {
           const { data: booking } = await supabase
             .from("bookings")
-            .select("id, user_id, provision_status, provision_fee, iyzico_provision_payment_id")
+            .select(
+              "id, user_id, car_id, rental_type, end_time, total_price, payment_saved_card_id, km_package_included_km, provision_status, provision_fee, iyzico_provision_payment_id",
+            )
             .eq("id", bookingId)
             .maybeSingle();
 
-          if (booking?.provision_status === "held" && booking.iyzico_provision_payment_id) {
-            await releaseProvisionHold(supabase, booking);
-          } else if (booking?.provision_status === "held") {
-            await supabase
+          if (booking) {
+            const actualEndTime = new Date();
+            const carRow = { id: car.id, name: car.name, owner_id: car.owner_id };
+
+            const overtimeResult = await chargeOvertimeIfNeeded(supabase, booking, carRow, actualEndTime);
+
+            if (overtimeResult.charged) {
+              result.overtimeMinutes = overtimeResult.overtimeMinutes;
+              result.overtimeAmount = overtimeResult.overtimeAmount;
+              result.overtimeRatePerMinute = overtimeResult.ratePerMinute;
+              result.overtimeCharged = overtimeResult.paymentStatus === "charged";
+              result.overtimeChargeFailed = overtimeResult.paymentStatus === "failed";
+              if (overtimeResult.error) result.overtimeError = overtimeResult.error;
+            }
+
+            const distance = typeof distanceKm === "number" && Number.isFinite(distanceKm) ? distanceKm : 0;
+            const { data: bookingForKm } = await supabase
               .from("bookings")
-              .update({ provision_status: "released" })
-              .eq("id", bookingId);
+              .select("id, user_id, total_price, payment_saved_card_id, km_package_included_km")
+              .eq("id", bookingId)
+              .maybeSingle();
+
+            if (bookingForKm) {
+              const kmResult = await chargeKmIfNeeded(supabase, bookingForKm, carRow, distance);
+
+              result.totalDistanceKm = kmResult.totalDistanceKm;
+              if (kmResult.charged) {
+                result.chargeableKm = kmResult.chargeableKm;
+                result.kmAmount = kmResult.kmAmount;
+                result.kmRatePerKm = kmResult.ratePerKm;
+                result.kmCharged = kmResult.paymentStatus === "charged";
+                result.kmChargeFailed = kmResult.paymentStatus === "failed";
+                if (kmResult.error) result.kmError = kmResult.error;
+              }
+            }
+
+            if (booking.provision_status === "held" && booking.iyzico_provision_payment_id) {
+              await releaseProvisionHold(supabase, booking);
+            } else if (booking.provision_status === "held") {
+              await supabase
+                .from("bookings")
+                .update({ provision_status: "released" })
+                .eq("id", bookingId);
+            }
           }
 
           await supabase.from("bookings").update({ payment_status: "completed" }).eq("id", bookingId);
@@ -285,8 +375,67 @@ serve(async (req) => {
           notes: "Kiralama bitirildi",
         });
 
-        result.message = "Kiralama bitirildi. Arac kapilari kilitlendi.";
+        const messages: string[] = ["Kiralama bitirildi. Arac kapilari kilitlendi."];
+        if (result.overtimeCharged) {
+          messages.push(`Ek sure: ${result.overtimeAmount} TL tahsil edildi.`);
+        } else if (result.overtimeChargeFailed) {
+          messages.push("Ek sure ucreti tahsil edilemedi.");
+        }
+        if (result.kmCharged) {
+          messages.push(`Km ucreti: ${result.kmAmount} TL (${result.chargeableKm} km) tahsil edildi.`);
+        } else if (result.kmChargeFailed) {
+          messages.push("Km ucreti tahsil edilemedi.");
+        }
+        result.message = messages.join(" ");
         result.lockStatus = "locked";
+        break;
+      }
+
+      case "extend_rental": {
+        if (!bookingId || !userId) {
+          return new Response(
+            JSON.stringify({ success: false, error: "bookingId ve userId gereklidir" }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+
+        const extensionResult = await extendActiveRental(supabase, {
+          bookingId,
+          userId,
+          car: {
+            id: car.id,
+            name: car.name,
+            owner_id: car.owner_id,
+            price_per_minute: Number(car.price_per_minute),
+            price_per_hour: Number(car.price_per_hour),
+            price_per_day: Number(car.price_per_day),
+          },
+          units: { extensionMinutes, extensionHours, extensionDays },
+        });
+
+        if (!extensionResult.success) {
+          return new Response(
+            JSON.stringify({ success: false, error: extensionResult.error }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+
+        result.extensionAmount = extensionResult.extensionAmount;
+        result.newEndTime = extensionResult.newEndTime;
+        result.extensionCharged = extensionResult.paymentStatus === "charged";
+        result.extensionChargeFailed = extensionResult.paymentStatus === "failed";
+        if (extensionResult.error) result.extensionError = extensionResult.error;
+
+        await supabase.from("vehicle_actions").insert({
+          car_id: carId,
+          user_id: userId,
+          action_type: "extend_rental",
+          notes: `Kiralama uzatildi: ${extensionResult.extensionAmount} TL`,
+        });
+
+        result.message = extensionResult.paymentStatus === "charged"
+          ? `Kiralama uzatildi. ${extensionResult.extensionAmount} TL karttan tahsil edildi.`
+          : "Uzatma ucreti tahsil edilemedi.";
         break;
       }
 

@@ -10,6 +10,7 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Car as CarType } from "@/types/car";
+import { carIsVisibleInListings } from "@/lib/carGps";
 import carCompact from "@/assets/car-compact.jpg";
 import carSedan from "@/assets/car-sedan.jpg";
 import carSuv from "@/assets/car-suv.jpg";
@@ -54,7 +55,7 @@ const Cars = () => {
         return;
       }
 
-      const rows = data ?? [];
+      const rows = (data ?? []).filter(carIsVisibleInListings);
 
       const convertedCars: CarType[] = rows.map((car) => {
         let image = carCompact;

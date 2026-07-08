@@ -23,6 +23,22 @@ export type Database = {
           dropoff_address: string | null
           dropoff_zone_id: string | null
           end_time: string
+          actual_end_time: string | null
+          overtime_minutes: number
+          overtime_rate: number
+          overtime_amount: number
+          overtime_payment_status: string
+          overtime_iyzico_payment_id: string | null
+          payment_saved_card_id: string | null
+          km_package_id: string | null
+          km_package_included_km: number
+          km_package_price: number
+          total_distance_km: number
+          chargeable_km: number
+          km_rate: number
+          km_charge_amount: number
+          km_charge_status: string
+          km_iyzico_payment_id: string | null
           id: string
           iyzico_conversation_id: string | null
           iyzico_payment_id: string | null
@@ -53,6 +69,22 @@ export type Database = {
           dropoff_address?: string | null
           dropoff_zone_id?: string | null
           end_time: string
+          actual_end_time?: string | null
+          overtime_minutes?: number
+          overtime_rate?: number
+          overtime_amount?: number
+          overtime_payment_status?: string
+          overtime_iyzico_payment_id?: string | null
+          payment_saved_card_id?: string | null
+          km_package_id?: string | null
+          km_package_included_km?: number
+          km_package_price?: number
+          total_distance_km?: number
+          chargeable_km?: number
+          km_rate?: number
+          km_charge_amount?: number
+          km_charge_status?: string
+          km_iyzico_payment_id?: string | null
           id?: string
           iyzico_conversation_id?: string | null
           iyzico_payment_id?: string | null
@@ -83,6 +115,22 @@ export type Database = {
           dropoff_address?: string | null
           dropoff_zone_id?: string | null
           end_time?: string
+          actual_end_time?: string | null
+          overtime_minutes?: number
+          overtime_rate?: number
+          overtime_amount?: number
+          overtime_payment_status?: string
+          overtime_iyzico_payment_id?: string | null
+          payment_saved_card_id?: string | null
+          km_package_id?: string | null
+          km_package_included_km?: number
+          km_package_price?: number
+          total_distance_km?: number
+          chargeable_km?: number
+          km_rate?: number
+          km_charge_amount?: number
+          km_charge_status?: string
+          km_iyzico_payment_id?: string | null
           id?: string
           iyzico_conversation_id?: string | null
           iyzico_payment_id?: string | null
