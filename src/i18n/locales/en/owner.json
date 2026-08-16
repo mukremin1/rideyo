@@ -167,9 +167,9 @@
       },
       "gps": {
         "bannerTitle": "{{count}} of your cars have no GPS device",
-        "bannerDesc": "Link a GPS device to each car for km tracking and live location. Cars without GPS are hidden and cannot be rented.",
+        "bannerDesc": "Link a GPS device to each car for km billing and rental safety. Live location is visible only to RideYo admins — owners cannot track the vehicle. Cars without GPS are hidden and cannot be rented.",
         "connectTitle": "Connect GPS Device",
-        "connectDesc": "Enter your telematics device ID. The device must send location via the update-gps API.",
+        "connectDesc": "Enter your telematics device ID. The device sends location signals; you only see connection status, not a live map.",
         "devicePlaceholder": "GPS device ID (e.g. TRK-12345)",
         "saveDevice": "Save GPS Device",
         "saving": "Saving...",
@@ -216,7 +216,7 @@
       "endDate": "End",
       "rentalType": "Rental Type",
       "gpsBannerTitle": "{{count}} of your cars have no GPS linked",
-      "gpsBannerDesc": "Cars without a GPS device are hidden from customers and cannot be rented.",
+      "gpsBannerDesc": "Cars without a GPS device are hidden from customers and cannot be rented. Live location is admin-only.",
       "gpsConnectCta": "Connect GPS"
     },
     "availability": {
@@ -343,11 +343,20 @@
       ],
       "securityMeasures": "Security Measures",
       "securityItems": [
-        "All renters pass identity and license verification",
+        "All renters pass identity (NFC) and license verification",
         "Driver score and history are checked",
-        "Rideyo administrators monitor GPS during active rentals",
-        "Before and after photos for damage assessment",
+        "Live GPS tracking is admin-only; owners cannot track the vehicle",
+        "After-rental photos for damage; start photos coming soon",
         "24/7 support team always available"
+      ],
+      "pilotAgreementTitle": "Pilot Partnership Summary (draft)",
+      "pilotAgreementItems": [
+        "Owner accepts telematics/GPS device installation",
+        "Live vehicle location is not shown on the owner panel — admin/ops only",
+        "Platform commission 15% (adjustable by agreement)",
+        "Rentals require identity + license verification",
+        "Compulsory traffic insurance required; cascade/mini-casco updated when a partner is signed",
+        "Pilot term and termination are defined in a written contract (lawyer review required)"
       ],
       "renterSelection": "Renter Selection",
       "renterCriteria": "Renter Evaluation Criteria",

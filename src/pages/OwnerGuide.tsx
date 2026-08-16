@@ -13,6 +13,7 @@ const OwnerGuide = () => {
   const increaseTips = t("owner.guide.increaseTips", { returnObjects: true }) as string[];
   const insuranceItems = t("owner.guide.insuranceItems", { returnObjects: true }) as string[];
   const securityItems = t("owner.guide.securityItems", { returnObjects: true }) as string[];
+  const pilotAgreementItems = t("owner.guide.pilotAgreementItems", { returnObjects: true }) as string[];
   const goodRenterItems = t("owner.guide.goodRenterItems", { returnObjects: true }) as string[];
   const cautionRenterItems = t("owner.guide.cautionRenterItems", { returnObjects: true }) as string[];
   const reservationAcceptItems = t("owner.guide.reservationAcceptItems", { returnObjects: true }) as string[];
@@ -134,6 +135,18 @@ const OwnerGuide = () => {
                   {securityItems.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
+                </ul>
+              </Card>
+
+              <Card className="p-6 border-primary/30 bg-primary/5">
+                <h3 className="text-xl font-semibold text-foreground mb-3">
+                  {t("owner.guide.pilotAgreementTitle")}
+                </h3>
+                <ul className="list-disc list-inside space-y-2 ml-6">
+                  {Array.isArray(pilotAgreementItems) &&
+                    pilotAgreementItems.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
                 </ul>
               </Card>
             </div>

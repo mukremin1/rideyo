@@ -352,8 +352,10 @@
           "title": "4. Kişisel Verilerin Aktarılması",
           "paragraphs": ["Kişisel verileriniz, yukarıda belirtilen amaçlar doğrultusunda:"],
           "list": [
-            "Araç sahipleri ile (kiralama işlemleri için)",
-            "Ödeme kuruluşları ile (ödeme işlemleri için)",
+            "Araç sahipleri ile (kiralama işlemleri için — canlı araç konumu araç sahibine açılmaz)",
+            "Ödeme kuruluşları ile (ör. iyzico — ödeme işlemleri için)",
+            "SMS hizmet sağlayıcıları ile (ör. Netgsm — doğrulama kodları için)",
+            "Nüfus ve Vatandaşlık İşleri (NVİ) / KPS ile (açık rızanız dahilinde kimlik eşleşmesi için; ehliyet ceza puanı sorgusu değildir)",
             "Hukuk firmaları ile (hukuki süreçler için)",
             "Yetkili kamu kurum ve kuruluşları ile (yasal zorunluluklar için)",
             "İş ortakları ve hizmet sağlayıcılar ile (platform operasyonları için)"

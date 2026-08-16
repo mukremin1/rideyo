@@ -352,8 +352,10 @@
           "title": "4. Transfer of Personal Data",
           "paragraphs": ["Your personal data may be transferred for the purposes stated above to:"],
           "list": [
-            "Vehicle owners (for rental transactions)",
-            "Payment institutions (for payment processing)",
+            "Vehicle owners (for rental transactions — live vehicle location is not shared with owners)",
+            "Payment providers (e.g. iyzico — for payment processing)",
+            "SMS providers (e.g. Netgsm — for verification codes)",
+            "Population and Citizenship Affairs (NVİ) / KPS (with your explicit consent, for identity matching only; not a license-penalty query)",
             "Law firms (for legal proceedings)",
             "Authorized public institutions (for legal requirements)",
             "Business partners and service providers (for platform operations)"

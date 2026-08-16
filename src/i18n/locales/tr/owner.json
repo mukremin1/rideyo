@@ -167,9 +167,9 @@
       },
       "gps": {
         "bannerTitle": "{{count}} aracınızda GPS cihazı yok",
-        "bannerDesc": "Km sayacı ve canlı takip için her araca GPS cihazı bağlayın. GPS'siz araçlar listede görünmez ve kiralanamaz.",
+        "bannerDesc": "Km sayacı ve kiralama güvenliği için her araca GPS cihazı bağlayın. Canlı konum yalnızca RideYo yönetiminde görünür; araç sahibi konum izleyemez. GPS'siz araçlar listede görünmez ve kiralanamaz.",
         "connectTitle": "GPS Cihazı Bağla",
-        "connectDesc": "Telematik cihazınızın ID'sini girin. Cihaz update-gps API'si ile konum göndermelidir.",
+        "connectDesc": "Telematik cihazınızın ID'sini girin. Cihaz konum sinyali gönderir; siz canlı harita görmezsiniz, yalnızca bağlantı durumu görünür.",
         "devicePlaceholder": "GPS cihaz ID (ör. TRK-12345)",
         "saveDevice": "GPS Cihazını Kaydet",
         "saving": "Kaydediliyor...",
@@ -216,7 +216,7 @@
       "endDate": "Bitiş",
       "rentalType": "Kiralama Türü",
       "gpsBannerTitle": "{{count}} aracınızda GPS bağlı değil",
-      "gpsBannerDesc": "GPS cihazı olmayan araçlar müşteri listesinde görünmez ve kiralanamaz.",
+      "gpsBannerDesc": "GPS cihazı olmayan araçlar müşteri listesinde görünmez ve kiralanamaz. Canlı konum yalnızca yönetimde izlenir.",
       "gpsConnectCta": "GPS Bağla"
     },
     "availability": {
@@ -343,11 +343,20 @@
       ],
       "securityMeasures": "Güvenlik Önlemleri",
       "securityItems": [
-        "Tüm kiracılar kimlik ve ehliyet doğrulamasından geçer",
+        "Tüm kiracılar kimlik (NFC) ve ehliyet doğrulamasından geçer",
         "Sürücü puanı ve geçmişi kontrol edilir",
-        "Rideyo yöneticisi aktif kiralamalarda GPS takibini yürütür",
-        "Hasar tespiti için öncesi ve sonrası fotoğraf çekilir",
+        "Canlı GPS takibi yalnızca RideYo yöneticisinde; araç sahibi konum izleyemez",
+        "Hasar tespiti için kiralama sonrası fotoğraf; başlangıç fotoğrafı yakında zorunlu olacak",
         "7/24 destek ekibi her zaman yanınızda"
+      ],
+      "pilotAgreementTitle": "Pilot Ortaklık Özeti (taslak)",
+      "pilotAgreementItems": [
+        "Araç sahibi telematics/GPS cihazı montajını kabul eder",
+        "Canlı araç konumu sahibi paneline açılmaz; yalnızca operasyon/admin",
+        "Platform komisyonu %15 (anlaşma ile güncellenebilir)",
+        "Kiracı kimlik + ehliyet doğrulaması olmadan kiralama başlatılamaz",
+        "ZTS zorunlu; kasko / mini kasko partneri bağlanınca poliçe güncellenir",
+        "Pilot süre ve fesih şartları yazılı sözleşmede belirlenir (avukat onayı şart)"
       ],
       "renterSelection": "Kiracı Seçimi",
       "renterCriteria": "Kiracı Değerlendirme Kriterleri",

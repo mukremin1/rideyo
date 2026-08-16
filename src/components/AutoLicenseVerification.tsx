@@ -2,9 +2,10 @@ import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { useTranslation, Trans } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Button } from "./ui/button";
 import { Shield, AlertTriangle, CheckCircle, Loader2, Search, XCircle, Info, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "./ui/progress";
@@ -63,6 +64,7 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
   );
 
   const [licenseNumber, setLicenseNumber] = useState("");
+  const [nviConsent, setNviConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verificationStep, setVerificationStep] = useState<"idle" | "checking" | "complete">("idle");
   const [result, setResult] = useState<LicenseVerificationResult | null>(null);
@@ -280,6 +282,14 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
       });
       return;
     }
+    if (!nviConsent) {
+      toast({
+        title: t("verification.autoLicense.toast.nviConsentRequired"),
+        description: t("verification.autoLicense.toast.nviConsentRequiredDesc"),
+        variant: "destructive",
+      });
+      return;
+    }
     if (!userId) {
       toast({
         title: t("verification.autoLicense.toast.signInRequired"),
@@ -307,6 +317,12 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
         throw new Error(t("verification.autoLicense.toast.sessionNotFound"));
       }
 
+      const dobSource =
+        cardData?.dateOfBirth ||
+        (dateOfBirth ? isoToYymmdd(dateOfBirth) : "") ||
+        stored.dobYymmdd ||
+        "";
+
       const { data: verifyData, error: verifyError } = await invokeVerifyLicense(
         {
           licenseNumber,
@@ -314,6 +330,8 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
           nationalId: cardData?.nationalId,
           surname: cardData?.surname,
           givenNames: cardData?.givenNames,
+          dateOfBirth: dobSource,
+          nviConsent: true,
         },
         session.access_token,
         supabaseInvoke,
@@ -572,6 +590,19 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
             </div>
             <p className="text-xs text-muted-foreground">{t("verification.autoLicense.licenseNumberHelp")}</p>
           </div>
+
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3">
+            <Checkbox
+              id="nvi-consent"
+              checked={nviConsent}
+              onCheckedChange={(checked) => setNviConsent(Boolean(checked))}
+              disabled={loading}
+            />
+            <label htmlFor="nvi-consent" className="text-xs leading-relaxed text-muted-foreground cursor-pointer">
+              {t("verification.autoLicense.nviConsent")}
+            </label>
+          </div>
+
           {verificationStep === "checking" && (
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-3">
               <div className="flex items-center gap-2">
@@ -580,8 +611,8 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
               </div>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-green-500" /><span>{t("verification.autoLicense.checkFormat")}</span></div>
-                <div className="flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /><span>{t("verification.autoLicense.checkTrafficRecords")}</span></div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3" /><span className="opacity-50">{t("verification.autoLicense.checkRiskAnalysis")}</span></div>
+                <div className="flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /><span>{t("verification.autoLicense.checkNvi")}</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3" /><span className="opacity-50">{t("verification.autoLicense.checkLicense")}</span></div>
               </div>
             </div>
           )}
@@ -618,7 +649,7 @@ const AutoLicenseVerification = ({ userId, onVerified }: AutoLicenseVerification
           <Button
             type="submit"
             className="w-full"
-            disabled={loading || nfcStatus !== "verified" || livenessStatus !== "verified"}
+            disabled={loading || nfcStatus !== "verified" || livenessStatus !== "verified" || !nviConsent}
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("verification.autoLicense.verifying")}</>
